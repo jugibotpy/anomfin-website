@@ -5,6 +5,10 @@
 - [ ] Tietosuoja- ja evästesivu (FI).
 - [ ] Plausible-analytiikka (ilman evästebanneria).
 - [ ] Siirto Astro/Next -projektiin (datavetoinen).
+- [ ] Live-demo CTA modal hero-osioon.
+- [ ] PWA-manifesti ja service worker offline-tilaan.
+- [ ] Lead magnet -PDF ja automaattinen lähetys.
+- [ ] GitHub Actions -deploy ja visuaaliset testit.
 
 # COPILOT_TODO
 - [ ] Scaffold Astro.
