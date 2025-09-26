@@ -36,9 +36,9 @@
 <main id="main" data-source="content/site.json">
     <section class="hero" id="top" data-section="hero">
       <div class="container hero-inner">
-        <h1>Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.</h1>
-        <p class="lead">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. <br class="hide-sm">Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
-        <div class="hero-ctas">
+        <h1 data-bind="hero-title">Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.</h1>
+        <p class="lead" data-bind="hero-sub">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. <br class="hide-sm">Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
+        <div class="hero-ctas" data-bind="hero-ctas">
           <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn primary">Varaa 30 min kartoitus</a>
           <a href="#services" class="btn ghost">Tutustu palveluihin</a>
         </div>
@@ -50,7 +50,7 @@
       <div class="container">
         <h2>Palvelut</h2>
         <p class="section-sub">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
-        <div class="cards">
+        <div class="cards" data-bind="services-list">
           <article class="card">
             <h3>Räätälöidyt sovellukset</h3>
             <p>Suunnittelemme ja toteutamme <b>mobiili</b>-, <b>desktop</b>- ja <b>web</b>-sovelluksia, jotka istuvat prosesseihinne.</p>
@@ -74,7 +74,7 @@
     <section id="platforms" class="section" data-section="platforms">
       <div class="container">
         <h2>Alustat</h2>
-        <div class="platforms">
+        <div class="platforms" data-bind="platforms-list">
           <div class="platform"><span>iOS</span></div>
           <div class="platform"><span>Android</span></div>
           <div class="platform"><span>macOS</span></div>
@@ -109,7 +109,7 @@
     <section id="pricing" class="section" data-section="pricing">
       <div class="container">
         <h2>Hinnoittelu</h2>
-        <div class="pricing">
+        <div class="pricing" data-bind="pricing-list">
           <div class="price-card">
             <h3>Start</h3>
             <p class="price">alk. 690 € / kk</p>
@@ -142,8 +142,8 @@
           </div>
         </div>
       </div>
-    
-      <div class="faq">
+
+      <div class="faq" data-bind="faq-list">
         <details>
           <summary>Mitä SLA tarkoittaa?</summary>
           <p>Palvelutasosopimus: vasteaika hälytyksille ja tukipyynnöille. Start: NBD, Protect: 4h, Elite: 1h.</p>
