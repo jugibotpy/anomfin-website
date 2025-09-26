@@ -1,28 +1,44 @@
-// Mobile Navigation Toggle
-document.addEventListener('DOMContentLoaded', function() {
+// Mobile Navigation Toggle & Smooth Scroll Enhancements
+document.addEventListener('DOMContentLoaded', () => {
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.querySelector('.nav-menu');
-    
-    mobileMenu.addEventListener('click', function() {
-        mobileMenu.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
 
-    // Close mobile menu when clicking on a link
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenu.classList.remove('active');
-            navMenu.classList.remove('active');
+    initIntroOverlay();
+
+    if (mobileMenu && navMenu) {
+        mobileMenu.addEventListener('click', () => {
+            const expanded = mobileMenu.getAttribute('aria-expanded') === 'true';
+            mobileMenu.setAttribute('aria-expanded', String(!expanded));
+            mobileMenu.classList.toggle('active');
+            navMenu.classList.toggle('active');
         });
-    });
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                navMenu.classList.remove('active');
+                mobileMenu.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+
+    // Scroll reveal setup
+    initScrollReveal();
+
+    // Contact form handling
+    initContactForm();
 });
 
-// Smooth Scrolling for Navigation Links
+// Smooth Scrolling for Navigation Links (skip skip-link)
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        e.preventDefault();
+        if (this.classList.contains('skip-link')) {
+            return;
+        }
+
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
+            e.preventDefault();
             target.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
@@ -32,82 +48,84 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Navbar Background on Scroll
-window.addEventListener('scroll', function() {
+window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
     if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(10, 11, 13, 0.98)';
+        navbar.style.background = 'rgba(6, 7, 10, 0.95)';
     } else {
-        navbar.style.background = 'rgba(10, 11, 13, 0.95)';
+        navbar.style.background = 'rgba(6, 7, 10, 0.8)';
     }
 });
 
-// Contact Form Handling
-document.addEventListener('DOMContentLoaded', function() {
+function initContactForm() {
     const contactForm = document.querySelector('.contact-form');
-    
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = new FormData(contactForm);
-            const name = formData.get('name');
-            const email = formData.get('email');
-            const message = formData.get('message');
-            
-            // Basic validation
-            if (!name || !email || !message) {
-                showNotification('Please fill in all fields.', 'error');
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showNotification('Please enter a valid email address.', 'error');
-                return;
-            }
-            
-            // Simulate form submission
-            showNotification('Thank you for your message! We\'ll get back to you soon.', 'success');
-            contactForm.reset();
-        });
-    }
-});
+    if (!contactForm) return;
 
-// Email validation function
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const formStatus = contactForm.querySelector('.form-status');
+
+    contactForm.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const formData = new FormData(contactForm);
+        const company = formData.get('company');
+        const name = formData.get('name');
+        const email = formData.get('email');
+        const consentChecked = contactForm.querySelector('input[name="consent"]')?.checked;
+
+        if (!company || !name || !email) {
+            showNotification('Täytä yritys-, nimi- ja sähköpostikentät.', 'error');
+            formStatus.textContent = 'Täytä pakolliset kentät.';
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showNotification('Tarkista sähköpostiosoite.', 'error');
+            formStatus.textContent = 'Virheellinen sähköpostiosoite.';
+            return;
+        }
+
+        if (!consentChecked) {
+            showNotification('Hyväksy tietosuoja, jotta voimme olla yhteydessä.', 'error');
+            formStatus.textContent = 'Hyväksy tietosuojaseloste.';
+            return;
+        }
+
+        contactForm.reset();
+        formStatus.textContent = 'Kiitos! Otamme yhteyttä 24 tunnin sisällä.';
+        showNotification('Kiitos viestistä – AnomFIN | AnomTools palaa pian asiaan.', 'success');
+    });
 }
 
-// Notification system
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(String(email).toLowerCase());
+}
+
 function showNotification(message, type = 'info') {
-    // Remove existing notifications
     const existingNotification = document.querySelector('.notification');
     if (existingNotification) {
         existingNotification.remove();
     }
-    
-    // Create notification element
+
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
-    
-    // Add styles
     notification.style.cssText = `
         position: fixed;
         top: 90px;
-        right: 20px;
+        right: 24px;
         padding: 15px 20px;
-        border-radius: 8px;
+        border-radius: 14px;
         color: white;
-        font-weight: 500;
+        font-weight: 600;
         z-index: 10000;
         animation: slideIn 0.3s ease;
-        max-width: 400px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-width: 360px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
     `;
-    
-    // Set background color based on type
+
     switch (type) {
         case 'success':
             notification.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
@@ -118,20 +136,33 @@ function showNotification(message, type = 'info') {
         default:
             notification.style.background = 'linear-gradient(135deg, #00d4ff, #0099cc)';
     }
-    
-    // Add to page
+
     document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
+
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
+        setTimeout(() => notification.remove(), 300);
     }, 5000);
 }
 
-// Add CSS animations for notifications
+function initIntroOverlay() {
+    const overlay = document.querySelector('.intro-overlay');
+    if (!overlay) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+        overlay.classList.add('intro-overlay-hidden');
+        return;
+    }
+
+    const hideOverlay = () => overlay.classList.add('intro-overlay-hidden');
+
+    overlay.addEventListener('animationend', hideOverlay, { once: true });
+
+    // Fallback in case animation is interrupted.
+    window.setTimeout(hideOverlay, 6500);
+}
+
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -144,7 +175,6 @@ style.textContent = `
             opacity: 1;
         }
     }
-    
     @keyframes slideOut {
         from {
             transform: translateX(0);
@@ -158,55 +188,36 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Scroll reveal animation
-function revealOnScroll() {
-    const elements = document.querySelectorAll('.service-card, .stat, .about-text');
-    
-    elements.forEach(element => {
-        const elementTop = element.getBoundingClientRect().top;
-        const elementVisible = 150;
-        
-        if (elementTop < window.innerHeight - elementVisible) {
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
-        }
-    });
-}
+function initScrollReveal() {
+    const elements = document.querySelectorAll('.service-card, .price-card, .security-cta, .platform-chip');
+    const reveal = () => {
+        elements.forEach(element => {
+            const elementTop = element.getBoundingClientRect().top;
+            const elementVisible = 140;
+            if (elementTop < window.innerHeight - elementVisible) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }
+        });
+    };
 
-// Initialize scroll reveal
-document.addEventListener('DOMContentLoaded', function() {
-    const elements = document.querySelectorAll('.service-card, .stat, .about-text');
     elements.forEach(element => {
         element.style.opacity = '0';
         element.style.transform = 'translateY(30px)';
         element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     });
-    
-    window.addEventListener('scroll', revealOnScroll);
-    revealOnScroll(); // Check initial position
-});
 
-// Performance optimization: Throttle scroll events
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
+    window.addEventListener('scroll', throttle(reveal, 200));
+    reveal();
 }
 
-// Apply throttling to scroll events
-window.addEventListener('scroll', throttle(function() {
-    // Navbar background change
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(10, 11, 13, 0.98)';
-    } else {
-        navbar.style.background = 'rgba(10, 11, 13, 0.95)';
-    }
-}, 16)); // ~60fps
+function throttle(func, limit) {
+    let inThrottle;
+    return function (...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => (inThrottle = false), limit);
+        }
+    };
+}

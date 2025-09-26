@@ -1,409 +1,298 @@
 <!DOCTYPE html>
-# <<<<<<< copilot/fix-1
-<html lang="en">
+<html lang="fi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AnomFIN - Advanced Cybersecurity Solutions for Modern Businesses">
-    <title>AnomFIN - Cybersecurity Excellence</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="description" content="AnomFIN koodaa yrityksellenne yksilölliset sovellukset kaikille alustoille – kyberturva sisäänrakennettuna.">
+    <title>AnomFIN – Yksilölliset sovellukset ja kyberturvaratkaisut</title>
+    <link rel="preload" href="assets/logo.png" as="image" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
+    <a class="skip-link" href="#main">Siirry sisältöön</a>
+
+    <div class="intro-overlay" aria-hidden="true">
+        <img src="assets/logo.png" alt="" class="intro-logo" width="320" height="320" decoding="async" fetchpriority="high">
+    </div>
+
+    <nav class="navbar" role="navigation" aria-label="Päävalikko">
         <div class="nav-container">
-            <div class="nav-logo">
+            <a class="nav-logo" href="#home" aria-label="AnomFIN etusivu">
+                <img src="assets/logo.png" alt="AnomFIN | AnomTools logo" width="32" height="32" decoding="async">
                 <h2>AnomFIN</h2>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#home" class="nav-link">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#services" class="nav-link">Services</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#about" class="nav-link">About</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#contact" class="nav-link">Contact</a>
-                </li>
+            </a>
+            <ul class="nav-menu" id="primary-menu">
+                <li class="nav-item"><a href="#home" class="nav-link">Etusivu</a></li>
+                <li class="nav-item"><a href="#services" class="nav-link">Palvelut</a></li>
+                <li class="nav-item"><a href="#platforms" class="nav-link">Alustat</a></li>
+                <li class="nav-item"><a href="#security" class="nav-link">Kyberturva</a></li>
+                <li class="nav-item"><a href="#pricing" class="nav-link">Hinnoittelu</a></li>
+                <li class="nav-item"><a href="#contact" class="nav-link nav-link-cta">Ota yhteyttä</a></li>
             </ul>
-            <div class="nav-toggle" id="mobile-menu">
+            <button class="nav-toggle" id="mobile-menu" aria-expanded="false" aria-controls="primary-menu">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
-            </div>
+            </button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1 class="hero-title">Secure Your Digital Future</h1>
-                <p class="hero-subtitle">AnomFIN provides cutting-edge cybersecurity solutions to protect your business from evolving digital threats.</p>
-                <div class="hero-buttons">
-                    <a href="#services" class="btn btn-primary">Our Services</a>
-                    <a href="#contact" class="btn btn-secondary">Get Started</a>
-                </div>
-            </div>
-            <div class="hero-image">
-                <div class="security-icon">🛡️</div>
-            </div>
-        </div>
-    </section>
+    <!-- COPILOT_HINT: Tämä tiedosto on MVP. Siirrä sisältö content/site.json → komponentteihin.
+         Luo Astro/Next -projekti ja tee reitit: /, /palvelut/[slug], /hinnoittelu, /yhteys.
+         Komponentit: Hero, CardGrid, Pricing, FAQ. Käytä schema.org. -->
 
-    <!-- Services Section -->
-    <section id="services" class="services">
-        <div class="container">
-            <h2 class="section-title">Our Services</h2>
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">🔒</div>
-                    <h3>Threat Detection</h3>
-                    <p>Advanced AI-powered threat detection and real-time monitoring to identify and neutralize security risks before they impact your business.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">🔍</div>
-                    <h3>Security Audits</h3>
-                    <p>Comprehensive security assessments and penetration testing to identify vulnerabilities and strengthen your defense systems.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">⚡</div>
-                    <h3>Incident Response</h3>
-                    <p>24/7 rapid response team ready to contain, investigate, and remediate security incidents with minimal business disruption.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">🎓</div>
-                    <h3>Security Training</h3>
-                    <p>Employee education and awareness programs to build a strong security culture and reduce human-factor vulnerabilities.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="about-content">
-                <div class="about-text">
-                    <h2 class="section-title">About AnomFIN</h2>
-                    <p>Founded by cybersecurity experts with decades of combined experience, AnomFIN is dedicated to providing enterprise-grade security solutions for businesses of all sizes.</p>
-                    <p>Our team of certified security professionals stays ahead of emerging threats, ensuring your organization remains protected against the latest attack vectors and vulnerabilities.</p>
-                    <div class="stats">
-                        <div class="stat">
-                            <span class="stat-number">500+</span>
-                            <span class="stat-label">Clients Protected</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">99.9%</span>
-                            <span class="stat-label">Uptime Guarantee</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">24/7</span>
-                            <span class="stat-label">Monitoring</span>
-                        </div>
+    <main id="main" data-source="content/site.json">
+        <section id="home" class="hero" data-section="hero">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <p class="eyebrow">Yksilöllinen sovelluskehitys &amp; kyberturva</p>
+                    <h1 class="hero-title">Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.</h1>
+                    <p class="hero-subtitle">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
+                    <div class="hero-buttons">
+                        <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn btn-primary">Varaa 30 min kartoitus</a>
+                        <a href="#services" class="btn btn-secondary">Tutustu palveluihin</a>
                     </div>
+                    <ul class="hero-metrics">
+                        <li>
+                            <span class="metric-value">24/7</span>
+                            <span class="metric-label">valvonta ja tuki</span>
+                        </li>
+                        <li>
+                            <span class="metric-value">4+</span>
+                            <span class="metric-label">alustaa per ratkaisu</span>
+                        </li>
+                        <li>
+                            <span class="metric-value">100%</span>
+                            <span class="metric-label">kotimainen tiimi</span>
+                        </li>
+                    </ul>
                 </div>
-                <div class="about-image">
-                    <div class="team-icon">👥</div>
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="hero-orb"></div>
+                    <div class="hero-grid"></div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <h2 class="section-title">Get In Touch</h2>
-            <div class="contact-content">
+        <section id="services" class="section-block services" data-section="services">
+            <div class="container">
+                <div class="section-header">
+                    <p class="eyebrow">Palvelukokonaisuus</p>
+                    <h2 class="section-title">Palvelut</h2>
+                    <p class="section-sub">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
+                </div>
+                <div class="services-grid">
+                    <article class="service-card">
+                        <div class="service-icon">🧩</div>
+                        <h3>Räätälöidyt sovellukset</h3>
+                        <p>Suunnittelemme ja toteutamme <strong>mobiili</strong>-, <strong>desktop</strong>- ja <strong>web</strong>-sovelluksia, jotka istuvat prosesseihinne.</p>
+                    </article>
+                    <article class="service-card">
+                        <div class="service-icon">🛡️</div>
+                        <h3>Kyberturvaratkaisut</h3>
+                        <p>Huijausviestien tunnistus, SMS-suojaus ja turvalliset integraatiot – käytännönläheisesti.</p>
+                    </article>
+                    <article class="service-card">
+                        <div class="service-icon">🧪</div>
+                        <h3>Auditoinnit &amp; testaus</h3>
+                        <p>Sovellusten kovennukset ja penetraatiotestaus. Selkokielinen raportti ja korjauslista.</p>
+                    </article>
+                    <article class="service-card">
+                        <div class="service-icon">📈</div>
+                        <h3>24/7 valvonta &amp; ylläpito</h3>
+                        <p>Automaattiset hälytykset, triage ja kuukausiraportit. Jatkuva kehitys.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="platforms" class="section-block platforms" data-section="platforms">
+            <div class="container">
+                <div class="section-header">
+                    <p class="eyebrow">Julkaisut kaikille päätelaitteille</p>
+                    <h2 class="section-title">Alustat</h2>
+                </div>
+                <div class="platforms-grid" role="list">
+                    <div class="platform-chip" role="listitem">iOS</div>
+                    <div class="platform-chip" role="listitem">Android</div>
+                    <div class="platform-chip" role="listitem">macOS</div>
+                    <div class="platform-chip" role="listitem">Windows</div>
+                    <div class="platform-chip" role="listitem">Linux</div>
+                    <div class="platform-chip" role="listitem">Web</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="security" class="section-block security" data-section="security">
+            <div class="container">
+                <div class="security-inner">
+                    <div class="security-content">
+                        <p class="eyebrow">Kyberturva sisäänrakennettuna</p>
+                        <h2 class="section-title">Kyberturva</h2>
+                        <ul class="checks">
+                            <li>PhishHunterAI™ – huijausviestien tunnistus ja riskipisteytys</li>
+                            <li>SMS Shield™ – tekstiviestihuijausten torjunta</li>
+                            <li>M365/Google kovennukset ja valvonta</li>
+                            <li>Incident-apuri: eristys, forensiikka, palautus</li>
+                        </ul>
+                    </div>
+                    <aside class="security-cta">
+                        <h3>PoC viikoissa</h3>
+                        <p>Rakennamme pienen, todennettavan kokeilun nopeasti ja viemme tuotantoon turvallisesti.</p>
+                        <a href="#contact" class="btn btn-ghost">Pyydä demo</a>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <section id="pricing" class="section-block pricing" data-section="pricing">
+            <div class="container">
+                <div class="section-header">
+                    <p class="eyebrow">Palvelupaketit</p>
+                    <h2 class="section-title">Hinnoittelu</h2>
+                </div>
+                <div class="pricing-grid">
+                    <article class="price-card">
+                        <h3>Start</h3>
+                        <p class="price">alk. 690 € / kk</p>
+                        <ul>
+                            <li><strong>SLA:</strong> NBD (seuraava arkipäivä)</li>
+                            <li>Alkuauditointi</li>
+                            <li>Peruskovennus</li>
+                            <li>Koulutus + 1 simulaatio</li>
+                        </ul>
+                    </article>
+                    <article class="price-card highlight">
+                        <div class="badge">Suosituin</div>
+                        <h3>Protect</h3>
+                        <p class="price">alk. 1 490 € / kk</p>
+                        <ul>
+                            <li><strong>SLA:</strong> 4h</li>
+                            <li>Start + 24/7 valvonta</li>
+                            <li>Kuukausiraportti</li>
+                            <li>Kvartaali-katselmus</li>
+                        </ul>
+                    </article>
+                    <article class="price-card">
+                        <h3>Elite</h3>
+                        <p class="price">alk. 3 490 € / kk</p>
+                        <ul>
+                            <li><strong>SLA:</strong> 1h</li>
+                            <li>Protect + IR SLA</li>
+                            <li>Laajennettu automaatio</li>
+                            <li>Laajennetut simulaatiot</li>
+                        </ul>
+                    </article>
+                </div>
+
+                <div class="faq" aria-label="Usein kysytyt kysymykset">
+                    <details>
+                        <summary>Mitä SLA tarkoittaa?</summary>
+                        <p>Palvelutasosopimus: vasteaika hälytyksille ja tukipyynnöille. Start: NBD, Protect: 4h, Elite: 1h.</p>
+                    </details>
+                    <details>
+                        <summary>Onko määräaikaa?</summary>
+                        <p>Kuukausi kerrallaan tai 12 kk alennuksella. Ei vendor-lockia.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section-block contact" data-section="contact">
+            <div class="container contact-inner">
                 <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">📧</div>
-                        <div>
-                            <h3>Email</h3>
-                            <p>contact@anomfin.com</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">📞</div>
-                        <div>
-                            <h3>Phone</h3>
-                            <p>+1 (555) 123-4567</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">🏢</div>
-                        <div>
-                            <h3>Office</h3>
-                            <p>123 Security Blvd<br>Cyber City, CC 12345</p>
-                        </div>
-                    </div>
+                    <p class="eyebrow">Yhteys</p>
+                    <h2 class="section-title">Ota yhteyttä</h2>
+                    <p>Varataan kartoitus, priorisoidaan tarpeet ja tuodaan ratkaisut tuotantoon turvallisesti.</p>
+                    <ul class="contact-methods">
+                        <li>
+                            <span class="contact-label">Sähköposti</span>
+                            <a href="mailto:info@anomfin.fi">info@anomfin.fi</a>
+                        </li>
+                        <li>
+                            <span class="contact-label">Puhelin</span>
+                            <a href="tel:+358401234567">+358 40 123 4567</a>
+                        </li>
+                        <li>
+                            <span class="contact-label">Tuki</span>
+                            <a href="mailto:soc@anomfin.fi">soc@anomfin.fi</a>
+                        </li>
+                    </ul>
                 </div>
-                <form class="contact-form">
-                    <div class="form-group">
-                        <input type="text" id="name" name="name" placeholder="Your Name" required>
+                <form class="contact-form" method="post" action="#" novalidate>
+                    <div class="form-grid">
+                        <label>Yritys
+                            <input type="text" name="company" required>
+                        </label>
+                        <label>Nimi
+                            <input type="text" name="name" required>
+                        </label>
+                        <label>Sähköposti
+                            <input type="email" name="email" required>
+                        </label>
+                        <label>Puhelin
+                            <input type="tel" name="phone">
+                        </label>
+                        <label>Henkilömäärä
+                            <input type="number" name="headcount" min="1">
+                        </label>
+                        <label>Tarve / kuvaus
+                            <textarea name="message" rows="4" placeholder="Kuvaa lyhyesti ongelma tai tavoite"></textarea>
+                        </label>
+                        <label class="consent">
+                            <input type="checkbox" name="consent" required>
+                            Hyväksyn tietosuojan.
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <input type="email" id="email" name="email" placeholder="Your Email" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Send Message</button>
+                    <button type="submit" class="btn btn-primary">Lähetä</button>
+                    <p class="form-status" role="status" aria-live="polite"></p>
                 </form>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>AnomFIN</h3>
-                    <p>Protecting your digital assets with advanced cybersecurity solutions.</p>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <img src="assets/logo.svg" alt="" width="28" height="28">
+                <div>
+                    <strong>AnomFIN</strong>
+                    <p>Rakennamme turvallisia sovelluksia kaikille alustoille.</p>
                 </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
+            </div>
+            <div class="footer-links">
+                <div>
+                    <h4>Pikalinkit</h4>
                     <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#services">Palvelut</a></li>
+                        <li><a href="#security">Kyberturva</a></li>
+                        <li><a href="#pricing">Hinnoittelu</a></li>
+                        <li><a href="#contact">Yhteys</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h4>Services</h4>
+                <div>
+                    <h4>Resurssit</h4>
                     <ul>
-                        <li><a href="#services">Threat Detection</a></li>
-                        <li><a href="#services">Security Audits</a></li>
-                        <li><a href="#services">Incident Response</a></li>
-                        <li><a href="#services">Security Training</a></li>
+                        <li><a href="#privacy">Tietosuoja</a></li>
+                        <li><a href="#terms">Ehdot</a></li>
+                        <li><a href="mailto:soc@anomfin.fi">SOC 24/7</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 AnomFIN. All rights reserved.</p>
+            <div class="footer-cta">
+                <h4>Aloitetaan</h4>
+                <p>Siirrä kritiikka backlogista tuotantoon – turvallisesti.</p>
+                <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn btn-secondary">Varaa kartoitus</a>
             </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 AnomFIN · Rakennettu AnomTools-tiimin kanssa</p>
         </div>
     </footer>
 
     <script src="js/script.js"></script>
 </body>
 </html>
-# =======
-<html lang="fi">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AnomFIN – Yksilölliset sovellukset ja kyberturvaratkaisut</title>
-  <meta name="description" content="AnomFIN koodaa yrityksellenne yksilölliset sovellukset kaikille alustoille – kyberturva sisäänrakennettuna." />
-  <link rel="preload" href="assets/logo.svg" as="image" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <a class="skip-link" href="#main">Siirry sisältöön</a>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="#top" aria-label="AnomFIN etusivu">
-        <img src="assets/logo.svg" alt="AnomFIN logo" width="34" height="34" />
-        <span>AnomFIN</span>
-      </a>
-      <button class="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
-        <span class="nav-toggle-bar"></span>
-        <span class="sr-only">Valikko</span>
-      </button>
-      <nav id="primary-nav" class="site-nav" aria-label="Päävalikko">
-        <a href="#services">Palvelut</a>
-        <a href="#platforms">Alustat</a>
-        <a href="#security">Kyberturva</a>
-        <a href="#pricing">Hinnoittelu</a>
-        <a href="#contact" class="cta-link">Ota yhteyttä</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- COPILOT_HINT: Tämä tiedosto on MVP. Siirrä sisältö content/site.json → komponentteihin.
-     Luo Astro/Next -projekti ja tee reitit: /, /palvelut/[slug], /hinnoittelu, /yhteys.
-     Komponentit: Hero, CardGrid, Pricing, FAQ. Käytä schema.org. -->
-<main id="main" data-source="content/site.json">
-    <section class="hero" id="top" data-section="hero">
-      <div class="container hero-inner">
-        <h1>Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.</h1>
-        <p class="lead">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. <br class="hide-sm">Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
-        <div class="hero-ctas">
-          <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn primary">Varaa 30 min kartoitus</a>
-          <a href="#services" class="btn ghost">Tutustu palveluihin</a>
-        </div>
-      </div>
-      <div class="bg-grid" aria-hidden="true"></div>
-    </section>
-
-    <section id="services" class="section" data-section="services">
-      <div class="container">
-        <h2>Palvelut</h2>
-        <p class="section-sub">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
-        <div class="cards">
-          <article class="card">
-            <h3>Räätälöidyt sovellukset</h3>
-            <p>Suunnittelemme ja toteutamme <b>mobiili</b>-, <b>desktop</b>- ja <b>web</b>-sovelluksia, jotka istuvat prosesseihinne.</p>
-          </article>
-          <article class="card">
-            <h3>Kyberturvaratkaisut</h3>
-            <p>Huijausviestien tunnistus, SMS-suojaus ja turvalliset integraatiot – käytännönläheisesti.</p>
-          </article>
-          <article class="card">
-            <h3>Auditoinnit &amp; testaus</h3>
-            <p>Sovellusten kovennukset ja penetraatiotestaus. Selkokielinen raportti ja korjauslista.</p>
-          </article>
-          <article class="card">
-            <h3>24/7 valvonta &amp; ylläpito</h3>
-            <p>Automaattiset hälytykset, triage ja kuukausiraportit. Jatkuva kehitys.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="platforms" class="section" data-section="platforms">
-      <div class="container">
-        <h2>Alustat</h2>
-        <div class="platforms">
-          <div class="platform"><span>iOS</span></div>
-          <div class="platform"><span>Android</span></div>
-          <div class="platform"><span>macOS</span></div>
-          <div class="platform"><span>Windows</span></div>
-          <div class="platform"><span>Linux</span></div>
-          <div class="platform"><span>Web</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="security" class="section section-accent" data-section="security">
-      <div class="container">
-        <h2>Kyberturva</h2>
-        <div class="split">
-          <div>
-            <ul class="checks">
-              <li>PhishHunterAI™ – huijausviestien tunnistus ja riskipisteytys</li>
-              <li>SMS Shield™ – tekstiviestihuijausten torjunta</li>
-              <li>M365/Google kovennukset ja valvonta</li>
-              <li>Incident-apuri: eristys, forensiikka, palautus</li>
-            </ul>
-          </div>
-          <div class="accent-box">
-            <h3>PoC viikoissa</h3>
-            <p>Rakennamme pienen, todennettavan kokeilun nopeasti ja viemme tuotantoon turvallisesti.</p>
-            <a href="#contact" class="btn secondary">Pyydä demo</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="pricing" class="section" data-section="pricing">
-      <div class="container">
-        <h2>Hinnoittelu</h2>
-        <div class="pricing">
-          <div class="price-card">
-            <h3>Start</h3>
-            <p class="price">alk. 690 € / kk</p>
-            <ul>
-              <li><b>SLA:</b> NBD (seuraava arkipäivä)</li>
-              <li>Alkuauditointi</li>
-              <li>Peruskovennus</li>
-              <li>Koulutus + 1 simulaatio</li>
-            </ul>
-          </div>
-          <div class="price-card highlight">
-            <h3>Protect</h3>
-            <p class="price">alk. 1 490 € / kk</p>
-            <ul>
-              <li><b>SLA:</b> 4h</li>
-              <li>Start + 24/7 valvonta</li>
-              <li>Kuukausiraportti</li>
-              <li>Kvartaali-katselmus</li>
-            </ul>
-          </div>
-          <div class="price-card">
-            <h3>Elite</h3>
-            <p class="price">alk. 3 490 € / kk</p>
-            <ul>
-              <li><b>SLA:</b> 1h</li>
-              <li>Protect + IR SLA</li>
-              <li>Laajennettu automaatio</li>
-              <li>Laajennetut simulaatiot</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    
-      <div class="faq">
-        <details>
-          <summary>Mitä SLA tarkoittaa?</summary>
-          <p>Palvelutasosopimus: vasteaika hälytyksille ja tukipyynnöille. Start: NBD, Protect: 4h, Elite: 1h.</p>
-        </details>
-        <details>
-          <summary>Onko määräaikaa?</summary>
-          <p>Kuukausi kerrallaan tai 12 kk alennuksella. Ei vendor-lockia.</p>
-        </details>
-      </div>
-
-    </section>
-
-    <section id="contact" class="section section-muted" data-section="contact">
-      <div class="container">
-        <h2>Ota yhteyttä</h2>
-        <form class="contact-form" method="post" action="#" onsubmit="return fakeSubmit(event)">
-          <div class="grid">
-            <label>Yritys
-              <input type="text" name="company" required />
-            </label>
-            <label>Nimi
-              <input type="text" name="name" required />
-            </label>
-            <label>Sähköposti
-              <input type="email" name="email" required />
-            </label>
-            <label>Puhelin
-              <input type="tel" name="phone" />
-            </label>
-            <label>Henkilömäärä
-              <input type="number" name="headcount" min="1" />
-            </label>
-            <label>Tarve / kuvaus
-              <textarea name="message" rows="4" placeholder="Kuvaa lyhyesti ongelma tai tavoite"></textarea>
-            </label>
-            <label class="consent">
-              <input type="checkbox" required /> Hyväksyn tietosuojan.
-            </label>
-          </div>
-          <button class="btn primary" type="submit">Lähetä</button>
-          <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div class="footer-brand">
-        <img src="assets/logo.svg" alt="" width="28" height="28" />
-        <strong>AnomFIN</strong>
-      </div>
-      <nav class="footer-nav">
-        <a href="#privacy">Tietosuoja</a>
-        <a href="#terms">Ehdot</a>
-        <a href="mailto:info@anomfin.fi">info@anomfin.fi</a>
-      </nav>
-      <p class="copyright">© 2025 AnomFIN</p>
-    </div>
-  </footer>
-
-  <script src="script.js"></script>
-</body>
-</html>
-# >>>>>>> main
