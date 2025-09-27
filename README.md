@@ -1,22 +1,20 @@
-#<<<<<<< copilot/fix-1
-# AnomFIN - Cybersecurity Website
+# AnomFIN · AnomTools Cybersecurity Website
 
-A professional website for AnomFIN, a cutting-edge cybersecurity company providing comprehensive digital security solutions.
+A professional, bilingual website foundation for AnomFIN, a cutting-edge cybersecurity company powered by the AnomTools suite.
 
 ## Features
 
-- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
-- **Modern UI**: Clean, professional design with cybersecurity theme
-- **Interactive Elements**: Smooth scrolling navigation, animated components
-- **Contact Form**: Functional contact form with validation and notifications
-- **Professional Sections**: Hero, Services, About, and Contact sections
-- **Easy Deployment**: Simple static files ready for any web server
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices.
+- **Modern UI**: Clean, professional look themed for cybersecurity.
+- **Interactive Elements**: Smooth scrolling navigation and animated components.
+- **Contact Form**: Client-side validation with clear user feedback (ready for backend integration).
+- **Content Source**: `site.json` contains structured data that can feed future Astro/Next builds.
 
 ## Quick Start
 
-1. **View the website**: Open `index.html` in your web browser
-2. **Deploy**: Upload all files to your web server
-3. **Package**: Run `./package.sh` to create a deployment zip file
+1. **Preview**: Open `index.html` directly in your browser.
+2. **Customize**: Update text in `index.html`, styles in `css/style.css`, and scripts in `js/script.js`.
+3. **Package**: Run `./package.sh` to create a deployment ZIP for static hosting.
 
 ## File Structure
 
@@ -26,78 +24,63 @@ A professional website for AnomFIN, a cutting-edge cybersecurity company providi
 │   └── style.css      # Main stylesheet
 ├── js/
 │   └── script.js      # Interactive functionality
-├── assets/            # Images and other assets (empty initially)
+├── assets/            # Images and other assets
+├── docs/              # Project documentation (including git sync status)
+├── site.json          # Content source for generators
 ├── package.sh         # Packaging script for deployment
 └── README.md          # This file
 ```
 
-## Deployment
+## Deployment Options
 
 ### Option 1: Simple Upload
-1. Upload all files to your web server's public directory
-2. Ensure your server can serve static HTML files
-3. Access via your domain
+1. Upload all files to your web server's public directory.
+2. Ensure your server serves static HTML files.
+3. Visit your domain to verify the site.
 
-### Option 2: Using Package Script
-1. Run `./package.sh` to create a deployment package
-2. Extract the generated zip file to your web server
-3. Follow the included deployment instructions
+### Option 2: Using the Packaging Script
+1. Run `./package.sh` to create `anomfin_site.zip`.
+2. Extract the archive on your web server.
+3. Follow the included deployment notes.
 
-## Customization
+---
 
-- **Content**: Edit `index.html` to update text, contact information, and services
-- **Styling**: Modify `css/style.css` to change colors, fonts, and layout
-- **Images**: Add company logos and images to the `assets/` directory
-- **Functionality**: Extend `js/script.js` for additional interactive features
+## Kehitys (FI)
 
-## Browser Support
+Tämä repo sisältää kevyen, responsiivisen demopohjan AnomFINille (AnomTools-tekniikalla). Suunnitelma on siirtää sisältö myöhemmin Astro- tai Next.js -projektiin.
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers
-
-## Contact Form
-
-The contact form includes client-side validation and provides user feedback. For production use, you'll need to integrate with a backend service to handle form submissions.
-
-## License
-
-© 2024 AnomFIN. All rights reserved.
-=======
-# AnomFIN sivupohja (demo → laajennettava)
-
-Tämä on kevyt, responsiivinen sivupohja AnomFINille. Se on suunniteltu siirrettäväksi myöhemmin Astro/Next -projektiin.
-
-## Rakenne
 - `index.html` – staattinen demoversio (merkattu COPILOT-kommentein)
-- `style.css` – tumma neon-tyyli, mobile-first
-- `script.js` – mobiilivalikko + lomakkeen demo-kuittaus
-- `content/site.json` – **sisältölähde**, jota voi käyttää generaattorin kanssa
+- `css/style.css` – tumma neon-tyyli, mobile-first
+- `js/script.js` – mobiilivalikko ja lomakkeen demo-kuittaus
+- `site.json` – **sisältölähde**, jota voidaan käyttää generaattorin kanssa
 
-## Kehitys
-Avaa `index.html` suoraan selaimeen. Myöhemmin voit siirtää sisällöt `content/site.json` → Astro/Next.
+### Kehitysvinkit
 
-## Copilot: CONTINUE
-Seuraavat tehtävät GitHubin AI:lle (Copilot/GitHub Actions):
+1. Avaa `index.html` suoraan selaimessa nopeaa esikatselua varten.
+2. Hyödynnä `site.json` -tiedostoa, jos rakennat dynaamisen sivuston (Astro/Next.js).
+3. Lisää omaa sisältöä `assets/`-hakemistoon (logot, kuvat, videot).
 
-1. **Generoi** Astro- tai Next.js -projekti ja lue `content/site.json` sivujen pohjaksi.
+### Copilot TODO (FI)
+
+Seuraavat askelmerkit GitHubin AI-työkaluille:
+
+1. **Generoi** Astro- tai Next.js -projekti, joka lukee `site.json` -datan sivujen pohjaksi.
 2. Luo **reitit**: `/`, `/palvelut/[slug]`, `/hinnoittelu`, `/yhteys`, `/tietosuoja`.
-3. Tee **komponentit** (Hero, Cards, Pricing, FAQ) ja täytä ne JSON-datasta.
+3. Rakenna **komponentit** (Hero, Cards, Pricing, FAQ) ja täytä ne JSON-datasta.
 4. Lisää **lokalisointi**-valmius (FI aluksi; rakenne i18n:lle).
-5. Konfiguroi **CI/CD**: GitHub Actions → Vercel/Cloudflare Pages.
-6. Toteuta **lomake** (sähköpostilla tai esim. Brevo/SMTP/Sheets) ja lisää validointi.
-7. Lisää **schema.org** (Organization, Product, FAQ) + perus SEO-metat.
+5. Konfiguroi **CI/CD**: GitHub Actions → Vercel tai Cloudflare Pages.
+6. Toteuta **lomake** taustapalvelulla (esim. Brevo/SMTP/Google Sheets) ja lisää validointi.
+7. Lisää **schema.org** (Organization, Product, FAQ) sekä perus SEO-metat.
 
 > Vihje: Aloita komennolla `# COPILOT_TODO: scaffold Astro with content/site.json as data source.`
 
+## Publishing to GitHub Pages
 
-## Julkaisu GitHub Pagesiin
 1. Luo GitHub-repo (esim. `anomfin-site`) ja puske kaikki tiedostot.
-2. Varmista, että olet `main`-branchissa.
+2. Varmista, että työskentelet `main`-branchissa.
 3. Ota Pages käyttöön: **Settings → Pages → Source: GitHub Actions**.
-4. Workflow `.github/workflows/deploy.yml` julkaisee sivun automaattisesti.
+4. Workflow `.github/workflows/deploy.yml` julkaisee sivun automaattisesti. Kun siirryt Astro/Next-projektiin, päivitä Node-askeleet ja muuta `upload-pages-artifact` polku `./dist`-hakemistoon.
 
-> Kun siirryt Astro/Next -projektiin, kommentoi workflowssa auki Node-askeleet ja muuta `upload-pages-artifact` polku `./dist`:iin.
-#>>>>>>> main
+## License
+
+© 2024 AnomFIN · AnomTools. All rights reserved.
