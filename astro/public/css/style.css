@@ -388,6 +388,25 @@ a {
 .hero-grid.grid-shift{ animation: hueToGreen var(--grid-hue-duration-ms, 1800ms) ease forwards; }
 .hero-grid.lively{ animation-duration: 4s; }
 .hero-orb.lively{ animation-duration: 6s; box-shadow: 0 0 80px rgba(0, 212, 255, 0.55); }
+/* Floating grid that follows scroll */
+.floating-grid{
+    position: fixed;
+    top: 20vh; left: 60vw;
+    width: 280px; height: 180px;
+    border-radius: 24px;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.04) 0%, rgba(var(--square-green-rgba, 0,255,150), 0.18) 100%);
+    border: 1px solid rgba(var(--square-green-rgba, 0,255,150), 0.22);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+    z-index: 999;
+    will-change: transform, filter;
+    transition: filter .6s ease, box-shadow .6s ease;
+}
+.floating-grid.fg-active{ box-shadow: 0 0 50px rgba(0,255,150,.25); }
+.floating-grid.fg-on-services{ filter: saturate(140%) hue-rotate(10deg); }
+.floating-grid.fg-on-security{ filter: saturate(160%) hue-rotate(-10deg); }
+.floating-grid.fg-on-pricing{ filter: saturate(150%) brightness(1.1); }
+.floating-grid.fg-on-contact{ filter: hue-rotate(180deg) saturate(130%); }
 
 @keyframes orbPulse {
     0%, 100% {
@@ -450,6 +469,12 @@ a {
     font-weight: 700;
     color: #f4f7fb;
     margin-bottom: 1rem;
+}
+.section-tag{
+    font-style: italic;
+    color: rgba(244,247,251,0.8);
+    margin-top: -.4rem;
+    margin-bottom: .8rem;
 }
 
 .section-sub {

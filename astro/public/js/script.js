@@ -223,6 +223,51 @@ function initIntroOverlay() {
     }, 500);
 }
 
+// Floating grid that follows scroll with smoothing and reacts to sections
+(function(){
+  let rafId=null, lastY=0, lastX=0, targetY=0, targetX=0;
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function initFloatingGrid(){
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const src = document.querySelector('.hero-grid');
+    if(!src || prefersReduced) return;
+    const fg = src.cloneNode(true);
+    fg.classList.add('floating-grid','fg-active');
+    fg.setAttribute('aria-hidden','true');
+    document.body.appendChild(fg);
+    const loop = ()=>{
+      const t = 0.12;
+      lastY = lerp(lastY, targetY, t);
+      lastX = lerp(lastX, targetX, t);
+      fg.style.transform = `translate(${Math.round(lastX)}px, ${Math.round(lastY)}px)`;
+      rafId = requestAnimationFrame(loop);
+    };
+    const onScroll = ()=>{
+      const sy = window.scrollY || document.documentElement.scrollTop || 0;
+      const vh = window.innerHeight;
+      targetY = sy * 0.12 + vh * 0.22;
+      targetX = Math.sin(sy * 0.002) * 40 + (window.innerWidth * 0.25);
+    };
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        const id = e.target.id;
+        if(e.isIntersecting){
+          fg.classList.remove('fg-on-services','fg-on-security','fg-on-pricing','fg-on-contact');
+          if(id==='services') fg.classList.add('fg-on-services');
+          if(id==='security') fg.classList.add('fg-on-security');
+          if(id==='pricing') fg.classList.add('fg-on-pricing');
+          if(id==='contact') fg.classList.add('fg-on-contact');
+        }
+      });
+    },{ threshold: 0.3 });
+    ['services','security','pricing','contact'].forEach(id=>{ const el = document.getElementById(id); if(el) io.observe(el); });
+    window.addEventListener('scroll', onScroll, { passive:true });
+    onScroll();
+    loop();
+  }
+  document.addEventListener('DOMContentLoaded', ()=> setTimeout(initFloatingGrid, 1200));
+})();
+
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
