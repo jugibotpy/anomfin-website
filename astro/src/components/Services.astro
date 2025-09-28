@@ -1,16 +1,20 @@
 ---
-type Service = { title: string; desc: string; slug: string };
-const { services = [] }: { services: Service[] } = Astro.props;
+const { services } = Astro.props.site;
 ---
-<section>
-  <h2>Palvelut</h2>
-  <div class="grid">
-    {services.map((s) => (
-      <article class="card">
-        <h3>{s.title}</h3>
-        <p class="muted">{s.desc}</p>
-      </article>
-    ))}
+<section id="services" class="section-block services" data-section="services">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title fade-in-smooth">Palvelumme</h2>
+      <p class="section-sub">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
+    </div>
+    <div class="services-grid">
+      {services?.map((s) => (
+        <article class="service-card">
+          <div class="service-icon">{s.icon}</div>
+          <h3>{s.title}</h3>
+          <p>{s.text}</p>
+        </article>
+      ))}
+    </div>
   </div>
 </section>
-

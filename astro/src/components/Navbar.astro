@@ -1,0 +1,22 @@
+---
+const site = Astro.props.site;
+---
+<nav class="navbar" role="navigation" aria-label="Päävalikko">
+  <div class="nav-container container">
+    <a class="nav-logo" href="#home" aria-label="AnomFIN etusivu">
+      <img src="/assets/image2vector.svg" alt="" width="28" height="28" />
+      <h2>{site?.brand?.name ?? 'AnomFIN'}</h2>
+    </a>
+    <ul class="nav-menu" id="primary-menu">
+      <li class="nav-item"><a href="#home" class="nav-link">Etusivu</a></li>
+      <li class="nav-item"><a href="#services" class="nav-link">Palvelut</a></li>
+      <li class="nav-item"><a href="#platforms" class="nav-link">Alustat</a></li>
+      <li class="nav-item"><a href="#security" class="nav-link">Kyberturva</a></li>
+      <li class="nav-item"><a href="#pricing" class="nav-link">Hinnoittelu</a></li>
+      <li class="nav-item"><a href="#contact" class="nav-link nav-link-cta">Ota yhteyttä</a></li>
+    </ul>
+    <button class="nav-toggle" id="mobile-menu" aria-expanded="false" aria-controls="primary-menu" hidden>
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+  </div>
+</nav>

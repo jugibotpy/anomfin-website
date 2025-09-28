@@ -1,21 +1,21 @@
 ---
-type Props = { bullets: string[], ctaHref?: string };
-const { bullets = [], ctaHref = '#contact' }: Props = Astro.props as any;
+const { security } = Astro.props.site;
 ---
-<section id="security" class="section section-accent accent-blue">
+<section id="security" class="section-block security" data-section="security">
   <div class="container">
-    <h2>Kyberturva</h2>
-    <div class="split">
-      <div>
+    <div class="security-inner">
+      <div class="security-content">
+        <p class="eyebrow">Kyberturva sisäänrakennettuna</p>
+        <h2 class="section-title">Kyberturva</h2>
         <ul class="checks">
-          {bullets.map((b) => <li>{b}</li>)}
+          {security?.points?.map((t) => <li>{t}</li>)}
         </ul>
       </div>
-      <div class="accent-box">
+      <aside class="security-cta">
         <h3>PoC viikoissa</h3>
         <p>Rakennamme pienen, todennettavan kokeilun nopeasti ja viemme tuotantoon turvallisesti.</p>
-        <a href={ctaHref} class="btn btn-secondary">Pyydä demo</a>
-      </div>
+        <a href="#contact" class="btn btn-secondary">Pyydä demo</a>
+      </aside>
     </div>
   </div>
 </section>
