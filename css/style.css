@@ -32,10 +32,12 @@ body {
     --logo-initial-opacity: 0.2;
     --logo-initial-blur: 80px;
     --logo-initial-brightness: 0.85;
+    --logo-arc-x: 0.65;       /* 0..1, kaaren vaakakerroin */
+    --logo-arc-dy: 60px;      /* px, kaaren pystysiirto */
     --grid-hue-duration-ms: 1800ms;
-    --square-shake-duration-ms: 800ms;
-    --square-shake-amp: 10px;
-    --square-scale-end: 1.2;
+    --square-shake-duration-ms: 1000ms;
+    --square-shake-amp: 14px;
+    --square-scale-end: 1.25;
     --orb-float-duration-s: 8s;
     --grid-float-duration-s: 6s;
     --eyebrow-size: 1rem;

@@ -210,13 +210,15 @@ function initIntroOverlay() {
             const scale = Math.max(0.25, Math.min(0.5, (gridRect.width * 0.35) / (logoRect.width || 1)));
 
             const moveMs = cssMs('--logo-move-duration-ms', 1000);
-            const midX = dx * 0.6;
-            const midY = dy * 0.7 - 40;
+            const varX = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--logo-arc-x')) || 0.65;
+            const varDY = parseFloat((getComputedStyle(document.documentElement).getPropertyValue('--logo-arc-dy')||'').replace('px','')) || 60;
+            const midX = dx * varX;
+            const midY = dy * varX - varDY;
             const anim = logo.animate([
                 { transform: 'translate(0px,0px) scale(1)' },
                 { transform: `translate(${midX}px, ${midY}px) scale(${Math.max(1, scale*0.9)})` },
                 { transform: `translate(${dx}px, ${dy}px) scale(${scale})` }
-            ], { duration: moveMs, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+            ], { duration: moveMs, easing: (localStorage.getItem('anomfin:ease')||'cubic-bezier(.2,.8,.2,1)'), fill: 'forwards' });
 
             const onMoveEnd = () => {
                 // Neliö reagoi: tärisee, kasvaa ~20% ja vaihtaa vihreäksi

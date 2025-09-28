@@ -83,6 +83,28 @@
       </div>
 
       <div class="card">
+        <h3>Logon lento</h3>
+        <label>Kaari – X-kerroin (0..1)
+          <div class="row"><input id="logo-arc-x" type="range" min="0" max="1" step="0.01"><input id="logo-arc-x-n" type="number" min="0" max="1" step="0.01" style="width:100px"></div>
+        </label>
+        <label>Kaari – Y-siirto (px)
+          <div class="row"><input id="logo-arc-dy" type="range" min="-200" max="200" step="1"><input id="logo-arc-dy-n" type="number" min="-200" max="200" step="1" style="width:100px"></div>
+        </label>
+        <label>Easing (polku)
+          <div class="row">
+            <select id="logo-ease" style="width:100%">
+              <option value="cubic-bezier(.2,.8,.2,1)">Smooth (default)</option>
+              <option value="ease-in-out">ease-in-out</option>
+              <option value="ease-out">ease-out</option>
+              <option value="ease-in">ease-in</option>
+              <option value="ease">ease</option>
+              <option value="linear">linear</option>
+            </select>
+          </div>
+        </label>
+      </div>
+
+      <div class="card">
         <h3>Typografia / Fade</h3>
         <label>Otsikon eyebrow-koko (rem)
           <div class="row"><input id="eyebrow-size" type="range" min="0.7" max="1.4" step="0.01"><input id="eyebrow-size-n" type="number" min="0.7" max="1.4" step="0.01" style="width:100px"></div>
@@ -159,6 +181,8 @@
       const hex = '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
       document.getElementById('square-green').value = hex;
       document.getElementById('square-green-val').textContent = hex + ` (${rgb})`;
+      const ease = localStorage.getItem('anomfin:ease') || 'cubic-bezier(.2,.8,.2,1)';
+      document.getElementById('logo-ease').value = ease;
     }
 
     function save(){
@@ -175,6 +199,8 @@
       const [r,g,b] = hexToRgb(sGreenHex);
       out['--square-green-rgba'] = `${r},${g},${b}`;
       localStorage.setItem('anomfin:cssVars', JSON.stringify(out));
+      const ease = (document.getElementById('logo-ease').value||'').trim();
+      if(ease) localStorage.setItem('anomfin:ease', ease);
       // Apply immediately
       Object.entries(out).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
       document.getElementById('neon-val').textContent = neon;
