@@ -236,6 +236,10 @@ function initIntroOverlay() {
     fg.classList.add('floating-grid','fg-active');
     fg.setAttribute('aria-hidden','true');
     document.body.appendChild(fg);
+    const cap = document.createElement('div');
+    cap.className = 'floating-caption';
+    cap.innerHTML = '<span>AnomFIN · Yksilölliset ratkaisut</span>';
+    fg.appendChild(cap);
     const loop = ()=>{
       const t = 0.12;
       lastY = lerp(lastY, targetY, t);
@@ -246,9 +250,11 @@ function initIntroOverlay() {
     };
     const onScroll = ()=>{
       const sy = window.scrollY || document.documentElement.scrollTop || 0;
-      const vh = window.innerHeight;
+      const vh = window.innerHeight; const vw = window.innerWidth;
+      const docH = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - vh;
+      const p = docH>0 ? Math.min(1, Math.max(0, sy / docH)) : 0;
       targetY = sy * 0.12 + vh * 0.22;
-      targetX = Math.sin(sy * 0.002) * 40 + (window.innerWidth * 0.25);
+      targetX = (vw * (0.15 + 0.7 * p)) + Math.sin(sy * 0.004) * 30 - (vw * 0.5);
     };
     const io = new IntersectionObserver((entries)=>{
       entries.forEach(e=>{
@@ -259,6 +265,13 @@ function initIntroOverlay() {
           if(id==='security') fg.classList.add('fg-on-security');
           if(id==='pricing') fg.classList.add('fg-on-pricing');
           if(id==='contact') fg.classList.add('fg-on-contact');
+          let text = 'AnomFIN · Yksilölliset ratkaisut';
+          if(id==='services') text = 'Rakenna nopeasti, skaalaa fiksusti';
+          if(id==='security') text = 'Kyberturva arjessa, ei paperilla';
+          if(id==='pricing') text = 'Selkeä hinnoittelu, ei yllätyksiä';
+          if(id==='contact') text = 'Jutellaan – viedään ideasi tuotantoon';
+          cap.innerHTML = `<span>${text}</span>`;
+          fg.classList.add('fg-caption-show');
         }
       });
     },{ threshold: 0.3 });

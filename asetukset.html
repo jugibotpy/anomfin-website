@@ -135,6 +135,12 @@
           <div class="row"><input id="square-green" type="color"><span class="kv" id="square-green-val"></span></div>
         </label>
       </div>
+
+      <div class="card">
+        <h3>Käytös</h3>
+        <label><input type="checkbox" id="reactHover"> Reagoi palvelukortteihin (hover → pulssi)</label>
+        <label><input type="checkbox" id="reactContact"> Reagoi yhteysosioon (korostus)</label>
+      </div>
     </div>
 
     <div class="actions">
@@ -317,6 +323,9 @@
       localStorage.setItem('anomfin:cssVars', JSON.stringify(out));
       const ease = (document.getElementById('logo-ease').value||'').trim();
       if(ease) localStorage.setItem('anomfin:ease', ease);
+      // behaviors
+      localStorage.setItem('anomfin:reactHover', document.getElementById('reactHover').checked ? '1' : '0');
+      localStorage.setItem('anomfin:reactContact', document.getElementById('reactContact').checked ? '1' : '0');
       // Apply immediately
       Object.entries(out).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
       document.getElementById('neon-val').textContent = neon;
@@ -339,6 +348,9 @@
     setupPresetCheckboxes();
     linkSliders();
     load();
+    // load behaviors
+    document.getElementById('reactHover').checked = (localStorage.getItem('anomfin:reactHover')||'1')==='1';
+    document.getElementById('reactContact').checked = (localStorage.getItem('anomfin:reactContact')||'1')==='1';
   </script>
 </body>
 </html>
