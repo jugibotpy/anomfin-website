@@ -1,0 +1,18 @@
+---
+const { platforms = [] }: { platforms: string[] } = Astro.props;
+---
+<section id="platforms" class="section section-block accent-green">
+  <div class="container">
+    <div class="section-header">
+      <p class="eyebrow">Alustat</p>
+      <h2 class="section-title">Alustat</h2>
+      <p class="section-sub">Toteutamme ratkaisun sinne, missä sitä käytetään.</p>
+    </div>
+    <div class="platforms">
+      {platforms.map((p) => (
+        <div class="platform"><span>{p}</span></div>
+      ))}
+    </div>
+  </div>
+</section>
+

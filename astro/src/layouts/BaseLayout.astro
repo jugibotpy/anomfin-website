@@ -1,0 +1,46 @@
+---
+import "../styles/root.css";
+const { title = "AnomFIN", description = "Sovellukset ja kyberturva" } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <header>
+      <a href="/">AnomFIN</a>
+      <nav>
+        <a href="/">Etusivu</a>
+        <a href="/hinnoittelu">Hinnoittelu</a>
+        <a href="/yhteys">Yhteys</a>
+        <a href="/tietosuoja">Tietosuoja</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p class="muted">© {new Date().getFullYear()} AnomFIN · Kaikki oikeudet pidätetään.</p>
+    </footer>
+    <script is:inline>
+      (() => {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+        const setScroll = () => {
+          document.documentElement.style.setProperty('--scrollY', String(window.scrollY * 0.1));
+        };
+        window.addEventListener('scroll', setScroll, { passive: true });
+        setScroll();
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) if (e.isIntersecting) e.target.classList.add('reveal');
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.service-card,.price-card,.platform,.accent-box,.section-title').forEach(el => io.observe(el));
+      })();
+    </script>
+  </body>
+  
+</html>

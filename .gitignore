@@ -47,3 +47,7 @@ pids
 .env.development.local
 .env.test.local
 .env.production.local
+# Astro build artifacts
+astro/node_modules/
+astro/dist/
+astro/.astro/

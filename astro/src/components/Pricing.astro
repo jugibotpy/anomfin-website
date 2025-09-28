@@ -1,0 +1,19 @@
+---
+type Tier = { name: string; price: string; sla: string; features: string[] };
+const { pricing = [] }: { pricing: Tier[] } = Astro.props;
+---
+<section>
+  <h2>Hinnoittelu</h2>
+  <div class="grid">
+    {pricing.map((t) => (
+      <article class="card">
+        <h3>{t.name}</h3>
+        <p><strong>{t.price}</strong> · SLA {t.sla}</p>
+        <ul>
+          {t.features.map((f) => <li>{f}</li>)}
+        </ul>
+      </article>
+    ))}
+  </div>
+</section>
+
