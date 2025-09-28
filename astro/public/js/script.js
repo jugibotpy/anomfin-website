@@ -211,6 +211,7 @@ function initIntroOverlay() {
                     grid.addEventListener('animationend', onShakeEnd);
                 }
                 orb && orb.classList.add('lively');
+                window.AnomFIN_FG && window.AnomFIN_FG.supercharge && window.AnomFIN_FG.supercharge();
                 setTimeout(() => {
                     overlay.style.opacity = '0';
                     overlay.style.transition = 'opacity .6s ease';
@@ -225,7 +226,7 @@ function initIntroOverlay() {
 
 // Floating grid that follows scroll with smoothing and reacts to sections
 (function(){
-  let rafId=null, lastY=0, lastX=0, targetY=0, targetX=0;
+  let rafId=null, lastY=0, lastX=0, targetY=0, targetX=0, scaleCur=1, scaleTarget=1;
   function lerp(a,b,t){ return a + (b-a)*t; }
   function initFloatingGrid(){
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -239,7 +240,8 @@ function initIntroOverlay() {
       const t = 0.12;
       lastY = lerp(lastY, targetY, t);
       lastX = lerp(lastX, targetX, t);
-      fg.style.transform = `translate(${Math.round(lastX)}px, ${Math.round(lastY)}px)`;
+      scaleCur = lerp(scaleCur, scaleTarget, 0.1);
+      fg.style.transform = `translate(${Math.round(lastX)}px, ${Math.round(lastY)}px) scale(${scaleCur})`;
       rafId = requestAnimationFrame(loop);
     };
     const onScroll = ()=>{
@@ -262,8 +264,19 @@ function initIntroOverlay() {
     },{ threshold: 0.3 });
     ['services','security','pricing','contact'].forEach(id=>{ const el = document.getElementById(id); if(el) io.observe(el); });
     window.addEventListener('scroll', onScroll, { passive:true });
+    document.querySelector('.hero-grid')?.classList.add('hidden-floating');
     onScroll();
     loop();
+    window.AnomFIN_FG = {
+      supercharge(){
+        const root = getComputedStyle(document.documentElement);
+        const end = parseFloat(root.getPropertyValue('--square-scale-end')) || 1.25;
+        scaleTarget = Math.max(end, 1.1);
+        const fgEl = document.querySelector('.floating-grid');
+        if(fgEl) fgEl.classList.add('fg-super');
+        setTimeout(()=>{ scaleTarget = 1; }, 1600);
+      }
+    };
   }
   document.addEventListener('DOMContentLoaded', ()=> setTimeout(initFloatingGrid, 1200));
 })();

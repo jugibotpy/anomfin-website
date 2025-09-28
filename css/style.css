@@ -105,6 +105,7 @@ a {
     max-width: 420px;
     filter: blur(var(--logo-blur, var(--logo-initial-blur))) brightness(var(--logo-brightness, var(--logo-initial-brightness))) drop-shadow(0 25px 60px rgba(0, 212, 255, 0.35));
     opacity: var(--logo-initial-opacity, .2);
+    transform: scale(var(--logo-initial-scale, 2));
     transition: opacity var(--logo-reveal-ms, 2500ms) ease, filter var(--logo-reveal-ms, 2500ms) ease, transform var(--logo-move-duration-ms, 1000ms) cubic-bezier(.2,.8,.2,1);
 }
 
@@ -439,6 +440,8 @@ a {
     will-change: transform, filter;
     transition: filter .6s ease, box-shadow .6s ease;
 }
+.floating-grid.fg-super{ border-width: 2px; box-shadow: 0 0 70px rgba(0,255,150,.35); }
+.hero-grid.hidden-floating{ opacity: 0; transition: opacity .6s ease; }
 .floating-grid.fg-active{ box-shadow: 0 0 50px rgba(0,255,150,.25); }
 .floating-grid.fg-on-services{ filter: saturate(140%) hue-rotate(10deg); }
 .floating-grid.fg-on-security{ filter: saturate(160%) hue-rotate(-10deg); }
@@ -494,6 +497,10 @@ a {
     margin-top: -.4rem;
     margin-bottom: .8rem;
 }
+
+/* Eyebrow flare for "Yksilöllinen" */
+.flare-boost{ filter: brightness(1.8) saturate(1.4); text-shadow: 0 0 18px rgba(98,161,255,.55); transition: filter var(--logo-reveal-ms, 2500ms) ease, text-shadow var(--logo-reveal-ms, 2500ms) ease; }
+body.flare-normalize .flare-boost{ filter: brightness(1) saturate(1); text-shadow: 0 0 4px rgba(98,161,255,.25); }
 
 .section-sub {
     color: rgba(244, 247, 251, 0.7);

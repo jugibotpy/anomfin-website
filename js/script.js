@@ -191,8 +191,9 @@ function initIntroOverlay() {
         const root = document.documentElement;
         root.style.setProperty('--logo-blur', '0px');
         root.style.setProperty('--logo-brightness', '1');
-        // Aloita taustan valkeneminen 3s ajan
+        // Aloita taustan valkeneminen 3s ajan ja normalisoi flare
         blackout && blackout.classList.add('fade-out');
+        document.body.classList.add('flare-normalize');
 
         // logo siirtyy kohti neliötä extra smooth (WAAPI)
         setTimeout(() => {
@@ -222,6 +223,11 @@ function initIntroOverlay() {
 
             const onMoveEnd = () => {
                 // Neliö reagoi: tärisee, kasvaa ~20% ja vaihtaa vihreäksi
+                const fg = document.querySelector('.floating-grid');
+                if (fg) {
+                    fg.classList.add('fg-super');
+                    window.AnomFIN_FG && window.AnomFIN_FG.supercharge && window.AnomFIN_FG.supercharge();
+                }
                 if (grid) {
                     grid.classList.add('square-excite', 'square-green');
                     const onShakeEnd = () => {
@@ -247,7 +253,7 @@ function initIntroOverlay() {
 
 // Floating grid that follows scroll with smoothing and reacts to sections
 (function(){
-  let rafId=null, lastY=0, lastX=0, targetY=0, targetX=0;
+  let rafId=null, lastY=0, lastX=0, targetY=0, targetX=0, scaleCur=1, scaleTarget=1;
   function lerp(a,b,t){ return a + (b-a)*t; }
   function initFloatingGrid(){
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -261,7 +267,8 @@ function initIntroOverlay() {
       const t = 0.12; // smoothing
       lastY = lerp(lastY, targetY, t);
       lastX = lerp(lastX, targetX, t);
-      fg.style.transform = `translate(${Math.round(lastX)}px, ${Math.round(lastY)}px)`;
+      scaleCur = lerp(scaleCur, scaleTarget, 0.1);
+      fg.style.transform = `translate(${Math.round(lastX)}px, ${Math.round(lastY)}px) scale(${scaleCur})`;
       rafId = requestAnimationFrame(loop);
     };
     const onScroll = ()=>{
@@ -288,8 +295,21 @@ function initIntroOverlay() {
       const el = document.getElementById(id); if(el) io.observe(el);
     });
     window.addEventListener('scroll', onScroll, { passive:true });
+    // hide original to avoid duplicates
+    src.classList.add('hidden-floating');
     onScroll();
     loop();
+    // expose supercharge
+    window.AnomFIN_FG = {
+      supercharge(){
+        const root = getComputedStyle(document.documentElement);
+        const end = parseFloat(root.getPropertyValue('--square-scale-end')) || 1.25;
+        scaleTarget = Math.max(end, 1.1);
+        const fgEl = document.querySelector('.floating-grid');
+        if(fgEl) fgEl.classList.add('fg-super');
+        setTimeout(()=>{ scaleTarget = 1; }, 1600);
+      }
+    };
   }
   // start after DOM ready + small delay for intro
   document.addEventListener('DOMContentLoaded', ()=> setTimeout(initFloatingGrid, 1200));
