@@ -34,15 +34,11 @@
     <div class="grid">
       <div class="card">
         <h3>Esiasetukset</h3>
-        <p class="hint">Valitse valmis animaatiotyyli. Voit vielä hienosäätää alla.</p>
-        <div class="row">
-          <select id="preset" style="width:100%">
-            <option value="">— Valitse esiasetus —</option>
-            <option value="drama">Dramaattinen lento</option>
-            <option value="fast">Nopea kirkastus</option>
-            <option value="soft">Hidas pehmeä</option>
-          </select>
-          <button id="apply-preset" type="button">Käytä</button>
+        <p class="hint">Valitse valmis animaatiotyyli. Valinta vaikuttaa heti; voit vielä hienosäätää alla.</p>
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+          <label><input type="checkbox" class="preset-box" data-preset="drama" /> Dramaattinen lento</label>
+          <label><input type="checkbox" class="preset-box" data-preset="fast" /> Nopea kirkastus</label>
+          <label><input type="checkbox" class="preset-box" data-preset="soft" /> Hidas pehmeä</label>
         </div>
       </div>
       <div class="card">
@@ -226,13 +222,29 @@
       }
     }
 
-    function applyPresetFromSelect(){
-      const key = document.getElementById('preset').value;
-      if(!key) return;
-      const p = PRESETS[key];
-      if(!p) return;
+    function selectPreset(key){
+      const p = PRESETS[key]; if(!p) return;
       applyPresetValues(p);
+      localStorage.setItem('anomfin:preset', key);
       save();
+    }
+
+    function setupPresetCheckboxes(){
+      const boxes = Array.from(document.querySelectorAll('.preset-box[data-preset]'));
+      // Restore saved selection
+      const saved = localStorage.getItem('anomfin:preset');
+      if(saved){
+        const b = boxes.find(x=>x.dataset.preset===saved);
+        if(b){ b.checked = true; applyPresetValues(PRESETS[saved]); }
+      }
+      boxes.forEach(box=>{
+        box.addEventListener('change', ()=>{
+          if(!box.checked) return;
+          // make exclusive
+          boxes.forEach(other=>{ if(other!==box) other.checked=false; });
+          selectPreset(box.dataset.preset);
+        });
+      });
     }
     const cssVars = [
       ['--intro-blackout-ms','intro-blackout-ms','ms'],
@@ -320,7 +332,7 @@
 
     document.getElementById('save').addEventListener('click', save);
     document.getElementById('reset').addEventListener('click', ()=>{ localStorage.removeItem('anomfin:cssVars'); location.reload(); });
-    document.getElementById('apply-preset').addEventListener('click', applyPresetFromSelect);
+    setupPresetCheckboxes();
     linkSliders();
     load();
   </script>
