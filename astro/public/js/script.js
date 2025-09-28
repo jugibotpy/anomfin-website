@@ -175,6 +175,9 @@ function initIntroOverlay() {
 
     setTimeout(() => {
         logo.style.opacity = '1';
+        const root = document.documentElement;
+        root.style.setProperty('--logo-blur', '0px');
+        root.style.setProperty('--logo-brightness', '1');
         blackout && blackout.classList.add('fade-out');
         setTimeout(() => {
             if (!grid) return;
@@ -187,7 +190,14 @@ function initIntroOverlay() {
             const dx = gridCx - logoCx;
             const dy = gridCy - logoCy;
             const scale = Math.max(0.25, Math.min(0.5, (gridRect.width * 0.35) / (logoRect.width || 1)));
-            logo.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+            const moveMs = 1000;
+            const midX = dx * 0.6;
+            const midY = dy * 0.7 - 40;
+            const anim = logo.animate([
+              { transform: 'translate(0px,0px) scale(1)' },
+              { transform: `translate(${midX}px, ${midY}px) scale(${Math.max(1, scale*0.9)})` },
+              { transform: `translate(${dx}px, ${dy}px) scale(${scale})` }
+            ], { duration: moveMs, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
             const onMoveEnd = () => {
                 if (grid) {
                     grid.classList.add('square-excite', 'square-green');
@@ -204,9 +214,9 @@ function initIntroOverlay() {
                     overlay.style.transition = 'opacity .6s ease';
                     setTimeout(() => overlay.classList.add('intro-overlay-hidden'), 700);
                 }, 300);
-                logo.removeEventListener('transitionend', onMoveEnd);
+                anim.removeEventListener?.('finish', onMoveEnd);
             };
-            logo.addEventListener('transitionend', onMoveEnd);
+            anim.addEventListener?.('finish', onMoveEnd);
         }, 600);
     }, 500);
 }

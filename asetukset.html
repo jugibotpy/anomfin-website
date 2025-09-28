@@ -40,8 +40,17 @@
         <label>Taustan valkeneminen (ms)
           <div class="row"><input id="intro-bg-fade-ms" type="range" min="200" max="6000" step="50"><input id="intro-bg-fade-ms-n" type="number" min="200" max="6000" step="50" style="width:100px"></div>
         </label>
-        <label>Logon fade‑in (ms)
-          <div class="row"><input id="logo-fade-ms" type="range" min="0" max="3000" step="50"><input id="logo-fade-ms-n" type="number" min="0" max="3000" step="50" style="width:100px"></div>
+        <label>Logon kirkastuminen (ms)
+          <div class="row"><input id="logo-reveal-ms" type="range" min="200" max="6000" step="50"><input id="logo-reveal-ms-n" type="number" min="200" max="6000" step="50" style="width:100px"></div>
+        </label>
+        <label>Logon alkukirkkaus (0..1)
+          <div class="row"><input id="logo-initial-brightness" type="range" min="0.2" max="1" step="0.01"><input id="logo-initial-brightness-n" type="number" min="0.2" max="1" step="0.01" style="width:100px"></div>
+        </label>
+        <label>Logon alkusumeus (px)
+          <div class="row"><input id="logo-initial-blur" type="range" min="0" max="120" step="1"><input id="logo-initial-blur-n" type="number" min="0" max="120" step="1" style="width:100px"></div>
+        </label>
+        <label>Logon alkusumuopasiteetti (0..1)
+          <div class="row"><input id="logo-initial-opacity" type="range" min="0" max="1" step="0.01"><input id="logo-initial-opacity-n" type="number" min="0" max="1" step="0.01" style="width:100px"></div>
         </label>
         <label>Logon siirtymän kesto (ms)
           <div class="row"><input id="logo-move-duration-ms" type="range" min="100" max="4000" step="50"><input id="logo-move-duration-ms-n" type="number" min="100" max="4000" step="50" style="width:100px"></div>
@@ -58,6 +67,9 @@
         </label>
         <label>Neliön tärinän kesto (ms)
           <div class="row"><input id="square-shake-duration-ms" type="range" min="0" max="3000" step="50"><input id="square-shake-duration-ms-n" type="number" min="0" max="3000" step="50" style="width:100px"></div>
+        </label>
+        <label>Neliön tärinän amplitudi (px)
+          <div class="row"><input id="square-shake-amp" type="range" min="0" max="30" step="1"><input id="square-shake-amp-n" type="number" min="0" max="30" step="1" style="width:100px"></div>
         </label>
         <label>Neliön loppuskaala (x)
           <div class="row"><input id="square-scale-end" type="range" min="1" max="2" step="0.01"><input id="square-scale-end-n" type="number" min="1" max="2" step="0.01" style="width:100px"></div>
@@ -103,11 +115,15 @@
     const cssVars = [
       ['--intro-blackout-ms','intro-blackout-ms','ms'],
       ['--intro-bg-fade-ms','intro-bg-fade-ms','ms'],
-      ['--logo-fade-ms','logo-fade-ms','ms'],
+      ['--logo-reveal-ms','logo-reveal-ms','ms'],
+      ['--logo-initial-brightness','logo-initial-brightness',''],
+      ['--logo-initial-blur','logo-initial-blur','px'],
+      ['--logo-initial-opacity','logo-initial-opacity',''],
       ['--logo-move-duration-ms','logo-move-duration-ms','ms'],
       ['--logo-move-delay-ms','logo-move-delay-ms','ms'],
       ['--grid-hue-duration-ms','grid-hue-duration-ms','ms'],
       ['--square-shake-duration-ms','square-shake-duration-ms','ms'],
+      ['--square-shake-amp','square-shake-amp','px'],
       ['--square-scale-end','square-scale-end',''],
       ['--orb-float-duration-s','orb-float-duration-s','s'],
       ['--grid-float-duration-s','grid-float-duration-s','s'],

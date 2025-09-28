@@ -28,8 +28,13 @@ body {
     --logo-fade-ms: 400ms;
     --logo-move-duration-ms: 1000ms;
     --logo-move-delay-ms: 600ms;
+    --logo-reveal-ms: 2500ms;
+    --logo-initial-opacity: 0.2;
+    --logo-initial-blur: 80px;
+    --logo-initial-brightness: 0.85;
     --grid-hue-duration-ms: 1800ms;
     --square-shake-duration-ms: 800ms;
+    --square-shake-amp: 10px;
     --square-scale-end: 1.2;
     --orb-float-duration-s: 8s;
     --grid-float-duration-s: 6s;
@@ -96,9 +101,9 @@ a {
 .intro-logo {
     width: min(48vw, 360px);
     max-width: 420px;
-    filter: drop-shadow(0 25px 60px rgba(0, 212, 255, 0.35));
-    opacity: 0;
-    transition: opacity var(--logo-fade-ms, 400ms) ease, transform var(--logo-move-duration-ms, 1000ms) cubic-bezier(.2,.8,.2,1);
+    filter: blur(var(--logo-blur, var(--logo-initial-blur))) brightness(var(--logo-brightness, var(--logo-initial-brightness))) drop-shadow(0 25px 60px rgba(0, 212, 255, 0.35));
+    opacity: var(--logo-initial-opacity, .2);
+    transition: opacity var(--logo-reveal-ms, 2500ms) ease, filter var(--logo-reveal-ms, 2500ms) ease, transform var(--logo-move-duration-ms, 1000ms) cubic-bezier(.2,.8,.2,1);
 }
 
 /* Neon-versio logosta */
@@ -960,8 +965,8 @@ textarea {
 }
 @keyframes shakeScale{
     0% { transform: translate(0,0) scale(1); }
-    25% { transform: translate(2px,-2px) scale(1.08); }
-    50% { transform: translate(-2px,2px) scale(1.2); }
-    75% { transform: translate(2px,1px) scale(1.08); }
-    100% { transform: translate(0,0) scale(1.2); }
+    25% { transform: translate(var(--square-shake-amp, 10px), calc(var(--square-shake-amp, 10px) * -1)) scale(1.1); }
+    50% { transform: translate(calc(var(--square-shake-amp, 10px) * -1), var(--square-shake-amp, 10px)) scale(var(--square-scale-end, 1.2)); }
+    75% { transform: translate(var(--square-shake-amp, 10px), calc(var(--square-shake-amp, 10px) * .5)) scale(1.1); }
+    100% { transform: translate(0,0) scale(var(--square-scale-end, 1.2)); }
 }
