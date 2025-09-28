@@ -1,5 +1,6 @@
 // Mobile Navigation Toggle & Smooth Scroll Enhancements
 document.addEventListener('DOMContentLoaded', () => {
+    applyUserSettingsFromStorage();
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.querySelector('.nav-menu');
 
@@ -28,6 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Contact form handling
     initContactForm();
 });
+
+function applyUserSettingsFromStorage(){
+    try{
+        const raw = localStorage.getItem('anomfin:cssVars');
+        if(!raw) return;
+        const vars = JSON.parse(raw);
+        const root = document.documentElement;
+        Object.entries(vars).forEach(([k,v])=>{
+            if(k && v!=null) root.style.setProperty(k, v);
+        });
+    }catch(e){/* ignore */}
+}
 
 // Smooth Scrolling for Navigation Links (skip skip-link)
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -160,14 +173,24 @@ function initIntroOverlay() {
     const grid = document.querySelector('.hero-grid');
     const orb = document.querySelector('.hero-orb');
 
-    // 0-0.5s: pidä täysin mustana
+    const cssMs = (name, def)=>{
+        const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        if(!v) return def;
+        if(v.endsWith('ms')) return parseFloat(v);
+        if(v.endsWith('s')) return parseFloat(v)*1000;
+        const n = parseFloat(v); return isNaN(n)?def:n;
+    };
+    const blackoutMs = cssMs('--intro-blackout-ms', 500);
+    const moveDelayMs = cssMs('--logo-move-delay-ms', 600);
+
+    // 0 - blackoutMs: pidä täysin mustana
     setTimeout(() => {
         // 0.5s: logo fade-in
         logo.style.opacity = '1';
         // Aloita taustan valkeneminen 3s ajan
         blackout && blackout.classList.add('fade-out');
 
-        // 1.1s: logo siirtyy kohti neliötä
+        // logo siirtyy kohti neliötä
         setTimeout(() => {
             if (!grid) return;
             const logoRect = logo.getBoundingClientRect();
@@ -205,8 +228,8 @@ function initIntroOverlay() {
                 logo.removeEventListener('transitionend', onMoveEnd);
             };
             logo.addEventListener('transitionend', onMoveEnd);
-        }, 600);
-    }, 500);
+        }, moveDelayMs);
+    }, blackoutMs);
 }
 
 const style = document.createElement('style');

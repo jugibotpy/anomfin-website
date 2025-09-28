@@ -23,6 +23,19 @@ body {
 /* Neon-hehkun asetus */
 :root{
     --neon: #00ffa6;
+    --intro-blackout-ms: 500ms;
+    --intro-bg-fade-ms: 3000ms;
+    --logo-fade-ms: 400ms;
+    --logo-move-duration-ms: 1000ms;
+    --logo-move-delay-ms: 600ms;
+    --grid-hue-duration-ms: 1800ms;
+    --square-shake-duration-ms: 800ms;
+    --square-scale-end: 1.2;
+    --orb-float-duration-s: 8s;
+    --grid-float-duration-s: 6s;
+    --eyebrow-size: 1rem;
+    --services-fade-delay-ms: 200ms;
+    --square-green-rgba: 0,255,150;
 }
 
 img {
@@ -76,7 +89,7 @@ a {
     inset: 0;
     background: #000;
     opacity: 1;
-    transition: opacity 3s ease;
+    transition: opacity var(--intro-bg-fade-ms, 3000ms) ease;
 }
 .intro-overlay .blackout.fade-out{ opacity: 0; }
 
@@ -85,7 +98,7 @@ a {
     max-width: 420px;
     filter: drop-shadow(0 25px 60px rgba(0, 212, 255, 0.35));
     opacity: 0;
-    transition: opacity .4s ease, transform 1s cubic-bezier(.2,.8,.2,1);
+    transition: opacity var(--logo-fade-ms, 400ms) ease, transform var(--logo-move-duration-ms, 1000ms) cubic-bezier(.2,.8,.2,1);
 }
 
 /* Neon-versio logosta */
@@ -315,14 +328,14 @@ a {
     letter-spacing: 0.16em;
     text-transform: uppercase;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: var(--eyebrow-size, 1rem);
     color: rgba(0, 212, 255, 0.85);
     margin-bottom: 1rem;
 }
 
 .eyebrow-big{ font-size: 1.05rem; letter-spacing: .14em; }
 
-.fade-in-smooth{ opacity: 0; transform: translateY(10px); animation: fadeUp .9s ease forwards .2s; }
+.fade-in-smooth{ opacity: 0; transform: translateY(10px); animation: fadeUp .9s ease forwards; animation-delay: var(--services-fade-delay-ms, 200ms); }
 @keyframes fadeUp{ to { opacity:1; transform:none; } }
 
 .hero-title {
@@ -387,7 +400,7 @@ a {
     background: radial-gradient(circle at 30% 30%, rgba(0, 212, 255, 0.6), rgba(0, 12, 24, 0.9));
     filter: blur(0px);
     box-shadow: 0 0 60px rgba(0, 212, 255, 0.45);
-    animation: orbPulse 8s ease-in-out infinite;
+    animation: orbPulse var(--orb-float-duration-s, 8s) ease-in-out infinite;
 }
 
 .hero-grid {
@@ -397,11 +410,11 @@ a {
     background: linear-gradient(120deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 212, 255, 0.14) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(6px);
-    animation: float 6s ease-in-out infinite;
+    animation: float var(--grid-float-duration-s, 6s) ease-in-out infinite;
     transition: filter 1.2s ease;
 }
 
-.hero-grid.grid-shift{ animation: hueToGreen 1.8s ease forwards; }
+.hero-grid.grid-shift{ animation: hueToGreen var(--grid-hue-duration-ms, 1800ms) ease forwards; }
 .hero-grid.lively{ animation-duration: 4s; }
 .hero-orb.lively{ animation-duration: 6s; box-shadow: 0 0 80px rgba(0, 212, 255, 0.55); }
 
@@ -943,7 +956,7 @@ textarea {
     border-color: rgba(0, 255, 150, 0.22);
 }
 .hero-grid.square-excite{
-    animation: shakeScale .8s ease forwards;
+    animation: shakeScale var(--square-shake-duration-ms, 800ms) ease forwards;
 }
 @keyframes shakeScale{
     0% { transform: translate(0,0) scale(1); }

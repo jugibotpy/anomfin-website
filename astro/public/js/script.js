@@ -1,5 +1,6 @@
 // Mobile Navigation Toggle & Smooth Scroll Enhancements
 document.addEventListener('DOMContentLoaded', () => {
+    applyUserSettingsFromStorage();
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.querySelector('.nav-menu');
 
@@ -28,6 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Contact form handling
     initContactForm();
 });
+
+function applyUserSettingsFromStorage(){
+    try{
+        const raw = localStorage.getItem('anomfin:cssVars');
+        if(!raw) return;
+        const vars = JSON.parse(raw);
+        const root = document.documentElement;
+        Object.entries(vars).forEach(([k,v])=>{
+            if(k && v!=null) root.style.setProperty(k, v);
+        });
+    }catch(e){/* ignore */}
+}
 
 // Smooth Scrolling for Navigation Links (skip skip-link)
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
