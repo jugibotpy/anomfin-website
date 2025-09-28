@@ -1,52 +1,29 @@
 ---
-import site from "../data/site.json";
+const site = Astro.props.site;
 ---
-<section id="contact" class="section section-block accent-green">
+<section id="contact" class="section-block contact" data-section="contact">
   <div class="container contact-inner">
     <div class="contact-info">
       <p class="eyebrow">Yhteys</p>
       <h2 class="section-title">Ota yhteyttä</h2>
       <p>Varataan kartoitus, priorisoidaan tarpeet ja tuodaan ratkaisut tuotantoon turvallisesti.</p>
       <ul class="contact-methods">
-        <li>
-          <span class="contact-label">Sähköposti</span>
-          <a href={`mailto:${site.brand.emails.info}`}>{site.brand.emails.info}</a>
-        </li>
-        <li>
-          <span class="contact-label">Tarjouspyynnöt</span>
-          <a href={`mailto:${site.brand.emails.laskutus}`}>{site.brand.emails.laskutus}</a>
-        </li>
-        <li>
-          <span class="contact-label">Rekry</span>
-          <a href={`mailto:${site.brand.emails.rekry}`}>{site.brand.emails.rekry}</a>
-        </li>
+        <li><span class="contact-label">Sähköposti</span> <a href={`mailto:${site.brand.email}`}>{site.brand.email}</a></li>
+        <li><span class="contact-label">Puhelin</span> <a href={`tel:${site.brand.phone}`}>{site.brand.phone}</a></li>
+        <li><span class="contact-label">Tuki</span> <a href={`mailto:${site.brand.socEmail}`}>{site.brand.socEmail}</a></li>
       </ul>
     </div>
-    <form class="contact-form" method="post" action="#" onsubmit="return false">
+    <form class="contact-form" method="post" action="#" novalidate>
       <div class="form-grid">
-        <label>Yritys
-          <input type="text" name="company" required />
-        </label>
-        <label>Nimi
-          <input type="text" name="name" required />
-        </label>
-        <label>Sähköposti
-          <input type="email" name="email" required />
-        </label>
-        <label>Puhelin
-          <input type="tel" name="phone" />
-        </label>
-        <label>Henkilömäärä
-          <input type="number" name="headcount" min="1" />
-        </label>
-        <label>Tarve / kuvaus
-          <textarea name="message" rows="4" placeholder="Kuvaa lyhyesti ongelma tai tavoite"></textarea>
-        </label>
-        <label class="consent">
-          <input type="checkbox" required /> Hyväksyn tietosuojan.
-        </label>
+        <label>Yritys <input type="text" name="company" required /></label>
+        <label>Nimi <input type="text" name="name" required /></label>
+        <label>Sähköposti <input type="email" name="email" required /></label>
+        <label>Puhelin <input type="tel" name="phone" /></label>
+        <label>Henkilömäärä <input type="number" name="headcount" min="1" /></label>
+        <label>Tarve / kuvaus <textarea name="message" rows="4" placeholder="Kuvaa lyhyesti ongelma tai tavoite"></textarea></label>
+        <label class="consent"><input type="checkbox" name="consent" required /> Hyväksyn tietosuojan.</label>
       </div>
-      <button class="btn btn-primary" type="submit">Lähetä</button>
+      <button type="submit" class="btn btn-primary">Lähetä</button>
       <p class="form-status" role="status" aria-live="polite"></p>
     </form>
   </div>

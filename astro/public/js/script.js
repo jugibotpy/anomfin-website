@@ -173,42 +173,22 @@ function initIntroOverlay() {
     const grid = document.querySelector('.hero-grid');
     const orb = document.querySelector('.hero-orb');
 
-    const cssMs = (name, def)=>{
-        const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-        if(!v) return def;
-        if(v.endsWith('ms')) return parseFloat(v);
-        if(v.endsWith('s')) return parseFloat(v)*1000;
-        const n = parseFloat(v); return isNaN(n)?def:n;
-    };
-    const blackoutMs = cssMs('--intro-blackout-ms', 500);
-    const moveDelayMs = cssMs('--logo-move-delay-ms', 600);
-
-    // 0 - blackoutMs: pidä täysin mustana
     setTimeout(() => {
-        // 0.5s: logo fade-in
         logo.style.opacity = '1';
-        // Aloita taustan valkeneminen 3s ajan
         blackout && blackout.classList.add('fade-out');
-
-        // logo siirtyy kohti neliötä
         setTimeout(() => {
             if (!grid) return;
             const logoRect = logo.getBoundingClientRect();
             const gridRect = grid.getBoundingClientRect();
-
             const logoCx = logoRect.left + logoRect.width / 2;
             const logoCy = logoRect.top + logoRect.height / 2;
             const gridCx = gridRect.left + gridRect.width / 2;
             const gridCy = gridRect.top + gridRect.height / 2;
-
             const dx = gridCx - logoCx;
             const dy = gridCy - logoCy;
             const scale = Math.max(0.25, Math.min(0.5, (gridRect.width * 0.35) / (logoRect.width || 1)));
-
             logo.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
-
             const onMoveEnd = () => {
-                // Neliö reagoi: tärisee, kasvaa ~20% ja vaihtaa vihreäksi
                 if (grid) {
                     grid.classList.add('square-excite', 'square-green');
                     const onShakeEnd = () => {
@@ -219,7 +199,6 @@ function initIntroOverlay() {
                     grid.addEventListener('animationend', onShakeEnd);
                 }
                 orb && orb.classList.add('lively');
-                // Piilota intro overlay pehmeästi
                 setTimeout(() => {
                     overlay.style.opacity = '0';
                     overlay.style.transition = 'opacity .6s ease';
@@ -228,8 +207,8 @@ function initIntroOverlay() {
                 logo.removeEventListener('transitionend', onMoveEnd);
             };
             logo.addEventListener('transitionend', onMoveEnd);
-        }, moveDelayMs);
-    }, blackoutMs);
+        }, 600);
+    }, 500);
 }
 
 const style = document.createElement('style');

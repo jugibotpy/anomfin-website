@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Asetukset – AnomFIN animaatiot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{ --fg:#e6eef8; --bg:#0b0f1a; --muted:#9fb3c8; --card:#11192a; --border:#1e2a3a; --accent:#62a1ff; }
+    *{ box-sizing:border-box }
+    html,body{ margin:0; background:var(--bg); color:var(--fg); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif }
+    .container{ max-width:880px; margin:0 auto; padding:24px }
+    h1{ font-size:1.6rem; margin:0 0 12px }
+    p{ color:var(--muted) }
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px }
+    label{ display:grid; gap:6px; font-size:.92rem }
+    input[type="range"],input[type="color"],input[type="number"]{ width:100% }
+    .row{ display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center }
+    .hint{ color:var(--muted); font-size:.85rem }
+    .actions{ margin-top:20px; display:flex; gap:10px }
+    button{ background:var(--accent); color:#08111f; border:1px solid #2d64a7; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:600 }
+    a.btn{ display:inline-block; text-decoration:none; background:#1b2a44; color:#cfe3ff; padding:10px 14px; border-radius:8px; border:1px solid #2d64a7 }
+    .kv{ display:flex; gap:8px; align-items:center; color:var(--muted); font-size:.85rem }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Asetukset</h1>
+    <p>Säädä intro‑animaatioita ja teemoja. Asetukset tallentuvat selaimen localStorageen ja vaikuttavat sivuihin.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Intro / Ajastukset</h3>
+        <label>Mustan alun kesto (ms)
+          <div class="row"><input id="intro-blackout-ms" type="range" min="0" max="3000" step="50"><input id="intro-blackout-ms-n" type="number" min="0" max="3000" step="50" style="width:100px"></div>
+        </label>
+        <label>Taustan valkeneminen (ms)
+          <div class="row"><input id="intro-bg-fade-ms" type="range" min="200" max="6000" step="50"><input id="intro-bg-fade-ms-n" type="number" min="200" max="6000" step="50" style="width:100px"></div>
+        </label>
+        <label>Logon fade‑in (ms)
+          <div class="row"><input id="logo-fade-ms" type="range" min="0" max="3000" step="50"><input id="logo-fade-ms-n" type="number" min="0" max="3000" step="50" style="width:100px"></div>
+        </label>
+        <label>Logon siirtymän kesto (ms)
+          <div class="row"><input id="logo-move-duration-ms" type="range" min="100" max="4000" step="50"><input id="logo-move-duration-ms-n" type="number" min="100" max="4000" step="50" style="width:100px"></div>
+        </label>
+        <label>Logon siirtymän viive (ms)
+          <div class="row"><input id="logo-move-delay-ms" type="range" min="0" max="3000" step="50"><input id="logo-move-delay-ms-n" type="number" min="0" max="3000" step="50" style="width:100px"></div>
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>Neliö / Orb</h3>
+        <label>Neliön värinvaihdon kesto (ms)
+          <div class="row"><input id="grid-hue-duration-ms" type="range" min="0" max="5000" step="50"><input id="grid-hue-duration-ms-n" type="number" min="0" max="5000" step="50" style="width:100px"></div>
+        </label>
+        <label>Neliön tärinän kesto (ms)
+          <div class="row"><input id="square-shake-duration-ms" type="range" min="0" max="3000" step="50"><input id="square-shake-duration-ms-n" type="number" min="0" max="3000" step="50" style="width:100px"></div>
+        </label>
+        <label>Neliön loppuskaala (x)
+          <div class="row"><input id="square-scale-end" type="range" min="1" max="2" step="0.01"><input id="square-scale-end-n" type="number" min="1" max="2" step="0.01" style="width:100px"></div>
+        </label>
+        <label>Orbin kellunnan kesto (s)
+          <div class="row"><input id="orb-float-duration-s" type="range" min="2" max="12" step="0.1"><input id="orb-float-duration-s-n" type="number" min="2" max="12" step="0.1" style="width:100px"></div>
+        </label>
+        <label>Neliön kellunnan kesto (s)
+          <div class="row"><input id="grid-float-duration-s" type="range" min="2" max="10" step="0.1"><input id="grid-float-duration-s-n" type="number" min="2" max="10" step="0.1" style="width:100px"></div>
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>Typografia / Fade</h3>
+        <label>Otsikon eyebrow-koko (rem)
+          <div class="row"><input id="eyebrow-size" type="range" min="0.7" max="1.4" step="0.01"><input id="eyebrow-size-n" type="number" min="0.7" max="1.4" step="0.01" style="width:100px"></div>
+        </label>
+        <label>“Palvelumme” fade‑viive (ms)
+          <div class="row"><input id="services-fade-delay-ms" type="range" min="0" max="2000" step="50"><input id="services-fade-delay-ms-n" type="number" min="0" max="2000" step="50" style="width:100px"></div>
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>Värit</h3>
+        <label>Neon‑väri
+          <div class="row"><input id="neon" type="color"><span class="kv" id="neon-val"></span></div>
+        </label>
+        <label>Neliön vihreä
+          <div class="row"><input id="square-green" type="color"><span class="kv" id="square-green-val"></span></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="save">Tallenna</button>
+      <button id="reset" type="button">Palauta oletukset</button>
+      <a class="btn" href="index.html">Avaa etusivu</a>
+    </div>
+    <p class="hint">Asetukset tallennetaan avaimella <code>anomfin:cssVars</code>. Etusivu/astro lukee ne automaattisesti.</p>
+  </div>
+
+  <script>
+    const cssVars = [
+      ['--intro-blackout-ms','intro-blackout-ms','ms'],
+      ['--intro-bg-fade-ms','intro-bg-fade-ms','ms'],
+      ['--logo-fade-ms','logo-fade-ms','ms'],
+      ['--logo-move-duration-ms','logo-move-duration-ms','ms'],
+      ['--logo-move-delay-ms','logo-move-delay-ms','ms'],
+      ['--grid-hue-duration-ms','grid-hue-duration-ms','ms'],
+      ['--square-shake-duration-ms','square-shake-duration-ms','ms'],
+      ['--square-scale-end','square-scale-end',''],
+      ['--orb-float-duration-s','orb-float-duration-s','s'],
+      ['--grid-float-duration-s','grid-float-duration-s','s'],
+      ['--eyebrow-size','eyebrow-size',''],
+      ['--services-fade-delay-ms','services-fade-delay-ms','ms'],
+    ];
+
+    function hexToRgb(hex){
+      const m = hex.replace('#','');
+      const bigint=parseInt(m,16);
+      if(m.length===6){
+        return [(bigint>>16)&255,(bigint>>8)&255,bigint&255];
+      }
+      return [0,255,150];
+    }
+
+    function load(){
+      const saved = JSON.parse(localStorage.getItem('anomfin:cssVars')||'{}');
+      const cs = getComputedStyle(document.documentElement);
+      for(const [varName,id,unit] of cssVars){
+        const el = document.getElementById(id);
+        const eln = document.getElementById(id+'-n');
+        const raw = saved[varName] || cs.getPropertyValue(varName).trim();
+        const num = parseFloat(raw);
+        if(el){ el.value = isNaN(num)? 0 : num; }
+        if(eln){ eln.value = isNaN(num)? 0 : num; }
+      }
+      const neon = saved['--neon'] || cs.getPropertyValue('--neon').trim() || '#00ffa6';
+      document.getElementById('neon').value = neon;
+      document.getElementById('neon-val').textContent = neon;
+      const rgb = saved['--square-green-rgba'] || cs.getPropertyValue('--square-green-rgba').trim() || '0,255,150';
+      const [r,g,b] = rgb.split(',').map(x=>parseInt(x,10));
+      const hex = '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+      document.getElementById('square-green').value = hex;
+      document.getElementById('square-green-val').textContent = hex + ` (${rgb})`;
+    }
+
+    function save(){
+      const out={};
+      for(const [varName,id,unit] of cssVars){
+        const el = document.getElementById(id+'-n') || document.getElementById(id);
+        if(!el) continue;
+        const v = el.value;
+        out[varName] = unit? `${v}${unit}` : String(v);
+      }
+      const neon = document.getElementById('neon').value;
+      out['--neon'] = neon;
+      const sGreenHex = document.getElementById('square-green').value;
+      const [r,g,b] = hexToRgb(sGreenHex);
+      out['--square-green-rgba'] = `${r},${g},${b}`;
+      localStorage.setItem('anomfin:cssVars', JSON.stringify(out));
+      // Apply immediately
+      Object.entries(out).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+      document.getElementById('neon-val').textContent = neon;
+      document.getElementById('square-green-val').textContent = sGreenHex + ` (${out['--square-green-rgba']})`;
+    }
+
+    function linkSliders(){
+      for(const [_,id] of cssVars){
+        const r = document.getElementById(id);
+        const n = document.getElementById(id+'-n');
+        if(r && n){
+          r.addEventListener('input', ()=>{ n.value=r.value; });
+          n.addEventListener('input', ()=>{ r.value=n.value; });
+        }
+      }
+    }
+
+    document.getElementById('save').addEventListener('click', save);
+    document.getElementById('reset').addEventListener('click', ()=>{ localStorage.removeItem('anomfin:cssVars'); location.reload(); });
+    linkSliders();
+    load();
+  </script>
+</body>
+</html>
