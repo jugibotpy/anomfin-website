@@ -33,6 +33,19 @@
 
     <div class="grid">
       <div class="card">
+        <h3>Esiasetukset</h3>
+        <p class="hint">Valitse valmis animaatiotyyli. Voit vielä hienosäätää alla.</p>
+        <div class="row">
+          <select id="preset" style="width:100%">
+            <option value="">— Valitse esiasetus —</option>
+            <option value="drama">Dramaattinen lento</option>
+            <option value="fast">Nopea kirkastus</option>
+            <option value="soft">Hidas pehmeä</option>
+          </select>
+          <button id="apply-preset" type="button">Käytä</button>
+        </div>
+      </div>
+      <div class="card">
         <h3>Intro / Ajastukset</h3>
         <label>Mustan alun kesto (ms)
           <div class="row"><input id="intro-blackout-ms" type="range" min="0" max="3000" step="50"><input id="intro-blackout-ms-n" type="number" min="0" max="3000" step="50" style="width:100px"></div>
@@ -134,6 +147,93 @@
   </div>
 
   <script>
+    const PRESETS = {
+      drama: {
+        '--intro-blackout-ms': '800',
+        '--intro-bg-fade-ms': '3500',
+        '--logo-reveal-ms': '3200',
+        '--logo-initial-opacity': '0.15',
+        '--logo-initial-blur': '100',
+        '--logo-initial-brightness': '0.75',
+        '--logo-move-duration-ms': '1600',
+        '--logo-move-delay-ms': '700',
+        '--logo-arc-x': '0.7',
+        '--logo-arc-dy': '90',
+        '--square-shake-duration-ms': '1200',
+        '--square-shake-amp': '18',
+        '--square-scale-end': '1.30',
+        '--orb-float-duration-s': '7',
+        '--grid-float-duration-s': '5',
+        ease: 'cubic-bezier(.22,.8,.2,1)'
+      },
+      fast: {
+        '--intro-blackout-ms': '300',
+        '--intro-bg-fade-ms': '1800',
+        '--logo-reveal-ms': '1200',
+        '--logo-initial-opacity': '0.25',
+        '--logo-initial-blur': '40',
+        '--logo-initial-brightness': '0.90',
+        '--logo-move-duration-ms': '800',
+        '--logo-move-delay-ms': '300',
+        '--logo-arc-x': '0.55',
+        '--logo-arc-dy': '30',
+        '--square-shake-duration-ms': '700',
+        '--square-shake-amp': '10',
+        '--square-scale-end': '1.20',
+        '--orb-float-duration-s': '8',
+        '--grid-float-duration-s': '6',
+        ease: 'ease-out'
+      },
+      soft: {
+        '--intro-blackout-ms': '600',
+        '--intro-bg-fade-ms': '4000',
+        '--logo-reveal-ms': '4000',
+        '--logo-initial-opacity': '0.20',
+        '--logo-initial-blur': '80',
+        '--logo-initial-brightness': '0.85',
+        '--logo-move-duration-ms': '1800',
+        '--logo-move-delay-ms': '800',
+        '--logo-arc-x': '0.60',
+        '--logo-arc-dy': '50',
+        '--square-shake-duration-ms': '1500',
+        '--square-shake-amp': '12',
+        '--square-scale-end': '1.25',
+        '--orb-float-duration-s': '9',
+        '--grid-float-duration-s': '7',
+        ease: 'ease-in-out'
+      }
+    };
+
+    function setField(id, value){
+      const r = document.getElementById(id);
+      const n = document.getElementById(id+'-n');
+      if(r){ r.value = value; }
+      if(n){ n.value = value; }
+    }
+
+    function applyPresetValues(p){
+      // Map var -> input id via cssVars
+      const map = new Map(cssVars.map(([v,id,unit])=>[v,{id,unit}]));
+      Object.entries(p).forEach(([k,val])=>{
+        if(k === 'ease') return;
+        const m = map.get(k);
+        if(!m) return;
+        setField(m.id, String(val));
+      });
+      if(p.ease){
+        const sel = document.getElementById('logo-ease');
+        if(sel){ sel.value = p.ease; }
+      }
+    }
+
+    function applyPresetFromSelect(){
+      const key = document.getElementById('preset').value;
+      if(!key) return;
+      const p = PRESETS[key];
+      if(!p) return;
+      applyPresetValues(p);
+      save();
+    }
     const cssVars = [
       ['--intro-blackout-ms','intro-blackout-ms','ms'],
       ['--intro-bg-fade-ms','intro-bg-fade-ms','ms'],
@@ -220,6 +320,7 @@
 
     document.getElementById('save').addEventListener('click', save);
     document.getElementById('reset').addEventListener('click', ()=>{ localStorage.removeItem('anomfin:cssVars'); location.reload(); });
+    document.getElementById('apply-preset').addEventListener('click', applyPresetFromSelect);
     linkSliders();
     load();
   </script>
