@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import site from "../data/site.json";
+import Hero from "../components/Hero.astro";
+import Services from "../components/Services.astro";
+import Platforms from "../components/Platforms.astro";
+import Projects from "../components/Projects.astro";
+import Security from "../components/Security.astro";
+import Pricing from "../components/Pricing.astro";
+import FAQ from "../components/FAQ.astro";
+import Contact from "../components/Contact.astro";
+---
+<BaseLayout title={`AnomFIN · ${site.brand.tagline}`} description={site.brand.tagline}>
+  <Hero brand={site.brand} hero={site.hero} />
+  <section id="services" class="section-block accent-green">
+    <div class="container">
+      <p class="eyebrow">Palvelukokonaisuus</p>
+      <h2 class="section-title title-led">Palvelut</h2>
+      <p class="section-sub">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
+      <Services services={site.services} />
+    </div>
+  </section>
+  <Platforms platforms={site.platforms} />
+  <Projects projects={site.projects} />
+  <Security bullets={site.security.bullets} />
+  <section id="pricing" class="section-block accent-blue">
+    <div class="container">
+      <p class="eyebrow">Palvelupaketit</p>
+      <h2 class="section-title title-led">Hinnoittelu</h2>
+      <Pricing pricing={site.pricing} />
+      <div class="faq">
+        <details>
+          <summary>{site.faq[0].q}</summary>
+          <p>{site.faq[0].a}</p>
+        </details>
+        <details>
+          <summary>{site.faq[1].q}</summary>
+          <p>{site.faq[1].a}</p>
+        </details>
+      </div>
+    </div>
+  </section>
+  <Contact />
+</BaseLayout>

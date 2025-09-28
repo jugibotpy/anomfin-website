@@ -1,0 +1,104 @@
+---
+interface CTA { label: string; href: string }
+const { brand, hero }: { brand: { name: string, tagline: string }, hero: { h1: string, sub: string, ctas: CTA[] } } = Astro.props;
+const logoPng = '/assets/logo.png';
+---
+<div class="intro-overlay" aria-hidden="true">
+  <img src={logoPng} alt="" class="intro-logo" width="320" height="320" />
+  <div class="intro-backdrop"></div>
+  <button class="skip-intro" aria-label="Ohita intro">Ohita</button>
+  
+</div>
+
+<section class="hero">
+  <div class="hero-container">
+    <div class="hero-content">
+      <p class="eyebrow">Yksilöllinen sovelluskehitys & kyberturva</p>
+      <h1>{hero.h1}</h1>
+      <p class="muted">{hero.sub}</p>
+      <div class="cta">
+        {hero.ctas?.map((c) => <a class="btn" href={c.href}>{c.label}</a>)}
+      </div>
+      <ul class="hero-metrics">
+        <li><span class="metric-value">24/7</span><span class="metric-label">valvonta ja tuki</span></li>
+        <li><span class="metric-value">4+</span><span class="metric-label">alustaa/ratkaisu</span></li>
+        <li><span class="metric-value">100%</span><span class="metric-label">kotimainen tiimi</span></li>
+      </ul>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-orb parallax-slow" aria-hidden="true"></div>
+      <div class="hero-grid parallax-fast" aria-hidden="true"></div>
+      <div class="hero-logo-box">
+        <div id="hero-logo-slot" class="hero-logo-slot" data-logo={logoPng} aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const overlay = document.querySelector('.intro-overlay');
+    const introLogo = overlay?.querySelector('.intro-logo');
+    const heroSlot = document.getElementById('hero-logo-slot');
+    const logoUrl = heroSlot?.dataset.logo || '/assets/logo.png';
+    const skipBtn = overlay?.querySelector('.skip-intro');
+
+    function endIntro() {
+      if (!overlay) return;
+      overlay.classList.add('intro-overlay-hidden');
+    }
+
+    function placeLogoInSlot() {
+      if (!heroSlot) return;
+      heroSlot.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = logoUrl;
+      img.alt = '';
+      img.width = 64;
+      img.height = 64;
+      img.className = 'hero-logo';
+      heroSlot.appendChild(img);
+    }
+
+    function animateLogoToSlot() {
+      if (!overlay || !introLogo || !heroSlot) { endIntro(); return; }
+      // Measure positions
+      const srcRect = introLogo.getBoundingClientRect();
+      const dstRect = heroSlot.getBoundingClientRect();
+      const scale = Math.max(0.28, Math.min(0.34, dstRect.width / srcRect.width));
+      const dx = (dstRect.left + dstRect.width / 2) - (srcRect.left + srcRect.width / 2);
+      const dy = (dstRect.top + dstRect.height / 2) - (srcRect.top + srcRect.height / 2);
+
+      // Use WAAPI for smooth transform
+      const anim = introLogo.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: 0.92 }
+      ], { duration: 900, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+
+      anim.addEventListener('finish', () => {
+        placeLogoInSlot();
+        endIntro();
+      });
+    }
+
+    function startIntro() {
+      if (!overlay) return;
+      if (prefersReduced) {
+        placeLogoInSlot();
+        endIntro();
+        return;
+      }
+      // Start after a short delay
+      const t = setTimeout(animateLogoToSlot, 1800);
+      skipBtn?.addEventListener('click', () => {
+        clearTimeout(t);
+        placeLogoInSlot();
+        endIntro();
+      }, { once: true });
+    }
+
+    // Defer to next frame to ensure layout ready
+    window.addEventListener('load', startIntro);
+  })();
+</script>

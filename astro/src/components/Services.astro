@@ -1,0 +1,16 @@
+---
+type Service = { title: string; desc: string; slug: string };
+const { services = [] }: { services: Service[] } = Astro.props;
+---
+<section>
+  <h2>Palvelut</h2>
+  <div class="grid">
+    {services.map((s) => (
+      <article class="card">
+        <h3>{s.title}</h3>
+        <p class="muted">{s.desc}</p>
+      </article>
+    ))}
+  </div>
+</section>
+
