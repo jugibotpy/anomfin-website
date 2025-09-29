@@ -1,10 +1,17 @@
 // Mobile Navigation Toggle & Smooth Scroll Enhancements
+let navbarRef = null;
+let navLogoRef = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     applyUserSettingsFromStorage();
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.querySelector('.nav-menu');
 
+    navbarRef = document.querySelector('.navbar');
+    navLogoRef = document.querySelector('.nav-logo');
+
     initIntroOverlay();
+    initNavLogoHalo(navLogoRef);
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -28,6 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Contact form handling
     initContactForm();
+
+    // Scroll companion
+    initScrollCompanion();
+
+    updateNavbarChrome();
 });
 
 function applyUserSettingsFromStorage(){
@@ -60,17 +72,8 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Navbar Background on Scroll
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (!navbar) return;
-
-    if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(6, 7, 10, 0.95)';
-    } else {
-        navbar.style.background = 'rgba(6, 7, 10, 0.8)';
-    }
-});
+// Navbar Background & logo glow on Scroll
+window.addEventListener('scroll', updateNavbarChrome, { passive: true });
 
 function initContactForm() {
     const contactForm = document.querySelector('.contact-form');
@@ -249,6 +252,341 @@ function initIntroOverlay() {
             anim.addEventListener?.('finish', onMoveEnd);
         }, moveDelayMs);
     }, blackoutMs);
+}
+
+function updateNavbarChrome() {
+    if (!navbarRef) {
+        navbarRef = document.querySelector('.navbar');
+    }
+    if (navbarRef) {
+        navbarRef.style.background = window.scrollY > 100
+            ? 'rgba(6, 7, 10, 0.95)'
+            : 'rgba(6, 7, 10, 0.8)';
+    }
+    if (navLogoRef) {
+        const glow = Math.min(1, Math.max(0, window.scrollY / 320));
+        navLogoRef.style.setProperty('--nav-glow', glow.toFixed(2));
+    }
+}
+
+function initNavLogoHalo(element) {
+    const navLogo = element || document.querySelector('.nav-logo');
+    if (!navLogo) return;
+
+    const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const clamp = (value) => Math.min(1, Math.max(0, value));
+
+    let targetX = 0.5;
+    let targetY = 0.5;
+    let currentX = targetX;
+    let currentY = targetY;
+    let rafId;
+
+    const updateVars = () => {
+        navLogo.style.setProperty('--nav-lx', currentX.toFixed(3));
+        navLogo.style.setProperty('--nav-ly', currentY.toFixed(3));
+    };
+
+    const center = () => {
+        targetX = 0.5;
+        targetY = 0.5;
+        if (reduceMotionQuery.matches) {
+            currentX = targetX;
+            currentY = targetY;
+            updateVars();
+        }
+    };
+
+    const animate = () => {
+        currentX += (targetX - currentX) * 0.18;
+        currentY += (targetY - currentY) * 0.18;
+        updateVars();
+        rafId = requestAnimationFrame(animate);
+    };
+
+    const handlePointer = (event) => {
+        const rect = navLogo.getBoundingClientRect();
+        const nextX = clamp((event.clientX - rect.left) / rect.width);
+        const nextY = clamp((event.clientY - rect.top) / rect.height);
+        targetX = nextX;
+        targetY = nextY;
+        if (reduceMotionQuery.matches) {
+            currentX = targetX;
+            currentY = targetY;
+            updateVars();
+        }
+    };
+
+    navLogo.addEventListener('pointermove', handlePointer, { passive: true });
+    navLogo.addEventListener('pointerdown', handlePointer, { passive: true });
+    navLogo.addEventListener('pointerleave', center);
+    navLogo.addEventListener('focus', center);
+    navLogo.addEventListener('blur', center);
+
+    center();
+    updateVars();
+
+    if (!reduceMotionQuery.matches) {
+        rafId = requestAnimationFrame(animate);
+    }
+
+    reduceMotionQuery.addEventListener?.('change', (event) => {
+        if (event.matches) {
+            if (rafId) cancelAnimationFrame(rafId);
+            currentX = targetX;
+            currentY = targetY;
+            updateVars();
+        } else {
+            currentX = targetX;
+            currentY = targetY;
+            rafId = requestAnimationFrame(animate);
+        }
+    });
+}
+
+function initScrollCompanion() {
+    const sections = Array.from(document.querySelectorAll('section[id]'));
+    if (!sections.length) return;
+
+    const companion = document.createElement('aside');
+    companion.className = 'scroll-companion';
+    companion.setAttribute('aria-label', 'AnomFIN | AnomTools vierityshyperkuutio');
+    companion.innerHTML = `
+        <div class="companion-core">
+            <div class="companion-header">
+                <div class="companion-logo">
+                    <span class="companion-logo-main">AnomFIN</span>
+                    <span class="companion-logo-sub">AnomTools HyperCube</span>
+                </div>
+                <span class="companion-spark">Scroll Sync</span>
+            </div>
+            <p class="companion-quote">Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.</p>
+            <div class="companion-progress" role="status" aria-live="polite">
+                <svg viewBox="0 0 120 120" class="companion-progress-ring" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="anomfin-companion-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00ffa6"></stop>
+                            <stop offset="100%" stop-color="#00d4ff"></stop>
+                        </linearGradient>
+                    </defs>
+                    <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+                    <circle class="ring-fg" cx="60" cy="60" r="52"></circle>
+                </svg>
+                <div class="companion-progress-info">
+                    <span class="progress-label">Scroll Sync</span>
+                    <span class="progress-value">0%</span>
+                </div>
+            </div>
+            <div class="companion-section-grid">
+                <div class="section-card section-card-active">
+                    <span class="section-label">Nyt</span>
+                    <span class="section-title">Etusivu</span>
+                </div>
+                <div class="section-card section-card-next">
+                    <span class="section-label">Seuraava</span>
+                    <span class="section-title">Palvelut</span>
+                </div>
+            </div>
+            <div class="companion-trail" aria-hidden="true"></div>
+        </div>
+    `;
+
+    document.body.appendChild(companion);
+
+    const progressValue = companion.querySelector('.progress-value');
+    const ring = companion.querySelector('.ring-fg');
+    const sectionActive = companion.querySelector('.section-card-active .section-title');
+    const sectionNext = companion.querySelector('.section-card-next .section-title');
+    const spark = companion.querySelector('.companion-spark');
+    const quote = companion.querySelector('.companion-quote');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const circumference = Math.PI * 2 * 52;
+    if (ring) {
+        ring.setAttribute('stroke', 'url(#anomfin-companion-gradient)');
+        ring.style.strokeDasharray = circumference.toFixed(2);
+        ring.style.strokeDashoffset = circumference.toFixed(2);
+    }
+
+    const sectionTitles = {
+        home: 'Etusivu',
+        services: 'Palvelut',
+        platforms: 'Alustat',
+        security: 'Kyberturva',
+        pricing: 'Hinnoittelu',
+        contact: 'Yhteys'
+    };
+
+    const sparkMap = {
+        home: 'HyperLaunch',
+        services: 'Build Sprint',
+        platforms: 'Omni Deploy',
+        security: 'SOC Hyperwatch',
+        pricing: 'Selkeä hinnoittelu',
+        contact: 'Yhteys valmis'
+    };
+
+    const quoteMap = {
+        home: 'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.',
+        services: 'Sprinttaa MVP tuotantoon – AnomTools valvoo laatua ja turvaa.',
+        platforms: 'Julkaisemme yhdellä koodipohjalla kaikkiin päätelaitteisiin.',
+        security: 'SOC Hyperwatch tarkkailee uhkia yhtä herkästi kuin liikegraafi.',
+        pricing: 'Hinnoittelu pysyy kristallinkirkkaana koko matkan.',
+        contact: 'Jutellaan – viedään ideasi tuotantoon turvallisesti.'
+    };
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const deriveSectionTitle = (section) => {
+        if (!section) return '';
+        const heading = section.querySelector('h1, h2, h3');
+        return heading ? heading.textContent.trim() : section.id.replace(/-/g, ' ');
+    };
+
+    let isCompact = false;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let rafId;
+
+    const marginDesktop = 36;
+    const marginMobile = 18;
+
+    const computeCompact = () => {
+        const compact = window.innerWidth <= 768;
+        if (compact !== isCompact) {
+            isCompact = compact;
+            companion.classList.toggle('compact', compact);
+        }
+        return compact;
+    };
+
+    const updateSections = () => {
+        const midline = window.innerHeight * (isCompact ? 0.55 : 0.35);
+        let currentSection = sections[0] || null;
+        let nextSection = sections[1] || null;
+
+        for (let i = 0; i < sections.length; i += 1) {
+            const section = sections[i];
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= midline && rect.bottom > midline) {
+                currentSection = section;
+                nextSection = sections[i + 1] || null;
+                break;
+            }
+            if (rect.top > midline) {
+                currentSection = sections[i - 1] || section;
+                nextSection = section;
+                break;
+            }
+        }
+
+        const currentId = currentSection?.id || sections[0]?.id || '';
+        const nextId = nextSection?.id || '';
+
+        if (sectionActive) {
+            sectionActive.textContent = sectionTitles[currentId] || deriveSectionTitle(currentSection) || 'Etusivu';
+        }
+        if (sectionNext) {
+            sectionNext.textContent = nextId ? (sectionTitles[nextId] || deriveSectionTitle(nextSection)) : 'Valmis';
+        }
+        if (spark) {
+            spark.textContent = sparkMap[currentId] || 'Scroll Sync';
+        }
+        if (quote) {
+            quote.textContent = quoteMap[currentId] || quoteMap.home;
+        }
+
+        companion.dataset.activeSection = currentId;
+    };
+
+    const updateProgress = () => {
+        const sy = window.scrollY || document.documentElement.scrollTop || 0;
+        const vh = window.innerHeight;
+        const docH = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - vh;
+        const ratio = docH > 0 ? clamp(sy / docH, 0, 1) : 0;
+        if (progressValue) {
+            const pct = Math.round(ratio * 100);
+            progressValue.textContent = `${pct}%`;
+        }
+        companion.style.setProperty('--scroll-progress', ratio.toFixed(3));
+        if (ring) {
+            ring.style.strokeDashoffset = (circumference - ratio * circumference).toFixed(2);
+        }
+        return ratio;
+    };
+
+    const updateTargets = (ratio) => {
+        const width = companion.offsetWidth || 280;
+        const height = companion.offsetHeight || 260;
+        const margin = isCompact ? marginMobile : marginDesktop;
+
+        if (isCompact) {
+            const baseX = (window.innerWidth - width) / 2;
+            const maxX = window.innerWidth - width - margin;
+            targetX = clamp(baseX, margin, Math.max(margin, maxX));
+            const maxY = window.innerHeight - height - margin;
+            targetY = clamp(maxY, margin, maxY);
+        } else {
+            const sway = Math.sin((window.scrollY || 0) * 0.004) * 22;
+            const baseX = window.innerWidth - width - margin;
+            targetX = clamp(baseX - ratio * 40 + sway, margin, window.innerWidth - width - margin + 20);
+            const baseY = window.innerHeight * 0.28;
+            const parallax = (window.scrollY || 0) * 0.12;
+            const maxY = window.innerHeight - height - margin;
+            targetY = clamp(baseY + parallax, margin, maxY);
+        }
+    };
+
+    const applyImmediateTransform = () => {
+        companion.style.transform = `translate3d(${Math.round(currentX)}px, ${Math.round(currentY)}px, 0)`;
+    };
+
+    const handleFlow = () => {
+        computeCompact();
+        const ratio = updateProgress();
+        updateTargets(ratio);
+        updateSections();
+        if (reduceMotion.matches) {
+            currentX = targetX;
+            currentY = targetY;
+            applyImmediateTransform();
+        }
+    };
+
+    const animate = () => {
+        currentX += (targetX - currentX) * 0.16;
+        currentY += (targetY - currentY) * 0.16;
+        applyImmediateTransform();
+        rafId = requestAnimationFrame(animate);
+    };
+
+    handleFlow();
+    currentX = targetX;
+    currentY = targetY;
+    applyImmediateTransform();
+
+    requestAnimationFrame(() => companion.classList.add('ready'));
+
+    if (!reduceMotion.matches) {
+        rafId = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('scroll', handleFlow, { passive: true });
+    window.addEventListener('resize', handleFlow);
+
+    reduceMotion.addEventListener?.('change', (event) => {
+        if (event.matches) {
+            if (rafId) cancelAnimationFrame(rafId);
+            currentX = targetX;
+            currentY = targetY;
+            applyImmediateTransform();
+        } else {
+            currentX = targetX;
+            currentY = targetY;
+            rafId = requestAnimationFrame(animate);
+        }
+    });
 }
 
 // Floating grid that follows scroll with smoothing and reacts to sections
