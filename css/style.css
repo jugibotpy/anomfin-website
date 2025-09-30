@@ -612,6 +612,20 @@ a {
 .floating-grid.fg-super{ border-width: 2px; box-shadow: 0 0 70px rgba(0,255,150,.35); }
 .hero-grid.hidden-floating{ opacity: 0; transition: opacity .6s ease; }
 
+/* Matrix active state - enhanced glow when logo enters */
+.floating-grid.matrix-active {
+    box-shadow: 0 0 60px rgba(0, 255, 150, 0.4), 
+                0 0 100px rgba(0, 255, 150, 0.2),
+                inset 0 0 40px rgba(0, 255, 150, 0.15);
+    border-color: rgba(0, 255, 150, 0.4);
+    transition: box-shadow 0.8s ease, border-color 0.8s ease;
+}
+
+/* Matrix rain canvas styling */
+.floating-grid .matrix-rain-canvas {
+    transition: opacity 0.8s ease;
+}
+
 /* Caption inside floating grid */
 .floating-grid{ position: fixed; }
 .floating-grid .floating-caption{
@@ -1922,6 +1936,19 @@ textarea {
 
 .left-edge-box {
     animation: leftBoxPulse 4s ease-in-out infinite;
+}
+
+/* Enhanced state when mask enters terminal */
+.left-edge-box.mask-in-terminal {
+    box-shadow: 0 0 70px rgba(0, 255, 150, 0.5), 
+                inset 0 0 60px rgba(0, 255, 150, 0.2);
+    border-color: rgba(0, 255, 150, 0.5);
+    transition: box-shadow 0.8s ease, border-color 0.8s ease;
+}
+
+.left-edge-box.mask-in-terminal .left-edge-mask {
+    opacity: 0.25;
+    transition: opacity 0.8s ease;
 }
 
 /* Applications Section */
