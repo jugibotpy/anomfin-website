@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLogoRectangleInteraction(); // Add matrix interaction
     initLeftEdgeBox(); // Add left-edge floating box
     initMobileVisualEnhancements(); // Add mobile visual enhancements
+    initMobileHyperCubeTrigger(); // Add mobile hypercube trigger
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -419,6 +420,7 @@ function initScrollCompanion() {
         services: 'Palvelut',
         platforms: 'Alustat',
         applications: 'Sovellukset',
+        softamme: 'Softamme',
         security: 'Kyberturva',
         pricing: 'Hinnoittelu',
         contact: 'Yhteys'
@@ -429,6 +431,7 @@ function initScrollCompanion() {
         services: 'Build Sprint',
         platforms: 'Omni Deploy',
         applications: 'GitHub Projects',
+        softamme: 'Open Source',
         security: 'SOC Hyperwatch',
         pricing: 'Selkeä hinnoittelu',
         contact: 'Yhteys valmis'
@@ -439,6 +442,7 @@ function initScrollCompanion() {
         services: 'Sprinttaa MVP tuotantoon – AnomTools valvoo laatua ja turvaa.',
         platforms: 'Julkaisemme yhdellä koodipohjalla kaikkiin päätelaitteisiin.',
         applications: 'Toteutetut projektit ja avoimet työkalut – inspiraatiota seuraavaan.',
+        softamme: 'Avoimen lähdekoodin periaatteet ja AnomFIN GitHub-projektit.',
         security: 'SOC Hyperwatch tarkkailee uhkia yhtä herkästi kuin liikegraafi.',
         pricing: 'Hinnoittelu pysyy kristallinkirkkaana koko matkan.',
         contact: 'Jutellaan – viedään ideasi tuotantoon turvallisesti.'
@@ -1241,12 +1245,12 @@ function initMobileVisualEnhancements() {
     setCanvasSize();
     window.addEventListener('resize', setCanvasSize);
     
-    // Matrix characters
-    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01';
-    const charArray = chars.split('');
+    // Matrix characters - AnomFIN project names and keywords
+    const chars = 'AnomFIN AnomTools Jugi JugiBot JugiTools Kali Linux Ubuntu v22.04 Teboil 01010110';
+    const charArray = chars.split(' ');
     
-    const fontSize = 14;
-    const columns = Math.floor(canvas.width / fontSize);
+    const fontSize = 10;
+    const columns = Math.floor(canvas.width / 50); // Wider columns for text
     const drops = Array(columns).fill(1);
     
     // Draw matrix rain
@@ -1259,13 +1263,13 @@ function initMobileVisualEnhancements() {
         ctx.fillStyle = '#00ff96';
         ctx.font = `${fontSize}px monospace`;
         
-        // Draw characters
+        // Draw text
         for (let i = 0; i < drops.length; i++) {
-            const char = charArray[Math.floor(Math.random() * charArray.length)];
-            const x = i * fontSize;
+            const text = charArray[Math.floor(Math.random() * charArray.length)];
+            const x = i * 50 + 5;
             const y = drops[i] * fontSize;
             
-            ctx.fillText(char, x, y);
+            ctx.fillText(text, x, y);
             
             // Reset drop randomly or when it reaches bottom
             if (y > canvas.height && Math.random() > 0.975) {
@@ -1315,4 +1319,58 @@ function initMobileVisualEnhancements() {
             matrixRainContainer.remove();
         }
     });
+}
+
+// Mobile HyperCube popup trigger
+function initMobileHyperCubeTrigger() {
+    if (window.innerWidth > 800) return;
+    
+    const trigger = document.getElementById('mobile-hypercube-trigger');
+    const companion = document.querySelector('.scroll-companion');
+    
+    if (!trigger || !companion) return;
+    
+    let isPopupVisible = false;
+    
+    trigger.addEventListener('click', () => {
+        if (!isPopupVisible) {
+            // Show the hypercube
+            companion.classList.add('mobile-popup');
+            
+            // Position it in the center of viewport
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const companionWidth = companion.offsetWidth || 280;
+            const companionHeight = companion.offsetHeight || 400;
+            
+            const x = (viewportWidth - companionWidth) / 2;
+            const y = (viewportHeight - companionHeight) / 2;
+            
+            companion.style.setProperty('--companion-x', `${x}px`);
+            companion.style.setProperty('--companion-y', `${y}px`);
+            
+            trigger.textContent = 'Piilota HyperCube ✕';
+            isPopupVisible = true;
+            
+            // Add click outside to close
+            setTimeout(() => {
+                document.addEventListener('click', closeOnClickOutside);
+            }, 100);
+        } else {
+            // Hide the hypercube
+            companion.classList.remove('mobile-popup');
+            trigger.textContent = 'Näytä HyperCube 🎯';
+            isPopupVisible = false;
+            document.removeEventListener('click', closeOnClickOutside);
+        }
+    });
+    
+    function closeOnClickOutside(e) {
+        if (isPopupVisible && !companion.contains(e.target) && e.target !== trigger) {
+            companion.classList.remove('mobile-popup');
+            trigger.textContent = 'Näytä HyperCube 🎯';
+            isPopupVisible = false;
+            document.removeEventListener('click', closeOnClickOutside);
+        }
+    }
 }
