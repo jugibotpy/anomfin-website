@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initIntroOverlay();
     initNavLogoHalo(navLogoRef);
     initLogoRectangleInteraction(); // Add matrix interaction
+    initLeftEdgeBox(); // Add left-edge floating box
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -613,6 +614,72 @@ function initScrollCompanion() {
     cap.className = 'floating-caption';
     cap.innerHTML = '<span>AnomFIN · Yksilölliset ratkaisut</span>';
     fg.appendChild(cap);
+    
+    // Add matrix-style digital rain effect to floating grid
+    const matrixCanvas = document.createElement('canvas');
+    matrixCanvas.className = 'matrix-rain-canvas';
+    matrixCanvas.width = 280;
+    matrixCanvas.height = 180;
+    matrixCanvas.style.cssText = `
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0.6;
+        mix-blend-mode: screen;
+        pointer-events: none;
+    `;
+    fg.appendChild(matrixCanvas);
+    
+    // Matrix rain animation
+    const ctx = matrixCanvas.getContext('2d');
+    const chars = 'ANOMFIN010110100101CYBERSEC01101HYPERFLUX010101'.split('');
+    const fontSize = 12;
+    const columns = Math.floor(matrixCanvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+    
+    const drawMatrix = () => {
+        // Semi-transparent black to create fade effect
+        ctx.fillStyle = 'rgba(6, 7, 10, 0.08)';
+        ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        
+        ctx.fillStyle = '#00ffa6';
+        ctx.font = `${fontSize}px monospace`;
+        
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+            
+            // Add glow effect to some characters
+            if (Math.random() > 0.95) {
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#00ffa6';
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.fillText(text, x, y);
+            
+            // Reset drop to top randomly or continue falling
+            if (y > matrixCanvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    };
+    
+    // Run matrix animation at ~20fps for performance
+    let matrixInterval = setInterval(drawMatrix, 50);
+    
+    // Pause matrix when page is hidden to save resources
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            clearInterval(matrixInterval);
+        } else {
+            matrixInterval = setInterval(drawMatrix, 50);
+        }
+    });
+    
     const loop = ()=>{
       const t = 0.12; // smoothing
       lastY = lerp(lastY, targetY, t);
@@ -630,6 +697,25 @@ function initScrollCompanion() {
       targetY = sy * 0.12 + vh * 0.22;
       // left→right across viewport with gentle sway
       targetX = (vw * (0.15 + 0.7 * p)) + Math.sin(sy * 0.004) * 30 - (vw * 0.5);
+      
+      // Sync matrix animation speed with scroll
+      const scrollSpeed = Math.abs(sy - (window.lastScrollY || 0));
+      window.lastScrollY = sy;
+      
+      // Speed up matrix drops based on scroll speed
+      if (scrollSpeed > 5) {
+        // Temporarily speed up the matrix
+        clearInterval(matrixInterval);
+        matrixInterval = setInterval(drawMatrix, Math.max(20, 50 - scrollSpeed * 2));
+        
+        // Reset to normal speed after a short delay
+        setTimeout(() => {
+          clearInterval(matrixInterval);
+          if (!document.hidden) {
+            matrixInterval = setInterval(drawMatrix, 50);
+          }
+        }, 500);
+      }
     };
     const io = new IntersectionObserver((entries)=>{
       entries.forEach(e=>{
@@ -927,6 +1013,59 @@ function createMatrixStream(originX, originY, index) {
     }
 
     return stream;
+}
+
+// Left-edge floating green box with cyclops eye effect
+function initLeftEdgeBox() {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const leftBox = document.createElement('div');
+    leftBox.className = 'left-edge-box';
+    leftBox.setAttribute('aria-hidden', 'true');
+    
+    // Create mask overlay for cyclops eye effect
+    const maskOverlay = document.createElement('div');
+    maskOverlay.className = 'left-edge-mask';
+    leftBox.appendChild(maskOverlay);
+    
+    document.body.appendChild(leftBox);
+
+    // Perlin-like noise animation for floating effect
+    let time = 0;
+    let baseY = window.innerHeight * 0.35; // Start at 35% of viewport height
+    
+    const noise = (x) => {
+        // Simple pseudo-random noise function
+        const s = Math.sin(x * 0.3) * Math.cos(x * 0.17);
+        const c = Math.cos(x * 0.23) * Math.sin(x * 0.13);
+        return (s + c) / 2;
+    };
+
+    const animate = () => {
+        time += 0.015; // Slow animation speed
+        
+        // Calculate floating position with noise
+        const noiseX = noise(time) * 25; // X movement amplitude
+        const noiseY = noise(time + 100) * 40; // Y movement amplitude (offset for variety)
+        const slowWave = Math.sin(time * 0.5) * 15; // Additional slow wave
+        
+        const targetY = baseY + noiseY + slowWave;
+        
+        // Keep box on left edge with slight horizontal sway
+        leftBox.style.transform = `translate(${noiseX}px, ${targetY}px)`;
+        
+        requestAnimationFrame(animate);
+    };
+
+    // Update base Y position on window resize
+    const updateBaseY = () => {
+        baseY = window.innerHeight * 0.35;
+    };
+    window.addEventListener('resize', updateBaseY);
+    
+    // Start animation
+    animate();
 }
 
 // GitHub Applications Section
