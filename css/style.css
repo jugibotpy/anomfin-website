@@ -1467,3 +1467,213 @@ textarea {
     75% { transform: translate(var(--square-shake-amp, 10px), calc(var(--square-shake-amp, 10px) * .5)) scale(1.1); }
     100% { transform: translate(0,0) scale(var(--square-scale-end, 1.2)); }
 }
+
+/* Matrix Animation Effects */
+.rectangle-activated {
+    animation: rectangleActivation 0.6s ease-out forwards;
+    border-color: #00ffa6 !important;
+    box-shadow: 0 0 30px rgba(0, 255, 166, 0.6), 
+                0 0 60px rgba(0, 255, 166, 0.4), 
+                inset 0 0 20px rgba(0, 255, 166, 0.2) !important;
+}
+
+@keyframes rectangleActivation {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.05);
+        filter: brightness(1.3) saturate(1.5);
+    }
+    100% {
+        transform: scale(1.02);
+        filter: brightness(1.1) saturate(1.2);
+    }
+}
+
+@keyframes matrixTrail {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--trail-dx, 200px), var(--trail-dy, 200px)) scale(0.3);
+        opacity: 0;
+    }
+}
+
+@keyframes matrixParticle {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--particle-dx, 160px), var(--particle-dy, 160px)) scale(0);
+        opacity: 0;
+    }
+}
+
+.matrix-animation-container {
+    will-change: transform;
+}
+
+.matrix-stream {
+    will-change: transform, opacity;
+}
+
+.matrix-particle {
+    will-change: transform, opacity;
+}
+
+/* Applications Section */
+.applications {
+    background: linear-gradient(135deg, rgba(0, 12, 24, 0.8) 0%, rgba(6, 7, 10, 0.95) 100%);
+}
+
+.applications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.application-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 212, 255, 0.08) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.application-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00d4ff, #00ffa6, #00d4ff);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.application-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 164, 255, 0.25);
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+.application-card:hover::before {
+    opacity: 1;
+}
+
+.application-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.application-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #00d4ff, #00ffa6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #06070a;
+    font-weight: 700;
+}
+
+.application-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f4f7fb;
+    margin: 0;
+}
+
+.application-description {
+    color: rgba(244, 247, 251, 0.8);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.application-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.tech-tag {
+    padding: 0.25rem 0.75rem;
+    background: rgba(0, 212, 255, 0.15);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: #00d4ff;
+}
+
+.application-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #00d4ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.application-link:hover {
+    color: #00ffa6;
+}
+
+.application-link::after {
+    content: '→';
+    transition: transform 0.3s ease;
+}
+
+.application-link:hover::after {
+    transform: translateX(4px);
+}
+
+.loading-placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: rgba(244, 247, 251, 0.7);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 212, 255, 0.2);
+    border-top: 3px solid #00d4ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: rgba(220, 53, 69, 0.8);
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 12px;
+}

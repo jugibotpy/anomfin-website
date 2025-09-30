@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initIntroOverlay();
     initNavLogoHalo(navLogoRef);
+    initLogoRectangleInteraction(); // Add matrix interaction
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -38,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Scroll companion
     initScrollCompanion();
+
+    // Applications section
+    initApplicationsSection();
 
     updateNavbarChrome();
 });
@@ -412,6 +416,7 @@ function initScrollCompanion() {
         home: 'Etusivu',
         services: 'Palvelut',
         platforms: 'Alustat',
+        applications: 'Sovellukset',
         security: 'Kyberturva',
         pricing: 'Hinnoittelu',
         contact: 'Yhteys'
@@ -421,6 +426,7 @@ function initScrollCompanion() {
         home: 'HyperLaunch',
         services: 'Build Sprint',
         platforms: 'Omni Deploy',
+        applications: 'GitHub Projects',
         security: 'SOC Hyperwatch',
         pricing: 'Selkeä hinnoittelu',
         contact: 'Yhteys valmis'
@@ -430,6 +436,7 @@ function initScrollCompanion() {
         home: 'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.',
         services: 'Sprinttaa MVP tuotantoon – AnomTools valvoo laatua ja turvaa.',
         platforms: 'Julkaisemme yhdellä koodipohjalla kaikkiin päätelaitteisiin.',
+        applications: 'Toteutetut projektit ja avoimet työkalut – inspiraatiota seuraavaan.',
         security: 'SOC Hyperwatch tarkkailee uhkia yhtä herkästi kuin liikegraafi.',
         pricing: 'Hinnoittelu pysyy kristallinkirkkaana koko matkan.',
         contact: 'Jutellaan – viedään ideasi tuotantoon turvallisesti.'
@@ -735,4 +742,335 @@ function throttle(func, limit) {
             setTimeout(() => (inThrottle = false), limit);
         }
     };
+}
+
+// Matrix animation and logo-rectangle interaction
+let matrixAnimationActive = false;
+let intersectionDetectionEnabled = true;
+
+function initLogoRectangleInteraction() {
+    const logo = document.querySelector('.nav-logo img');
+    const rectangle = document.querySelector('.hero-grid');
+    
+    if (!logo || !rectangle) return;
+
+    let rafId;
+    let lastIntersection = false;
+
+    const checkIntersection = () => {
+        if (!intersectionDetectionEnabled) return;
+
+        const logoRect = logo.getBoundingClientRect();
+        const rectRect = rectangle.getBoundingClientRect();
+
+        // Calculate if logo intersects with rectangle
+        const intersects = !(logoRect.right < rectRect.left || 
+                           logoRect.left > rectRect.right || 
+                           logoRect.bottom < rectRect.top || 
+                           logoRect.top > rectRect.bottom);
+
+        if (intersects && !lastIntersection) {
+            // Intersection started
+            activateRectangle();
+            lastIntersection = true;
+        } else if (!intersects && lastIntersection) {
+            // Intersection ended
+            lastIntersection = false;
+        }
+
+        rafId = requestAnimationFrame(checkIntersection);
+    };
+
+    // Start intersection detection
+    rafId = requestAnimationFrame(checkIntersection);
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+        if (rafId) cancelAnimationFrame(rafId);
+    });
+}
+
+function activateRectangle() {
+    const rectangle = document.querySelector('.hero-grid');
+    if (!rectangle || matrixAnimationActive) return;
+
+    // Add activation visual cue
+    rectangle.classList.add('rectangle-activated');
+    
+    // Trigger matrix animation after a short delay
+    setTimeout(() => {
+        launchMatrixAnimation(rectangle);
+    }, 300);
+}
+
+function launchMatrixAnimation(fromElement) {
+    if (matrixAnimationActive) return;
+    matrixAnimationActive = true;
+
+    const rect = fromElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Create matrix container
+    const matrixContainer = document.createElement('div');
+    matrixContainer.className = 'matrix-animation-container';
+    matrixContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 1000;
+        overflow: hidden;
+    `;
+
+    document.body.appendChild(matrixContainer);
+
+    // Create multiple matrix streams
+    const numStreams = 20;
+    const streams = [];
+
+    for (let i = 0; i < numStreams; i++) {
+        const stream = createMatrixStream(centerX, centerY, i);
+        matrixContainer.appendChild(stream);
+        streams.push(stream);
+    }
+
+    // Remove animation after completion
+    setTimeout(() => {
+        matrixContainer.remove();
+        matrixAnimationActive = false;
+        
+        // Remove activation class from rectangle
+        fromElement.classList.remove('rectangle-activated');
+    }, 4000);
+}
+
+// Make functions globally accessible for testing
+window.launchMatrixAnimation = launchMatrixAnimation;
+window.activateRectangle = activateRectangle;
+
+// Add developer test button (only in development)
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    const testButton = document.createElement('button');
+    testButton.textContent = '🎆 Test Matrix Animation';
+    testButton.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+        padding: 8px 12px;
+        background: #00ffa6;
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 12px;
+    `;
+    testButton.onclick = () => {
+        const rectangle = document.querySelector('.hero-grid');
+        if (rectangle) {
+            launchMatrixAnimation(rectangle);
+        }
+    };
+    document.body.appendChild(testButton);
+}
+
+function createMatrixStream(originX, originY, index) {
+    const stream = document.createElement('div');
+    stream.className = 'matrix-stream';
+    
+    // Calculate direction - spread streams in different directions
+    const angle = (index / 20) * Math.PI * 2;
+    const speed = 2 + Math.random() * 3;
+    const length = 150 + Math.random() * 300;
+    
+    const dx = Math.cos(angle) * length;
+    const dy = Math.sin(angle) * length;
+    
+    stream.style.cssText = `
+        position: absolute;
+        left: ${originX}px;
+        top: ${originY}px;
+        width: 2px;
+        height: 2px;
+        background: #00ffa6;
+        box-shadow: 0 0 10px #00ffa6, 0 0 20px #00ffa6, 0 0 30px #00ffa6;
+        border-radius: 50%;
+        animation: matrixTrail ${speed}s ease-out forwards;
+        animation-delay: ${index * 50}ms;
+        --trail-dx: ${dx}px;
+        --trail-dy: ${dy}px;
+    `;
+
+    // Add trailing particles
+    for (let j = 0; j < 8; j++) {
+        const particle = document.createElement('div');
+        particle.className = 'matrix-particle';
+        const particleDx = dx * (0.6 + j * 0.05);
+        const particleDy = dy * (0.6 + j * 0.05);
+        
+        particle.style.cssText = `
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: rgba(0, 255, 166, ${0.8 - j * 0.1});
+            border-radius: 50%;
+            animation: matrixParticle ${speed + 0.5}s ease-out forwards;
+            animation-delay: ${index * 50 + j * 25}ms;
+            --particle-dx: ${particleDx}px;
+            --particle-dy: ${particleDy}px;
+        `;
+        stream.appendChild(particle);
+    }
+
+    return stream;
+}
+
+// GitHub Applications Section
+const GITHUB_REPOS = [
+    'AnomFIN/anomfin-website',
+    'AnomFIN/hrk',
+    'AnomFIN/jugitube',
+    'AnomFIN/iPeili',
+    'AnomFIN/lexai'
+];
+
+function initApplicationsSection() {
+    const applicationsGrid = document.getElementById('applications-grid');
+    if (!applicationsGrid) return;
+
+    // Fallback data in case GitHub API fails
+    const fallbackData = {
+        'AnomFIN/anomfin-website': {
+            name: 'anomfin-website',
+            description: 'AnomFIN yrityswebsite - modernit sovellus- ja kyberturvaratkaisut',
+            html_url: 'https://github.com/AnomFIN/anomfin-website',
+            language: 'HTML',
+            topics: ['website', 'cybersecurity', 'applications']
+        },
+        'AnomFIN/hrk': {
+            name: 'hrk',
+            description: 'HRK - Human Resource Kit: henkilöstöhallinnon työkalupakki',
+            html_url: 'https://github.com/AnomFIN/hrk',
+            language: 'JavaScript',
+            topics: ['hr', 'management', 'tools']
+        },
+        'AnomFIN/jugitube': {
+            name: 'jugitube',
+            description: 'JugiTube - Suomalainen videoalusta ja sisällönhallintajärjestelmä',
+            html_url: 'https://github.com/AnomFIN/jugitube',
+            language: 'TypeScript',
+            topics: ['video', 'streaming', 'cms']
+        },
+        'AnomFIN/iPeili': {
+            name: 'iPeili',
+            description: 'iPeili - Älykäs peilisovellus IoT-laitteille',
+            html_url: 'https://github.com/AnomFIN/iPeili',
+            language: 'Python',
+            topics: ['iot', 'smart-mirror', 'python']
+        },
+        'AnomFIN/lexai': {
+            name: 'lexai',
+            description: 'LexAI - Tekoälyavusteinen lakitekstien analysointityökalu',
+            html_url: 'https://github.com/AnomFIN/lexai',
+            language: 'Python',
+            topics: ['ai', 'legal', 'nlp']
+        }
+    };
+
+    // Try to fetch from GitHub API first, fall back to static data
+    fetchGitHubRepos()
+        .then(repos => {
+            if (repos && repos.length > 0) {
+                displayApplications(repos);
+            } else {
+                // Use fallback data
+                const fallbackRepos = GITHUB_REPOS.map(repo => fallbackData[repo]).filter(Boolean);
+                displayApplications(fallbackRepos);
+            }
+        })
+        .catch(error => {
+            console.warn('GitHub API failed, using fallback data:', error);
+            const fallbackRepos = GITHUB_REPOS.map(repo => fallbackData[repo]).filter(Boolean);
+            displayApplications(fallbackRepos);
+        });
+}
+
+async function fetchGitHubRepos() {
+    try {
+        const repoPromises = GITHUB_REPOS.map(async (repo) => {
+            const response = await fetch(`https://api.github.com/repos/${repo}`);
+            if (response.ok) {
+                return await response.json();
+            }
+            return null;
+        });
+
+        const repos = await Promise.all(repoPromises);
+        return repos.filter(repo => repo !== null);
+    } catch (error) {
+        throw error;
+    }
+}
+
+function displayApplications(repos) {
+    const applicationsGrid = document.getElementById('applications-grid');
+    if (!applicationsGrid) return;
+
+    // Clear loading placeholder
+    applicationsGrid.innerHTML = '';
+
+    repos.forEach(repo => {
+        const card = createApplicationCard(repo);
+        applicationsGrid.appendChild(card);
+    });
+}
+
+function createApplicationCard(repo) {
+    const card = document.createElement('article');
+    card.className = 'application-card';
+
+    const icon = getRepoIcon(repo.language || 'Code');
+    const techTags = (repo.topics || []).slice(0, 3).map(topic => 
+        `<span class="tech-tag">${topic}</span>`
+    ).join('');
+
+    card.innerHTML = `
+        <div class="application-header">
+            <div class="application-icon">${icon}</div>
+            <h3 class="application-title">${repo.name}</h3>
+        </div>
+        <p class="application-description">
+            ${repo.description || 'Ei kuvausta saatavilla.'}
+        </p>
+        <div class="application-tech">
+            ${repo.language ? `<span class="tech-tag">${repo.language}</span>` : ''}
+            ${techTags}
+        </div>
+        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="application-link">
+            Katso GitHubissa
+        </a>
+    `;
+
+    return card;
+}
+
+function getRepoIcon(language) {
+    const icons = {
+        'HTML': '🌐',
+        'JavaScript': '⚡',
+        'TypeScript': '🔷',
+        'Python': '🐍',
+        'Java': '☕',
+        'C++': '⚙️',
+        'CSS': '🎨',
+        'Go': '🚀',
+        'Rust': '🦀',
+        'default': '💾'
+    };
+    
+    return icons[language] || icons.default;
 }
