@@ -7,6 +7,7 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 body {
@@ -18,6 +19,8 @@ body {
                       radial-gradient(circle at 80% 10%, rgba(0, 153, 204, 0.15), transparent 60%),
                       linear-gradient(180deg, #06070a 0%, #0d1018 100%);
     min-height: 100vh;
+    overflow-x: hidden;
+    max-width: 100vw;
 }
 
 /* Neon-hehkun asetus */
@@ -1556,14 +1559,71 @@ textarea {
         z-index: 1;
         pointer-events: none;
         opacity: 0;
-        transition: opacity 1s ease-in;
+        transition: opacity 1.5s ease-in;
     }
     
     .mobile-matrix-rain.active {
-        opacity: 1;
+        opacity: 0.6;
     }
     
     .mobile-matrix-rain canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    
+    /* GitHub Hypercube - floating 4D cube */
+    .mobile-hypercube {
+        position: fixed;
+        top: 12%;
+        right: 8%;
+        width: 200px;
+        height: 200px;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 1.5s ease-in;
+        filter: drop-shadow(0 0 20px rgba(0, 255, 166, 0.3));
+    }
+    
+    .mobile-hypercube.active {
+        opacity: 1;
+        animation: hypercubeFloat 6s ease-in-out infinite;
+    }
+    
+    @keyframes hypercubeFloat {
+        0%, 100% {
+            transform: translateY(0) scale(1);
+        }
+        50% {
+            transform: translateY(-15px) scale(1.05);
+        }
+    }
+    
+    .mobile-hypercube canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    
+    /* Mobile Particles - lightweight floating effect */
+    .mobile-particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 3;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 2s ease-in;
+    }
+    
+    .mobile-particles.active {
+        opacity: 1;
+    }
+    
+    .mobile-particles canvas {
         width: 100%;
         height: 100%;
         display: block;
@@ -1640,6 +1700,30 @@ textarea {
         opacity: 0.15;
         filter: blur(1px);
         animation: mobileLogoBreath 4s ease-in-out infinite;
+    }
+    
+    /* Geometric pattern overlay */
+    .hero-grid::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: 
+            linear-gradient(0deg, rgba(0, 255, 166, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 166, 0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.5;
+        animation: geometricPulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes geometricPulse {
+        0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.6;
+            transform: scale(1.02);
+        }
     }
     
     @keyframes mobileLogoBreath {
