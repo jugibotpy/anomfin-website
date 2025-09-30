@@ -1762,6 +1762,44 @@ textarea {
                 inset 0 0 20px rgba(0, 255, 166, 0.2) !important;
 }
 
+/* Logo blending into terminal effect */
+.hero-grid.logo-entering::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('../assets/logo.png');
+    background-size: 50%;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    animation: logoBlendIn 1s ease-out forwards;
+    pointer-events: none;
+}
+
+.hero-grid.logo-blended::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('../assets/logo.png');
+    background-size: 50%;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes logoBlendIn {
+    0% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+}
+
 @keyframes rectangleActivation {
     0% {
         transform: scale(1);
@@ -1833,6 +1871,8 @@ textarea {
     z-index: 998;
     will-change: transform;
     transition: box-shadow 0.4s ease;
+    /* Hide on desktop as per requirements */
+    display: none !important;
 }
 
 /* Cyclops eye mask effect - creates transparency when over text */
