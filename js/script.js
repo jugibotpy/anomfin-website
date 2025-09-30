@@ -706,10 +706,21 @@ function initScrollCompanion() {
     const columns = Math.floor(matrixCanvas.width / fontSize);
     const drops = Array(columns).fill(1);
     
+    let matrixActive = false; // Start dormant
+    let matrixOpacity = 0; // Start with 0 opacity for smooth transition
+    
     const drawMatrix = () => {
+        if (!matrixActive) return; // Don't draw if dormant
+        
         // Semi-transparent black to create fade effect
         ctx.fillStyle = 'rgba(6, 7, 10, 0.08)';
         ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        
+        // Gradually increase opacity when active
+        if (matrixOpacity < 0.5) {
+            matrixOpacity = Math.min(0.5, matrixOpacity + 0.02);
+            matrixCanvas.style.opacity = matrixOpacity;
+        }
         
         ctx.fillStyle = '#00ffa6';
         ctx.font = `${fontSize}px monospace`;
@@ -737,6 +748,29 @@ function initScrollCompanion() {
         }
     };
     
+    // Set initial canvas opacity to 0 (dormant state)
+    matrixCanvas.style.opacity = '0';
+    
+    // Function to activate matrix rain
+    const activateMatrix = () => {
+        if (!matrixActive) {
+            matrixActive = true;
+            fg.classList.add('matrix-active');
+        }
+    };
+    
+    // Function to deactivate matrix rain
+    const deactivateMatrix = () => {
+        if (matrixActive) {
+            matrixActive = false;
+            matrixOpacity = 0;
+            matrixCanvas.style.opacity = '0';
+            fg.classList.remove('matrix-active');
+            // Clear the canvas
+            ctx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        }
+    };
+    
     // Run matrix animation at ~20fps for performance
     let matrixInterval = setInterval(drawMatrix, 50);
     
@@ -748,6 +782,39 @@ function initScrollCompanion() {
             matrixInterval = setInterval(drawMatrix, 50);
         }
     });
+    
+    // Intersection detection between left-edge-box and floating-grid
+    const checkIntersection = () => {
+        const leftBox = document.querySelector('.left-edge-box');
+        if (!leftBox) {
+            requestAnimationFrame(checkIntersection);
+            return;
+        }
+        
+        const leftBoxRect = leftBox.getBoundingClientRect();
+        const fgRect = fg.getBoundingClientRect();
+        
+        // Check if boxes intersect
+        const intersects = !(leftBoxRect.right < fgRect.left || 
+                           leftBoxRect.left > fgRect.right || 
+                           leftBoxRect.bottom < fgRect.top || 
+                           leftBoxRect.top > fgRect.bottom);
+        
+        if (intersects) {
+            activateMatrix();
+            leftBox.classList.add('mask-in-terminal');
+        } else {
+            deactivateMatrix();
+            leftBox.classList.remove('mask-in-terminal');
+        }
+        
+        requestAnimationFrame(checkIntersection);
+    };
+    
+    // Start intersection detection after a short delay to ensure left-edge-box is created
+    setTimeout(() => {
+        requestAnimationFrame(checkIntersection);
+    }, 500);
     
     const loop = ()=>{
       const t = 0.12; // smoothing
