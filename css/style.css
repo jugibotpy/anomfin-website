@@ -1461,6 +1461,64 @@ textarea {
         display: none !important;
     }
     
+    /* Hide scroll-companion (Softamme) by default on mobile */
+    .scroll-companion {
+        opacity: 0 !important;
+        pointer-events: none;
+        transform: translate3d(-9999px, -9999px, 0) scale(0.8) !important;
+        transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+    
+    /* Show Softamme when activated */
+    .scroll-companion.softamme-active {
+        opacity: 1 !important;
+        pointer-events: auto;
+        transform: translate3d(var(--softamme-x, 50%), var(--softamme-y, 50%), 0) scale(1) !important;
+        filter: drop-shadow(0 20px 50px rgba(0, 255, 166, 0.5));
+    }
+    
+    /* Softamme trigger button - floating action button */
+    .softamme-trigger {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(0, 255, 166, 0.9), rgba(0, 212, 255, 0.9));
+        border: 2px solid rgba(0, 255, 166, 0.6);
+        box-shadow: 0 8px 25px rgba(0, 255, 166, 0.4);
+        cursor: pointer;
+        z-index: 1010;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #000;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        animation: softammePulse 2s ease-in-out infinite;
+    }
+    
+    .softamme-trigger:active {
+        transform: scale(0.95);
+    }
+    
+    .softamme-trigger.active {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(255, 100, 100, 0.9));
+        border-color: rgba(220, 53, 69, 0.6);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    }
+    
+    @keyframes softammePulse {
+        0%, 100% {
+            box-shadow: 0 8px 25px rgba(0, 255, 166, 0.4);
+        }
+        50% {
+            box-shadow: 0 8px 35px rgba(0, 255, 166, 0.7), 0 0 20px rgba(0, 255, 166, 0.5);
+        }
+    }
+    
     /* Mobile intro overlay with ultra-large logo */
     .intro-overlay {
         background: #000;

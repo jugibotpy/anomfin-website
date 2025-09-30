@@ -354,19 +354,41 @@ function initScrollCompanion() {
     const sections = Array.from(document.querySelectorAll('section[id]'));
     if (!sections.length) return;
 
+    // Detect if mobile device
+    const isMobile = window.innerWidth <= 800;
+
     const companion = document.createElement('aside');
     companion.className = 'scroll-companion';
-    companion.setAttribute('aria-label', 'AnomFIN | AnomTools vierityshyperkuutio');
+    if (isMobile) {
+        companion.classList.add('mobile-softamme');
+    }
+    companion.setAttribute('aria-label', isMobile ? 'AnomFIN | Softamme' : 'AnomFIN | AnomTools vierityshyperkuutio');
+    
+    // Different content for mobile vs desktop
+    const headerContent = isMobile ? `
+        <div class="companion-logo">
+            <span class="companion-logo-main">AnomFIN</span>
+            <span class="companion-logo-sub">Softamme</span>
+        </div>
+        <span class="companion-spark">Open Source</span>
+    ` : `
+        <div class="companion-logo">
+            <span class="companion-logo-main">AnomFIN</span>
+            <span class="companion-logo-sub">AnomTools HyperCube</span>
+        </div>
+        <span class="companion-spark">Scroll Sync</span>
+    `;
+    
+    const quoteContent = isMobile ? 
+        'Avoin lähdekoodi, vahva yhteisö. AnomFIN, AnomTools, Jugi-ekosysteemi – Kali Linux ja Ubuntu v22.04 tukevat kehitystyötä.' : 
+        'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.';
+    
     companion.innerHTML = `
         <div class="companion-core">
             <div class="companion-header">
-                <div class="companion-logo">
-                    <span class="companion-logo-main">AnomFIN</span>
-                    <span class="companion-logo-sub">AnomTools HyperCube</span>
-                </div>
-                <span class="companion-spark">Scroll Sync</span>
+                ${headerContent}
             </div>
-            <p class="companion-quote">Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.</p>
+            <p class="companion-quote">${quoteContent}</p>
             <div class="companion-progress" role="status" aria-live="polite">
                 <svg viewBox="0 0 120 120" class="companion-progress-ring" aria-hidden="true">
                     <defs>
@@ -424,7 +446,15 @@ function initScrollCompanion() {
         contact: 'Yhteys'
     };
 
-    const sparkMap = {
+    const sparkMap = isMobile ? {
+        home: 'Open Source',
+        services: 'AnomTools',
+        platforms: 'Jugi Ecosystem',
+        applications: 'GitHub Portfolio',
+        security: 'JugiBot',
+        pricing: 'Teboil',
+        contact: 'Ubuntu v22.04'
+    } : {
         home: 'HyperLaunch',
         services: 'Build Sprint',
         platforms: 'Omni Deploy',
@@ -434,7 +464,15 @@ function initScrollCompanion() {
         contact: 'Yhteys valmis'
     };
 
-    const quoteMap = {
+    const quoteMap = isMobile ? {
+        home: 'Avoin lähdekoodi, vahva yhteisö. AnomFIN, AnomTools, Jugi-ekosysteemi – Kali Linux ja Ubuntu v22.04 tukevat kehitystyötä.',
+        services: 'AnomTools: työkalupaketti tehokkaaseen kehitykseen ja kyberturva-analyysiin.',
+        platforms: 'JugiTube, JugiBot, JugiTools – Suomalaista avointa teknologiaa kaikille.',
+        applications: 'GitHub-projektimme ovat avoimia kaikille. Tutki, opi ja osallistu!',
+        security: 'JugiBot ja automatisoidut työkalut varmistavat jatkuvan kyberturvatason.',
+        pricing: 'Kali Linux ja Ubuntu v22.04 – luotettavat alustat kaikkeen kehitykseen.',
+        contact: 'Teboil-vahvuus ja tehokkuus – turvallinen matka tulevaisuuteen.'
+    } : {
         home: 'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.',
         services: 'Sprinttaa MVP tuotantoon – AnomTools valvoo laatua ja turvaa.',
         platforms: 'Julkaisemme yhdellä koodipohjalla kaikkiin päätelaitteisiin.',
@@ -596,6 +634,36 @@ function initScrollCompanion() {
             rafId = requestAnimationFrame(animate);
         }
     });
+    
+    // Add mobile trigger button for Softamme on mobile devices
+    if (isMobile) {
+        const triggerButton = document.createElement('button');
+        triggerButton.className = 'softamme-trigger';
+        triggerButton.innerHTML = '✨';
+        triggerButton.setAttribute('aria-label', 'Toggle Softamme');
+        triggerButton.setAttribute('title', 'Open/Close Softamme');
+        
+        let isActive = false;
+        
+        triggerButton.addEventListener('click', () => {
+            isActive = !isActive;
+            companion.classList.toggle('softamme-active', isActive);
+            triggerButton.classList.toggle('active', isActive);
+            triggerButton.innerHTML = isActive ? '✕' : '✨';
+            
+            // Position Softamme in center when activated
+            if (isActive) {
+                const width = companion.offsetWidth || 280;
+                const height = companion.offsetHeight || 260;
+                const centerX = (window.innerWidth - width) / 2;
+                const centerY = (window.innerHeight - height) / 2;
+                companion.style.setProperty('--softamme-x', `${centerX}px`);
+                companion.style.setProperty('--softamme-y', `${centerY}px`);
+            }
+        });
+        
+        document.body.appendChild(triggerButton);
+    }
 }
 
 // Floating grid that follows scroll with smoothing and reacts to sections
@@ -1241,15 +1309,21 @@ function initMobileVisualEnhancements() {
     setCanvasSize();
     window.addEventListener('resize', setCanvasSize);
     
-    // Matrix characters
-    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01';
-    const charArray = chars.split('');
+    // Code snippets to display instead of Chinese characters
+    const codeSnippets = [
+        'AnomFIN', 'AnomTools', 'Jugi', 'JugiBot', 'JugiTools', 
+        'Kali Linux', 'Ubuntu v22.04', 'Teboil',
+        '01', '10', '11', '00', 
+        '{', '}', '[', ']', '(', ')', 
+        '<', '>', '/', '*', '+', '-', '=',
+        'def', 'var', 'fn', 'if', 'for'
+    ];
     
     const fontSize = 14;
     const columns = Math.floor(canvas.width / fontSize);
     const drops = Array(columns).fill(1);
     
-    // Draw matrix rain
+    // Draw matrix rain with code snippets
     const drawMatrixRain = () => {
         // Semi-transparent black to create fade effect
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
@@ -1261,11 +1335,11 @@ function initMobileVisualEnhancements() {
         
         // Draw characters
         for (let i = 0; i < drops.length; i++) {
-            const char = charArray[Math.floor(Math.random() * charArray.length)];
+            const snippet = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
             const x = i * fontSize;
             const y = drops[i] * fontSize;
             
-            ctx.fillText(char, x, y);
+            ctx.fillText(snippet, x, y);
             
             // Reset drop randomly or when it reaches bottom
             if (y > canvas.height && Math.random() > 0.975) {
