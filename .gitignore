@@ -47,6 +47,9 @@ pids
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Keep .env.example for documentation
+!.env.example
 # Astro build artifacts
 astro/node_modules/
 astro/dist/
