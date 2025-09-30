@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavLogoHalo(navLogoRef);
     initLogoRectangleInteraction(); // Add matrix interaction
     initLeftEdgeBox(); // Add left-edge floating box
+    initMobileVisualEnhancements(); // Add mobile visual enhancements
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -1212,4 +1213,106 @@ function getRepoIcon(language) {
     };
     
     return icons[language] || icons.default;
+}
+
+// Mobile Visual Enhancements - Matrix Rain Effect
+function initMobileVisualEnhancements() {
+    // Only run on mobile devices
+    if (window.innerWidth > 800) return;
+    
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+    
+    // Create matrix rain container
+    const matrixRainContainer = document.createElement('div');
+    matrixRainContainer.className = 'mobile-matrix-rain';
+    
+    // Create canvas for matrix effect
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    matrixRainContainer.appendChild(canvas);
+    document.body.appendChild(matrixRainContainer);
+    
+    // Set canvas size
+    const setCanvasSize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+    setCanvasSize();
+    window.addEventListener('resize', setCanvasSize);
+    
+    // Matrix characters
+    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01';
+    const charArray = chars.split('');
+    
+    const fontSize = 14;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+    
+    // Draw matrix rain
+    const drawMatrixRain = () => {
+        // Semi-transparent black to create fade effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Green text
+        ctx.fillStyle = '#00ff96';
+        ctx.font = `${fontSize}px monospace`;
+        
+        // Draw characters
+        for (let i = 0; i < drops.length; i++) {
+            const char = charArray[Math.floor(Math.random() * charArray.length)];
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+            
+            ctx.fillText(char, x, y);
+            
+            // Reset drop randomly or when it reaches bottom
+            if (y > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            
+            drops[i]++;
+        }
+    };
+    
+    // Enhanced intro overlay for mobile
+    const overlay = document.querySelector('.intro-overlay');
+    if (overlay) {
+        // Add mega logo class for mobile
+        overlay.classList.add('mobile-logo-mega');
+        
+        // Start matrix rain after logo fade
+        setTimeout(() => {
+            matrixRainContainer.classList.add('active');
+            
+            // Start matrix animation
+            let matrixInterval = setInterval(drawMatrixRain, 50);
+            
+            // Handle visibility changes to save resources
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    clearInterval(matrixInterval);
+                } else {
+                    matrixInterval = setInterval(drawMatrixRain, 50);
+                }
+            });
+            
+            // Fade out overlay after logo animation
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 1s ease';
+                setTimeout(() => {
+                    overlay.classList.add('intro-overlay-hidden');
+                }, 1000);
+            }, 2000);
+        }, 2000);
+    }
+    
+    // Update matrix effect on resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 800) {
+            matrixRainContainer.remove();
+        }
+    });
 }
