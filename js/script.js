@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initLogoRectangleInteraction(); // Add matrix interaction
     initLeftEdgeBox(); // Add left-edge floating box
     initMobileVisualEnhancements(); // Add mobile visual enhancements
+    initMobileHypercube(); // Add GitHub hypercube effect
+    initMobileParticles(); // Add particle effect
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -1319,18 +1321,18 @@ function initMobileVisualEnhancements() {
         'def', 'var', 'fn', 'if', 'for'
     ];
     
-    const fontSize = 14;
+    const fontSize = 12;
     const columns = Math.floor(canvas.width / fontSize);
     const drops = Array(columns).fill(1);
     
-    // Draw matrix rain with code snippets
+    // Draw matrix rain with code snippets - slower and more subtle
     const drawMatrixRain = () => {
-        // Semi-transparent black to create fade effect
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        // More transparent black to create softer fade effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Green text
-        ctx.fillStyle = '#00ff96';
+        // Green text with reduced opacity for subtlety
+        ctx.fillStyle = 'rgba(0, 255, 150, 0.4)';
         ctx.font = `${fontSize}px monospace`;
         
         // Draw characters
@@ -1346,7 +1348,10 @@ function initMobileVisualEnhancements() {
                 drops[i] = 0;
             }
             
-            drops[i]++;
+            // Slower drop speed - increment less frequently
+            if (Math.random() > 0.5) {
+                drops[i]++;
+            }
         }
     };
     
@@ -1360,15 +1365,15 @@ function initMobileVisualEnhancements() {
         setTimeout(() => {
             matrixRainContainer.classList.add('active');
             
-            // Start matrix animation
-            let matrixInterval = setInterval(drawMatrixRain, 50);
+            // Start matrix animation - slower interval (100ms instead of 50ms)
+            let matrixInterval = setInterval(drawMatrixRain, 100);
             
             // Handle visibility changes to save resources
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     clearInterval(matrixInterval);
                 } else {
-                    matrixInterval = setInterval(drawMatrixRain, 50);
+                    matrixInterval = setInterval(drawMatrixRain, 100);
                 }
             });
             
@@ -1390,3 +1395,299 @@ function initMobileVisualEnhancements() {
         }
     });
 }
+
+// Mobile GitHub Hypercube Effect - Creative 3D rotating cube
+function initMobileHypercube() {
+    // Only run on mobile devices
+    if (window.innerWidth > 800) return;
+    
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+    
+    // Create hypercube container
+    const hypercubeContainer = document.createElement('div');
+    hypercubeContainer.className = 'mobile-hypercube';
+    
+    // Create canvas for hypercube
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    hypercubeContainer.appendChild(canvas);
+    document.body.appendChild(hypercubeContainer);
+    
+    // Set canvas size
+    const setCanvasSize = () => {
+        canvas.width = 200;
+        canvas.height = 200;
+    };
+    setCanvasSize();
+    
+    // 4D Hypercube vertices (tesseract)
+    const vertices4D = [
+        [-1, -1, -1, -1], [1, -1, -1, -1], [1, 1, -1, -1], [-1, 1, -1, -1],
+        [-1, -1, 1, -1], [1, -1, 1, -1], [1, 1, 1, -1], [-1, 1, 1, -1],
+        [-1, -1, -1, 1], [1, -1, -1, 1], [1, 1, -1, 1], [-1, 1, -1, 1],
+        [-1, -1, 1, 1], [1, -1, 1, 1], [1, 1, 1, 1], [-1, 1, 1, 1]
+    ];
+    
+    // Edges connecting vertices
+    const edges = [
+        // Inner cube
+        [0, 1], [1, 2], [2, 3], [3, 0],
+        [4, 5], [5, 6], [6, 7], [7, 4],
+        [0, 4], [1, 5], [2, 6], [3, 7],
+        // Outer cube
+        [8, 9], [9, 10], [10, 11], [11, 8],
+        [12, 13], [13, 14], [14, 15], [15, 12],
+        [8, 12], [9, 13], [10, 14], [11, 15],
+        // Connections between cubes
+        [0, 8], [1, 9], [2, 10], [3, 11],
+        [4, 12], [5, 13], [6, 14], [7, 15]
+    ];
+    
+    let angleXY = 0;
+    let angleZW = 0;
+    let angleXZ = 0;
+    
+    // Rotation matrices for 4D
+    function rotateXY(vertices, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return vertices.map(v => [
+            v[0] * cos - v[1] * sin,
+            v[0] * sin + v[1] * cos,
+            v[2], v[3]
+        ]);
+    }
+    
+    function rotateZW(vertices, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return vertices.map(v => [
+            v[0], v[1],
+            v[2] * cos - v[3] * sin,
+            v[2] * sin + v[3] * cos
+        ]);
+    }
+    
+    function rotateXZ(vertices, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return vertices.map(v => [
+            v[0] * cos - v[2] * sin,
+            v[1],
+            v[0] * sin + v[2] * cos,
+            v[3]
+        ]);
+    }
+    
+    // Project 4D to 3D then to 2D
+    function project4Dto2D(vertices) {
+        const distance3D = 3;
+        const distance2D = 2.5;
+        
+        // Project 4D to 3D
+        const vertices3D = vertices.map(v => {
+            const w = 1 / (distance3D - v[3]);
+            return [v[0] * w, v[1] * w, v[2] * w];
+        });
+        
+        // Project 3D to 2D
+        return vertices3D.map(v => {
+            const z = 1 / (distance2D - v[2]);
+            return [v[0] * z, v[1] * z];
+        });
+    }
+    
+    function drawHypercube() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Apply rotations
+        let rotated = rotateXY(vertices4D, angleXY);
+        rotated = rotateZW(rotated, angleZW);
+        rotated = rotateXZ(rotated, angleXZ);
+        
+        // Project to 2D
+        const projected = project4Dto2D(rotated);
+        
+        // Draw edges
+        const scale = 40;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        ctx.strokeStyle = 'rgba(0, 255, 166, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(0, 255, 166, 0.8)';
+        
+        edges.forEach(([i, j]) => {
+            ctx.beginPath();
+            ctx.moveTo(
+                centerX + projected[i][0] * scale,
+                centerY + projected[i][1] * scale
+            );
+            ctx.lineTo(
+                centerX + projected[j][0] * scale,
+                centerY + projected[j][1] * scale
+            );
+            ctx.stroke();
+        });
+        
+        // Draw vertices
+        ctx.fillStyle = 'rgba(0, 255, 166, 0.9)';
+        ctx.shadowBlur = 12;
+        projected.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(centerX + p[0] * scale, centerY + p[1] * scale, 2, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        // Update rotation angles
+        angleXY += 0.008;
+        angleZW += 0.005;
+        angleXZ += 0.006;
+    }
+    
+    // Start after intro animation
+    setTimeout(() => {
+        hypercubeContainer.classList.add('active');
+        
+        let animationId;
+        const animate = () => {
+            drawHypercube();
+            animationId = requestAnimationFrame(animate);
+        };
+        animate();
+        
+        // Cleanup on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationId);
+            } else {
+                animate();
+            }
+        });
+    }, 3000);
+    
+    // Cleanup on resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 800) {
+            hypercubeContainer.remove();
+        }
+    });
+}
+
+// Mobile Particle Effect - Lightweight floating particles
+function initMobileParticles() {
+    // Only run on mobile devices
+    if (window.innerWidth > 800) return;
+    
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+    
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'mobile-particles';
+    
+    // Create canvas for particles
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    particleContainer.appendChild(canvas);
+    document.body.appendChild(particleContainer);
+    
+    // Set canvas size
+    const setCanvasSize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+    setCanvasSize();
+    window.addEventListener('resize', setCanvasSize);
+    
+    // Particle class
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.3;
+            this.vy = (Math.random() - 0.5) * 0.3;
+            this.life = Math.random() * 100 + 100;
+            this.maxLife = this.life;
+            this.size = Math.random() * 2 + 0.5;
+        }
+        
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life--;
+            
+            // Wrap around edges
+            if (this.x < 0) this.x = canvas.width;
+            if (this.x > canvas.width) this.x = 0;
+            if (this.y < 0) this.y = canvas.height;
+            if (this.y > canvas.height) this.y = 0;
+            
+            if (this.life <= 0) {
+                this.reset();
+            }
+        }
+        
+        draw() {
+            const alpha = this.life / this.maxLife;
+            ctx.fillStyle = `rgba(0, 255, 166, ${alpha * 0.4})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add glow
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(0, 255, 166, 0.5)';
+        }
+    }
+    
+    // Create particles - keep it lightweight (30 particles)
+    const particles = [];
+    for (let i = 0; i < 30; i++) {
+        particles.push(new Particle());
+    }
+    
+    function drawParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+    }
+    
+    // Start after intro animation
+    setTimeout(() => {
+        particleContainer.classList.add('active');
+        
+        let animationId;
+        const animate = () => {
+            drawParticles();
+            animationId = requestAnimationFrame(animate);
+        };
+        animate();
+        
+        // Cleanup on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationId);
+            } else {
+                animate();
+            }
+        });
+    }, 3500);
+    
+    // Cleanup on resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 800) {
+            particleContainer.remove();
+        }
+    });
+}
+
