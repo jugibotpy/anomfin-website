@@ -38,6 +38,17 @@ if [ -f ".env.example" ]; then
     echo "  ✓ .env.example"
 fi
 
+# Copy documentation files
+echo "📚 Copying documentation..."
+if [ -f "ASENNUSOHJEET.md" ]; then
+    cp ASENNUSOHJEET.md "$TEMP_DIR/"
+    echo "  ✓ ASENNUSOHJEET.md (Finnish)"
+fi
+if [ -f "SIMPLE_INSTALL_GUIDE.md" ]; then
+    cp SIMPLE_INSTALL_GUIDE.md "$TEMP_DIR/"
+    echo "  ✓ SIMPLE_INSTALL_GUIDE.md"
+fi
+
 echo "📝 Creating installation documentation..."
 
 # Create comprehensive INSTALL.md

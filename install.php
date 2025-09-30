@@ -140,123 +140,343 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installationComplete) {
  * Create admin.php page for AI control and settings
  */
 function createAdminPage() {
-    $adminContent = file_get_contents(__DIR__ . '/admin_template.txt');
-    if ($adminContent === false) {
-        // If template doesn't exist, create basic admin page
-        $adminContent = '<?php
+    $adminContent = '<?php
 /**
  * AnomFIN Admin Panel
- * AI Control and Settings Management
+ * Viestien hallinta, AI-ohjaus ja etusivun asetukset
  */
 
 session_start();
-
-// Include configuration
 require_once __DIR__ . \'/connect.php\';
 
-// Simple authentication (change this password!)
-$adminPassword = "admin123"; // CHANGE THIS!
+// Yksinkertainen autentikointi (VAIHDA SALASANA!)
+$adminPassword = "admin123"; // VAIHDA TÄMÄ HETI!
 
+// Kirjautuminen
 if (!isset($_SESSION[\'admin_logged_in\'])) {
     if ($_SERVER[\'REQUEST_METHOD\'] === \'POST\' && isset($_POST[\'password\'])) {
         if ($_POST[\'password\'] === $adminPassword) {
             $_SESSION[\'admin_logged_in\'] = true;
+            header(\'Location: admin.php\');
+            exit;
         }
     }
+    ?>
+    <!DOCTYPE html>
+    <html lang="fi">
+    <head>
+        <meta charset="UTF-8">
+        <title>Kirjautuminen - AnomFIN Admin</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+        <style>
+            :root { --bg:#0b0f1a; --card:#11192a; --border:#1e2a3a; --accent:#62a1ff; --fg:#e6eef8; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: Inter, sans-serif; background: var(--bg); color: var(--fg); display: flex; justify-content: center; align-items: center; height: 100vh; }
+            .login { background: var(--card); padding: 40px; border-radius: 12px; border: 1px solid var(--border); min-width: 320px; }
+            h2 { margin-bottom: 24px; color: var(--accent); }
+            input { width: 100%; padding: 12px; margin: 10px 0; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--fg); font-size: 1rem; }
+            button { width: 100%; background: var(--accent); color: #08111f; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; margin-top: 10px; }
+            button:hover { opacity: 0.9; }
+        </style>
+    </head>
+    <body>
+        <div class="login">
+            <h2>🔐 Admin Kirjautuminen</h2>
+            <form method="POST">
+                <input type="password" name="password" placeholder="Salasana" required autofocus>
+                <button type="submit">Kirjaudu</button>
+            </form>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
+// Kirjaudu ulos
+if (isset($_GET[\'logout\'])) {
+    session_destroy();
+    header(\'Location: admin.php\');
+    exit;
+}
+
+// Luo viestit-taulu jos ei ole
+try {
+    $db = getDbConnection();
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS contact_messages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            company VARCHAR(255),
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            phone VARCHAR(50),
+            message TEXT NOT NULL,
+            status ENUM(\'new\', \'read\', \'replied\') DEFAULT \'new\',
+            admin_reply TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_status (status),
+            INDEX idx_created (created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
     
-    if (!isset($_SESSION[\'admin_logged_in\'])) {
-        ?>
-        <!DOCTYPE html>
-        <html lang="fi">
-        <head>
-            <meta charset="UTF-8">
-            <title>Admin - AnomFIN</title>
-            <style>
-                body { font-family: Arial; background: #0b0f1a; color: #e6eef8; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-                .login { background: #11192a; padding: 40px; border-radius: 12px; border: 1px solid #1e2a3a; }
-                input { padding: 10px; width: 100%; margin: 10px 0; background: #0b0f1a; border: 1px solid #1e2a3a; color: #e6eef8; }
-                button { background: #62a1ff; color: #08111f; padding: 10px 20px; border: none; cursor: pointer; font-weight: 600; }
-            </style>
-        </head>
-        <body>
-            <div class="login">
-                <h2>Admin Login</h2>
-                <form method="POST">
-                    <input type="password" name="password" placeholder="Password" required>
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-        </body>
-        </html>
-        <?php
-        exit;
+    // Luo asetukset-taulu
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS site_settings (
+            setting_key VARCHAR(100) PRIMARY KEY,
+            setting_value TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+} catch (Exception $e) {
+    // Jatka vaikka tauluja ei voida luoda
+}
+
+// Käsittele viestiin vastaaminen
+if ($_SERVER[\'REQUEST_METHOD\'] === \'POST\' && isset($_POST[\'reply_message\'])) {
+    $messageId = filter_input(INPUT_POST, \'message_id\', FILTER_VALIDATE_INT);
+    $reply = $_POST[\'reply_text\'] ?? \'\';
+    
+    if ($messageId && !empty($reply)) {
+        $stmt = $db->prepare("UPDATE contact_messages SET admin_reply = ?, status = \'replied\', updated_at = NOW() WHERE id = ?");
+        $stmt->execute([$reply, $messageId]);
     }
 }
 
-// Admin is logged in
+// Hae viestit
+$messages = [];
+try {
+    $stmt = $db->query("SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 50");
+    $messages = $stmt->fetchAll();
+} catch (Exception $e) {
+    // Ei viestejä
+}
+
+// Hae/tallenna etusivun asetukset
+$siteSettings = [
+    \'site_title\' => \'AnomFIN\',
+    \'site_description\' => \'Kyberturva ja sovelluskehitys\',
+    \'contact_email\' => \'info@anomfin.fi\',
+    \'telegram_enabled\' => \'0\'
+];
+
+if ($_SERVER[\'REQUEST_METHOD\'] === \'POST\' && isset($_POST[\'save_settings\'])) {
+    foreach ([\'site_title\', \'site_description\', \'contact_email\', \'telegram_enabled\'] as $key) {
+        if (isset($_POST[$key])) {
+            $stmt = $db->prepare("REPLACE INTO site_settings (setting_key, setting_value) VALUES (?, ?)");
+            $stmt->execute([$key, $_POST[$key]]);
+            $siteSettings[$key] = $_POST[$key];
+        }
+    }
+}
+
+try {
+    $stmt = $db->query("SELECT setting_key, setting_value FROM site_settings");
+    while ($row = $stmt->fetch()) {
+        $siteSettings[$row[\'setting_key\']] = $row[\'setting_value\'];
+    }
+} catch (Exception $e) {
+    // Käytä oletusarvoja
+}
 ?>
 <!DOCTYPE html>
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - AnomFIN</title>
+    <title>Admin Paneeli - AnomFIN</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --fg:#e6eef8; --bg:#0b0f1a; --card:#11192a; --border:#1e2a3a; --accent:#62a1ff; --success:#00ffa6; }
+        :root { --fg:#e6eef8; --bg:#0b0f1a; --card:#11192a; --border:#1e2a3a; --accent:#62a1ff; --success:#00ffa6; --warning:#ffaa00; --error:#ff4444; --muted:#9fb3c8; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { margin-bottom: 30px; background: linear-gradient(135deg, var(--accent), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        body { background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; padding: 20px; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { margin-bottom: 30px; font-size: 2rem; background: linear-gradient(135deg, var(--accent), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-        .card h2 { color: var(--accent); margin-bottom: 16px; }
-        button, a.btn { background: var(--accent); color: #08111f; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; margin: 5px; }
+        .card h2 { color: var(--accent); margin-bottom: 16px; font-size: 1.3rem; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+        .tab { padding: 12px 24px; cursor: pointer; background: none; border: none; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .tab:hover { color: var(--fg); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        button, a.btn { background: var(--accent); color: #08111f; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; margin: 5px 5px 5px 0; font-size: 0.95rem; }
         button:hover, a.btn:hover { opacity: 0.9; }
-        .danger { background: #ff4444; color: white; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media(max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        .btn-small { padding: 6px 12px; font-size: 0.85rem; }
+        .danger { background: var(--error); color: white; }
+        .success { background: var(--success); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .message-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+        .message-item.new { border-left: 4px solid var(--warning); }
+        .message-item.replied { border-left: 4px solid var(--success); }
+        .message-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .message-meta { color: var(--muted); font-size: 0.85rem; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .badge.new { background: var(--warning); color: #000; }
+        .badge.replied { background: var(--success); color: #000; }
+        .badge.read { background: var(--muted); color: #000; }
+        textarea { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--fg); font-family: inherit; resize: vertical; min-height: 100px; }
+        input[type="text"], input[type="email"] { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--fg); font-family: inherit; margin: 8px 0; }
+        label { display: block; margin-top: 12px; font-weight: 500; }
+        .form-group { margin-bottom: 16px; }
+        .info-box { background: rgba(98, 161, 255, 0.1); border: 1px solid var(--accent); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        .warning-box { background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); border-radius: 8px; padding: 16px; margin-bottom: 16px; color: var(--warning); }
+        .telegram-placeholder { background: rgba(98, 161, 255, 0.05); border: 2px dashed var(--accent); border-radius: 8px; padding: 32px; text-align: center; color: var(--muted); }
+        @media(max-width: 768px) { .grid { grid-template-columns: 1fr; } .tabs { flex-wrap: wrap; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎛️ AnomFIN Admin Panel</h1>
-        
-        <div class="grid">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1>🎛️ AnomFIN Admin</h1>
+            <a href="?logout=1" class="btn danger btn-small">Kirjaudu ulos</a>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(\'messages\')">📧 Viestit <?php if (count(array_filter($messages, fn($m) => $m[\'status\'] === \'new\')) > 0) echo \'(\' . count(array_filter($messages, fn($m) => $m[\'status\'] === \'new\')) . \')\'; ?></button>
+            <button class="tab" onclick="switchTab(\'ai\')">🤖 AI-ohjaus</button>
+            <button class="tab" onclick="switchTab(\'settings\')">⚙️ Etusivun asetukset</button>
+            <button class="tab" onclick="switchTab(\'telegram\')">📱 Telegram</button>
+            <button class="tab" onclick="switchTab(\'system\')">🔧 Järjestelmä</button>
+        </div>
+
+        <div id="tab-messages" class="tab-content active">
             <div class="card">
-                <h2>AI Control</h2>
-                <p style="color: #9fb3c8; margin-bottom: 16px;">Manage AI service and queries</p>
-                <a href="ai_connect.php" class="btn">Open AI Interface</a>
-            </div>
-            
-            <div class="card">
-                <h2>System Settings</h2>
-                <p style="color: #9fb3c8; margin-bottom: 16px;">Configuration and maintenance</p>
-                <a href="test_backend.php" class="btn">System Test</a>
+                <h2>Yhteydenottolomakkeen viestit</h2>
+                <?php if (empty($messages)): ?>
+                    <p style="color: var(--muted);">Ei viestejä vielä. Viestit tallentuvat tähän kun joku täyttää yhteydenottolomakkeen.</p>
+                <?php else: ?>
+                    <?php foreach ($messages as $msg): ?>
+                        <div class="message-item <?php echo $msg[\'status\']; ?>">
+                            <div class="message-header">
+                                <div>
+                                    <strong><?php echo htmlspecialchars($msg[\'name\']); ?></strong>
+                                    <?php if ($msg[\'company\']): ?>
+                                        <span style="color: var(--muted);"> - <?php echo htmlspecialchars($msg[\'company\']); ?></span>
+                                    <?php endif; ?>
+                                    <span class="badge <?php echo $msg[\'status\']; ?>"><?php echo [\'new\'=>\'Uusi\',\'read\'=>\'Luettu\',\'replied\'=>\'Vastattu\'][$msg[\'status\']]; ?></span>
+                                </div>
+                                <div class="message-meta"><?php echo date(\'d.m.Y H:i\', strtotime($msg[\'created_at\'])); ?></div>
+                            </div>
+                            <div class="message-meta" style="margin-bottom: 8px;">
+                                📧 <?php echo htmlspecialchars($msg[\'email\']); ?>
+                                <?php if ($msg[\'phone\']): ?>
+                                    | 📞 <?php echo htmlspecialchars($msg[\'phone\']); ?>
+                                <?php endif; ?>
+                            </div>
+                            <p style="margin-bottom: 12px;"><strong>Viesti:</strong><br><?php echo nl2br(htmlspecialchars($msg[\'message\'])); ?></p>
+                            <?php if ($msg[\'admin_reply\']): ?>
+                                <div style="background: rgba(0, 255, 166, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid var(--success); margin-top: 12px;">
+                                    <strong>Sinun vastauksesi:</strong><br>
+                                    <?php echo nl2br(htmlspecialchars($msg[\'admin_reply\'])); ?>
+                                </div>
+                            <?php else: ?>
+                                <form method="POST" style="margin-top: 12px;">
+                                    <input type="hidden" name="message_id" value="<?php echo $msg[\'id\']; ?>">
+                                    <textarea name="reply_text" placeholder="Kirjoita vastauksesi tähän..." required></textarea>
+                                    <button type="submit" name="reply_message" class="success btn-small">Lähetä vastaus</button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
-        
-        <div class="card">
-            <h2>Quick Actions</h2>
-            <a href="index.html" class="btn">View Website</a>
-            <a href="?logout=1" class="btn danger">Logout</a>
+
+        <div id="tab-ai" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>AI-yhteys</h2>
+                    <p style="color: var(--muted); margin-bottom: 16px;">Hallitse ChatGPT/OpenAI yhteyttä</p>
+                    <a href="ai_connect.php" class="btn">Avaa AI-käyttöliittymä</a>
+                    <p style="color: var(--muted); font-size: 0.85rem; margin-top: 12px;">
+                        AI-avain: <?php echo getenv(\'AI_API_KEY\') ? \'✓ Määritetty\' : \'✗ Ei määritetty\'; ?>
+                    </p>
+                </div>
+                <div class="card">
+                    <h2>AI-kyselyt</h2>
+                    <p style="color: var(--muted); margin-bottom: 16px;">Testaa ja tarkastele AI-kyselyitä</p>
+                    <a href="ai_connect.php?action=history" class="btn">Kyselyhistoria</a>
+                </div>
+            </div>
         </div>
-        
-        <div class="card">
-            <h2>Installation Info</h2>
-            <p style="color: #9fb3c8;">Database: <?php echo getenv(\'DB_NAME\') ?: \'Not configured\'; ?></p>
-            <p style="color: #9fb3c8;">AI Service: <?php echo getenv(\'AI_API_KEY\') ? \'Configured\' : \'Not configured\'; ?></p>
+
+        <div id="tab-settings" class="tab-content">
+            <div class="card">
+                <h2>Etusivun asetukset</h2>
+                <form method="POST">
+                    <div class="form-group">
+                        <label>Sivuston otsikko</label>
+                        <input type="text" name="site_title" value="<?php echo htmlspecialchars($siteSettings[\'site_title\']); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sivuston kuvaus</label>
+                        <input type="text" name="site_description" value="<?php echo htmlspecialchars($siteSettings[\'site_description\']); ?>">
+                    </div>
+                    <div class="form-group">
+                        <label>Yhteyssähköposti</label>
+                        <input type="email" name="contact_email" value="<?php echo htmlspecialchars($siteSettings[\'contact_email\']); ?>" required>
+                    </div>
+                    <button type="submit" name="save_settings" class="success">Tallenna asetukset</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="tab-telegram" class="tab-content">
+            <div class="card">
+                <h2>Telegram-integraatio</h2>
+                <div class="info-box">
+                    <strong>🚀 Tuleva ominaisuus!</strong><br>
+                    Telegram-integraatio on kehityksessä ja julkaistaan pian.
+                </div>
+                <div class="telegram-placeholder">
+                    <div style="font-size: 4rem; margin-bottom: 16px;">📱</div>
+                    <h3 style="color: var(--fg); margin-bottom: 12px;">Telegram-ilmoitukset tulossa!</h3>
+                    <p>Saat kaikki yhteydenotot suoraan Telegram-botista puhelimeesi.<br>Voit myös vastata viesteihin suoraan Telegramista.</p>
+                    <p style="margin-top: 16px; color: var(--muted); font-size: 0.85rem;">Ominaisuudet: Välittömät ilmoitukset • Vastaaminen • Työaika-asetukset • Hiljaiset tunnit</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-system" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2>Järjestelmätiedot</h2>
+                    <p style="color: var(--muted);">Tietokanta: <strong style="color: var(--fg);"><?php echo getenv(\'DB_NAME\') ?: \'Ei määritetty\'; ?></strong></p>
+                    <p style="color: var(--muted);">AI-palvelu: <strong style="color: var(--fg);"><?php echo getenv(\'AI_API_KEY\') ? \'Käytössä\' : \'Ei käytössä\'; ?></strong></p>
+                    <p style="color: var(--muted);">PHP-versio: <strong style="color: var(--fg);"><?php echo phpversion(); ?></strong></p>
+                </div>
+                <div class="card">
+                    <h2>Työkalut</h2>
+                    <a href="test_backend.php" class="btn">Järjestelmätesti</a>
+                    <a href="index.html" class="btn">Näytä etusivu</a>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Turvallisuus</h2>
+                <div class="warning-box">
+                    <strong>⚠️ Muista vaihtaa salasana!</strong><br>
+                    Oletussalasana "admin123" tulee vaihtaa heti. Muokkaa tiedostoa <code>admin.php</code> ja etsi rivi <code>$adminPassword</code>.
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Piilota kaikki välilehdet
+            document.querySelectorAll(\'.tab-content\').forEach(el => el.classList.remove(\'active\'));
+            document.querySelectorAll(\'.tab\').forEach(el => el.classList.remove(\'active\'));
+            
+            // Näytä valittu välilehti
+            document.getElementById(\'tab-\' + tabName).classList.add(\'active\');
+            event.target.classList.add(\'active\');
+        }
+    </script>
 </body>
 </html>
 <?php
-if (isset($_GET[\'logout\'])) {
-    session_destroy();
-    header(\'Location: admin.php\');
-    exit;
-}
 ?>';
-    }
     
     file_put_contents(__DIR__ . '/admin.php', $adminContent);
     @chmod(__DIR__ . '/admin.php', 0644);
