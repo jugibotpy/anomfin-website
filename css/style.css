@@ -1529,6 +1529,76 @@ textarea {
     will-change: transform, opacity;
 }
 
+/* Left-edge floating green box with cyclops eye effect */
+.left-edge-box {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 220px;
+    height: 280px;
+    background: linear-gradient(135deg, rgba(0, 255, 150, 0.22) 0%, rgba(0, 255, 150, 0.12) 100%);
+    border: 2px solid rgba(0, 255, 150, 0.35);
+    border-left: none;
+    border-top-right-radius: 24px;
+    border-bottom-right-radius: 24px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 50px rgba(0, 255, 150, 0.3), 
+                inset 0 0 40px rgba(0, 255, 150, 0.08);
+    pointer-events: none;
+    z-index: 998;
+    will-change: transform;
+    transition: box-shadow 0.4s ease;
+}
+
+/* Cyclops eye mask effect - creates transparency when over text */
+.left-edge-mask {
+    position: absolute;
+    inset: 0;
+    background-image: url('../assets/logo.png');
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    mix-blend-mode: screen;
+    opacity: 0.15;
+    mask-image: url('../assets/logo.png');
+    mask-size: 70%;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: url('../assets/logo.png');
+    -webkit-mask-size: 70%;
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+}
+
+/* When left-edge box overlaps text, increase transparency */
+.left-edge-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, 
+                                rgba(0, 255, 150, 0.25) 0%, 
+                                transparent 60%);
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+    border-radius: inherit;
+}
+
+/* Pulse animation for the left box */
+@keyframes leftBoxPulse {
+    0%, 100% {
+        box-shadow: 0 0 40px rgba(0, 255, 150, 0.3), 
+                    inset 0 0 40px rgba(0, 255, 150, 0.08);
+    }
+    50% {
+        box-shadow: 0 0 60px rgba(0, 255, 150, 0.45), 
+                    inset 0 0 50px rgba(0, 255, 150, 0.12);
+    }
+}
+
+.left-edge-box {
+    animation: leftBoxPulse 4s ease-in-out infinite;
+}
+
 /* Applications Section */
 .applications {
     background: linear-gradient(135deg, rgba(0, 12, 24, 0.8) 0%, rgba(6, 7, 10, 0.95) 100%);
