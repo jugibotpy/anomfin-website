@@ -949,13 +949,19 @@ function activateRectangle() {
     const rectangle = document.querySelector('.hero-grid');
     if (!rectangle || matrixAnimationActive) return;
 
-    // Add activation visual cue
-    rectangle.classList.add('rectangle-activated');
+    // Add logo blending class first
+    rectangle.classList.add('logo-entering');
     
-    // Trigger matrix animation after a short delay
+    // After logo blends in, activate terminal and start matrix animation
     setTimeout(() => {
-        launchMatrixAnimation(rectangle);
-    }, 300);
+        rectangle.classList.remove('logo-entering');
+        rectangle.classList.add('logo-blended', 'rectangle-activated');
+        
+        // Trigger matrix animation after logo is blended
+        setTimeout(() => {
+            launchMatrixAnimation(rectangle);
+        }, 300);
+    }, 1000); // Wait for logo blend animation to complete
 }
 
 function launchMatrixAnimation(fromElement) {
@@ -992,13 +998,18 @@ function launchMatrixAnimation(fromElement) {
         streams.push(stream);
     }
 
-    // Remove animation after completion
+    // After the burst animation, start continuous matrix rain inside terminal
+    setTimeout(() => {
+        startContinuousMatrixRain(fromElement);
+    }, 2000);
+
+    // Remove burst animation after completion
     setTimeout(() => {
         matrixContainer.remove();
         matrixAnimationActive = false;
         
-        // Remove activation class from rectangle
-        fromElement.classList.remove('rectangle-activated');
+        // Keep logo blended and activation classes
+        // Don't remove rectangle-activated to keep the glow
     }, 4000);
 }
 
@@ -1082,6 +1093,90 @@ function createMatrixStream(originX, originY, index) {
     }
 
     return stream;
+}
+
+// Continuous matrix rain inside terminal after activation
+function startContinuousMatrixRain(terminal) {
+    // Check if already has matrix rain
+    if (terminal.querySelector('.terminal-matrix-canvas')) return;
+    
+    // Create canvas for matrix rain
+    const canvas = document.createElement('canvas');
+    canvas.className = 'terminal-matrix-canvas';
+    canvas.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2;
+    `;
+    
+    terminal.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    const rect = terminal.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
+    // Matrix characters
+    const chars = 'ANOMFIN01011010CYBER01101HYPERFLUX010101'.split('');
+    const fontSize = 12;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+    
+    const drawMatrix = () => {
+        // Semi-transparent black to create fade effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#00ffa6';
+        ctx.font = `${fontSize}px monospace`;
+        
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+            
+            // Add glow effect to some characters
+            if (Math.random() > 0.95) {
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#00ffa6';
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.fillText(text, x, y);
+            
+            // Reset drop to top randomly or continue falling
+            if (y > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    };
+    
+    // Run matrix animation at ~20fps for performance
+    let matrixInterval = setInterval(drawMatrix, 50);
+    
+    // Pause matrix when page is hidden to save resources
+    const visibilityHandler = () => {
+        if (document.hidden) {
+            clearInterval(matrixInterval);
+        } else {
+            matrixInterval = setInterval(drawMatrix, 50);
+        }
+    };
+    
+    document.addEventListener('visibilitychange', visibilityHandler);
+    
+    // Cleanup function (optional - can be used to stop the animation later)
+    terminal._stopMatrixRain = () => {
+        clearInterval(matrixInterval);
+        document.removeEventListener('visibilitychange', visibilityHandler);
+        canvas.remove();
+    };
 }
 
 // Left-edge floating green box with cyclops eye effect
