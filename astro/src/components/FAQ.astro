@@ -1,0 +1,16 @@
+---
+type QA = { q: string; a: string };
+const { faq = [] }: { faq: QA[] } = Astro.props;
+---
+<section>
+  <h2>UKK</h2>
+  <div class="grid">
+    {faq.map((i) => (
+      <article class="card">
+        <h3>{i.q}</h3>
+        <p class="muted">{i.a}</p>
+      </article>
+    ))}
+  </div>
+</section>
+

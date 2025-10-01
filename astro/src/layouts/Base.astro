@@ -1,0 +1,95 @@
+---
+import site from "../content/site.json";
+const { title = 'AnomFIN', description = 'Yksilöllinen sovelluskehitys & kyberturva' } = Astro.props;
+
+const orgUrl = 'https://anomfin.fi';
+const logoUrl = '/assets/logo.png';
+const organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: site.brand.name,
+  url: orgUrl,
+  logo: logoUrl,
+  email: site.brand.email,
+  contactPoint: [{
+    "@type": "ContactPoint",
+    email: site.brand.socEmail,
+    contactType: "customer support",
+    availableLanguage: ["fi"]
+  }]
+};
+const website = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: site.brand.name,
+  url: orgUrl
+};
+const priceNum = (s) => ((s || '').match(/\d+/g) || []).join('');
+const products = site.pricing.map(p => ({
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: p.name,
+  category: "SoftwareSubscription",
+  offers: {
+    "@type": "Offer",
+    price: priceNum(p.price),
+    priceCurrency: "EUR",
+    availability: "https://schema.org/InStock",
+    priceSpecification: {
+      "@type": "UnitPriceSpecification",
+      price: priceNum(p.price),
+      priceCurrency: "EUR",
+      unitText: "MONTH"
+    }
+  }
+}));
+const faq = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: site.faq.map(q => ({
+    "@type": "Question",
+    name: q.q,
+    acceptedAnswer: { "@type": "Answer", text: q.a }
+  }))
+};
+const schema = [organization, website, ...products, faq];
+---
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="language" content="fi" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0b0f1a" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/assets/image2vector.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/assets/logo.png">
+    <link rel="canonical" href={orgUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.brand.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={orgUrl} />
+    <meta property="og:image" content={`${orgUrl}/assets/image2vector.svg`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${orgUrl}/assets/image2vector.svg`} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Siirry sisältöön</a>
+    <div class="intro-overlay" aria-hidden="true">
+      <div class="blackout"></div>
+      <img src="/assets/logo.png" alt="" class="intro-logo neon-logo" width="320" height="320" decoding="async" fetchpriority="high" />
+    </div>
+    <slot />
+    <script type="application/ld+json">{JSON.stringify(schema)}</script>
+    <script src="/js/script.js" defer></script>
+  </body>
+</html>

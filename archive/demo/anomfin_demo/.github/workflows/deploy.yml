@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "main", "feat/astro-onepager" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Kun siirryt Astro/Nextiin, ota nämä rivit käyttöön ja rakenna dist-kansio:
+      # If you later switch to Astro/Next build, install Node and build here.
       # - name: Setup Node
       #   uses: actions/setup-node@v4
       #   with:
@@ -32,7 +32,6 @@ jobs:
       #   with:
       #     path: ./dist
 
-      # Staattinen demo nyt: julkaise repo sellaisenaan
       - name: Upload static site (no build)
         uses: actions/upload-pages-artifact@v3
         with:

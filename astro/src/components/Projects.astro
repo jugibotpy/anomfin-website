@@ -1,0 +1,22 @@
+---
+type Project = { name: string; desc: string; link?: string; tags?: string[] };
+const { projects = [] }: { projects: Project[] } = Astro.props;
+---
+<section id="projects" class="section section-block accent-blue">
+  <div class="container">
+    <p class="eyebrow">Julkaistut</p>
+    <h2 class="section-title title-led">Julkaistut sovellukset</h2>
+    <p class="section-sub">Osa viimeaikaisista toteutuksista. Voimme lisätä caset ja linkit.</p>
+    <div class="services-grid">
+      {projects.map((p) => (
+        <article class="service-card">
+          <h3>{p.name}</h3>
+          <p class="muted">{p.desc}</p>
+          {p.tags && <p class="muted">{p.tags.join(' • ')}</p>}
+          {p.link && <p><a class="btn btn-secondary" href={p.link}>Lue lisää</a></p>}
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+

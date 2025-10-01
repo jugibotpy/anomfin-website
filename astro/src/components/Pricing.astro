@@ -1,0 +1,32 @@
+---
+const { pricing, faq } = Astro.props.site;
+---
+<section id="pricing" class="section-block pricing" data-section="pricing">
+  <div class="container">
+    <div class="section-header">
+      <p class="eyebrow">Palvelupaketit</p>
+      <h2 class="section-title">Hinnoittelu</h2>
+    </div>
+    <div class="pricing-grid">
+      {pricing?.map((p) => (
+        <article class="price-card">
+          {p.badge && <div class="badge">{p.badge}</div>}
+          <h3>{p.name}</h3>
+          <p class="price">{p.price}</p>
+          <ul>
+            {p.features?.map((f) => <li set:html={f.replace('SLA', '<strong>SLA</strong>')} />)}
+          </ul>
+        </article>
+      ))}
+    </div>
+    <div class="faq" aria-label="Usein kysytyt kysymykset">
+      {faq?.map((item) => (
+        <details>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+

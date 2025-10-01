@@ -1,0 +1,17 @@
+---
+const { platforms } = Astro.props.site;
+---
+<section id="platforms" class="section-block platforms" data-section="platforms">
+  <div class="container">
+    <div class="section-header">
+      <p class="eyebrow">Julkaisut kaikille päätelaitteille</p>
+      <h2 class="section-title">Alustat</h2>
+    </div>
+    <div class="platforms-grid" role="list">
+      {platforms?.map((p) => (
+        <div class="platform-chip" role="listitem">{p}</div>
+      ))}
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,22 @@
+---
+const { security } = Astro.props.site;
+---
+<section id="security" class="section-block security" data-section="security">
+  <div class="container">
+    <div class="security-inner">
+      <div class="security-content">
+        <p class="eyebrow">Kyberturva sisäänrakennettuna</p>
+        <h2 class="section-title">Kyberturva</h2>
+        <ul class="checks">
+          {security?.points?.map((t) => <li>{t}</li>)}
+        </ul>
+      </div>
+      <aside class="security-cta">
+        <h3>PoC viikoissa</h3>
+        <p>Rakennamme pienen, todennettavan kokeilun nopeasti ja viemme tuotantoon turvallisesti.</p>
+        <a href="#contact" class="btn btn-secondary">Pyydä demo</a>
+      </aside>
+    </div>
+  </div>
+</section>
+

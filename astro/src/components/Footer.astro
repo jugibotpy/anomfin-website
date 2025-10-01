@@ -1,0 +1,36 @@
+---
+const site = Astro.props.site;
+---
+<footer class="footer">
+  <div class="container footer-content">
+    <div class="footer-brand">
+      <img src="/assets/image2vector.svg" width="22" height="22" alt="" />
+      <div>
+        <strong>{site.brand.name}</strong>
+        <p>Rakennamme turvallisia sovelluksia kaikille alustoille.</p>
+      </div>
+    </div>
+    <div class="footer-links">
+      <div>
+        <h4>Pikalinkit</h4>
+        <ul>
+          <li><a href="#services">Palvelut</a></li>
+          <li><a href="#security">Kyberturva</a></li>
+          <li><a href="#pricing">Hinnoittelu</a></li>
+          <li><a href="#contact">Yhteys</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Resurssit</h4>
+        <ul>
+          <li><a href="#privacy">Tietosuoja</a></li>
+          <li><a href="#terms">Ehdot</a></li>
+          <li><a href={`mailto:${site.brand.socEmail}`}>SOC 24/7</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 {site.brand.name} · Rakennettu AnomTools-tiimin kanssa</p>
+  </div>
+</footer>
