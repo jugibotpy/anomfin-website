@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initLeftEdgeBox(); // Add left-edge floating box
     initMobileVisualEnhancements(); // Add mobile visual enhancements
     initMobileHyperCubeTrigger(); // Add mobile hypercube trigger
+    initMobileHypercube(); // Add GitHub hypercube effect
+    initMobileParticles(); // Add particle effect
+
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -355,19 +358,41 @@ function initScrollCompanion() {
     const sections = Array.from(document.querySelectorAll('section[id]'));
     if (!sections.length) return;
 
+    // Detect if mobile device
+    const isMobile = window.innerWidth <= 800;
+
     const companion = document.createElement('aside');
     companion.className = 'scroll-companion';
-    companion.setAttribute('aria-label', 'AnomFIN | AnomTools vierityshyperkuutio');
+    if (isMobile) {
+        companion.classList.add('mobile-softamme');
+    }
+    companion.setAttribute('aria-label', isMobile ? 'AnomFIN | Softamme' : 'AnomFIN | AnomTools vierityshyperkuutio');
+    
+    // Different content for mobile vs desktop
+    const headerContent = isMobile ? `
+        <div class="companion-logo">
+            <span class="companion-logo-main">AnomFIN</span>
+            <span class="companion-logo-sub">Softamme</span>
+        </div>
+        <span class="companion-spark">Open Source</span>
+    ` : `
+        <div class="companion-logo">
+            <span class="companion-logo-main">AnomFIN</span>
+            <span class="companion-logo-sub">24/7 CHAT</span>
+        </div>
+        <span class="companion-spark">Scroll Sync</span>
+    `;
+    
+    const quoteContent = isMobile ? 
+        'Avoin lähdekoodi, vahva yhteisö. AnomFIN, AnomTools, Jugi-ekosysteemi – Kali Linux ja Ubuntu v22.04 tukevat kehitystyötä.' : 
+        'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.';
+    
     companion.innerHTML = `
         <div class="companion-core">
             <div class="companion-header">
-                <div class="companion-logo">
-                    <span class="companion-logo-main">AnomFIN</span>
-                    <span class="companion-logo-sub">AnomTools HyperCube</span>
-                </div>
-                <span class="companion-spark">Scroll Sync</span>
+                ${headerContent}
             </div>
-            <p class="companion-quote">Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.</p>
+            <p class="companion-quote">${quoteContent}</p>
             <div class="companion-progress" role="status" aria-live="polite">
                 <svg viewBox="0 0 120 120" class="companion-progress-ring" aria-hidden="true">
                     <defs>
@@ -426,7 +451,15 @@ function initScrollCompanion() {
         contact: 'Yhteys'
     };
 
-    const sparkMap = {
+    const sparkMap = isMobile ? {
+        home: 'Open Source',
+        services: 'AnomTools',
+        platforms: 'Jugi Ecosystem',
+        applications: 'GitHub Portfolio',
+        security: 'JugiBot',
+        pricing: 'Teboil',
+        contact: 'Ubuntu v22.04'
+    } : {
         home: 'HyperLaunch',
         services: 'Build Sprint',
         platforms: 'Omni Deploy',
@@ -437,7 +470,15 @@ function initScrollCompanion() {
         contact: 'Yhteys valmis'
     };
 
-    const quoteMap = {
+    const quoteMap = isMobile ? {
+        home: 'Avoin lähdekoodi, vahva yhteisö. AnomFIN, AnomTools, Jugi-ekosysteemi – Kali Linux ja Ubuntu v22.04 tukevat kehitystyötä.',
+        services: 'AnomTools: työkalupaketti tehokkaaseen kehitykseen ja kyberturva-analyysiin.',
+        platforms: 'JugiTube, JugiBot, JugiTools – Suomalaista avointa teknologiaa kaikille.',
+        applications: 'GitHub-projektimme ovat avoimia kaikille. Tutki, opi ja osallistu!',
+        security: 'JugiBot ja automatisoidut työkalut varmistavat jatkuvan kyberturvatason.',
+        pricing: 'Kali Linux ja Ubuntu v22.04 – luotettavat alustat kaikkeen kehitykseen.',
+        contact: 'Teboil-vahvuus ja tehokkuus – turvallinen matka tulevaisuuteen.'
+    } : {
         home: 'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.',
         services: 'Sprinttaa MVP tuotantoon – AnomTools valvoo laatua ja turvaa.',
         platforms: 'Julkaisemme yhdellä koodipohjalla kaikkiin päätelaitteisiin.',
@@ -600,6 +641,36 @@ function initScrollCompanion() {
             rafId = requestAnimationFrame(animate);
         }
     });
+    
+    // Add mobile trigger button for Softamme on mobile devices
+    if (isMobile) {
+        const triggerButton = document.createElement('button');
+        triggerButton.className = 'softamme-trigger';
+        triggerButton.innerHTML = '✨';
+        triggerButton.setAttribute('aria-label', 'Toggle Softamme');
+        triggerButton.setAttribute('title', 'Open/Close Softamme');
+        
+        let isActive = false;
+        
+        triggerButton.addEventListener('click', () => {
+            isActive = !isActive;
+            companion.classList.toggle('softamme-active', isActive);
+            triggerButton.classList.toggle('active', isActive);
+            triggerButton.innerHTML = isActive ? '✕' : '✨';
+            
+            // Position Softamme in center when activated
+            if (isActive) {
+                const width = companion.offsetWidth || 280;
+                const height = companion.offsetHeight || 260;
+                const centerX = (window.innerWidth - width) / 2;
+                const centerY = (window.innerHeight - height) / 2;
+                companion.style.setProperty('--softamme-x', `${centerX}px`);
+                companion.style.setProperty('--softamme-y', `${centerY}px`);
+            }
+        });
+        
+        document.body.appendChild(triggerButton);
+    }
 }
 
 // Floating grid that follows scroll with smoothing and reacts to sections
@@ -642,10 +713,21 @@ function initScrollCompanion() {
     const columns = Math.floor(matrixCanvas.width / fontSize);
     const drops = Array(columns).fill(1);
     
+    let matrixActive = false; // Start dormant
+    let matrixOpacity = 0; // Start with 0 opacity for smooth transition
+    
     const drawMatrix = () => {
+        if (!matrixActive) return; // Don't draw if dormant
+        
         // Semi-transparent black to create fade effect
         ctx.fillStyle = 'rgba(6, 7, 10, 0.08)';
         ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        
+        // Gradually increase opacity when active
+        if (matrixOpacity < 0.5) {
+            matrixOpacity = Math.min(0.5, matrixOpacity + 0.02);
+            matrixCanvas.style.opacity = matrixOpacity;
+        }
         
         ctx.fillStyle = '#00ffa6';
         ctx.font = `${fontSize}px monospace`;
@@ -673,6 +755,29 @@ function initScrollCompanion() {
         }
     };
     
+    // Set initial canvas opacity to 0 (dormant state)
+    matrixCanvas.style.opacity = '0';
+    
+    // Function to activate matrix rain
+    const activateMatrix = () => {
+        if (!matrixActive) {
+            matrixActive = true;
+            fg.classList.add('matrix-active');
+        }
+    };
+    
+    // Function to deactivate matrix rain
+    const deactivateMatrix = () => {
+        if (matrixActive) {
+            matrixActive = false;
+            matrixOpacity = 0;
+            matrixCanvas.style.opacity = '0';
+            fg.classList.remove('matrix-active');
+            // Clear the canvas
+            ctx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        }
+    };
+    
     // Run matrix animation at ~20fps for performance
     let matrixInterval = setInterval(drawMatrix, 50);
     
@@ -684,6 +789,39 @@ function initScrollCompanion() {
             matrixInterval = setInterval(drawMatrix, 50);
         }
     });
+    
+    // Intersection detection between left-edge-box and floating-grid
+    const checkIntersection = () => {
+        const leftBox = document.querySelector('.left-edge-box');
+        if (!leftBox) {
+            requestAnimationFrame(checkIntersection);
+            return;
+        }
+        
+        const leftBoxRect = leftBox.getBoundingClientRect();
+        const fgRect = fg.getBoundingClientRect();
+        
+        // Check if boxes intersect
+        const intersects = !(leftBoxRect.right < fgRect.left || 
+                           leftBoxRect.left > fgRect.right || 
+                           leftBoxRect.bottom < fgRect.top || 
+                           leftBoxRect.top > fgRect.bottom);
+        
+        if (intersects) {
+            activateMatrix();
+            leftBox.classList.add('mask-in-terminal');
+        } else {
+            deactivateMatrix();
+            leftBox.classList.remove('mask-in-terminal');
+        }
+        
+        requestAnimationFrame(checkIntersection);
+    };
+    
+    // Start intersection detection after a short delay to ensure left-edge-box is created
+    setTimeout(() => {
+        requestAnimationFrame(checkIntersection);
+    }, 500);
     
     const loop = ()=>{
       const t = 0.12; // smoothing
@@ -885,13 +1023,19 @@ function activateRectangle() {
     const rectangle = document.querySelector('.hero-grid');
     if (!rectangle || matrixAnimationActive) return;
 
-    // Add activation visual cue
-    rectangle.classList.add('rectangle-activated');
+    // Add logo blending class first
+    rectangle.classList.add('logo-entering');
     
-    // Trigger matrix animation after a short delay
+    // After logo blends in, activate terminal and start matrix animation
     setTimeout(() => {
-        launchMatrixAnimation(rectangle);
-    }, 300);
+        rectangle.classList.remove('logo-entering');
+        rectangle.classList.add('logo-blended', 'rectangle-activated');
+        
+        // Trigger matrix animation after logo is blended
+        setTimeout(() => {
+            launchMatrixAnimation(rectangle);
+        }, 300);
+    }, 1000); // Wait for logo blend animation to complete
 }
 
 function launchMatrixAnimation(fromElement) {
@@ -928,13 +1072,18 @@ function launchMatrixAnimation(fromElement) {
         streams.push(stream);
     }
 
-    // Remove animation after completion
+    // After the burst animation, start continuous matrix rain inside terminal
+    setTimeout(() => {
+        startContinuousMatrixRain(fromElement);
+    }, 2000);
+
+    // Remove burst animation after completion
     setTimeout(() => {
         matrixContainer.remove();
         matrixAnimationActive = false;
         
-        // Remove activation class from rectangle
-        fromElement.classList.remove('rectangle-activated');
+        // Keep logo blended and activation classes
+        // Don't remove rectangle-activated to keep the glow
     }, 4000);
 }
 
@@ -1018,6 +1167,90 @@ function createMatrixStream(originX, originY, index) {
     }
 
     return stream;
+}
+
+// Continuous matrix rain inside terminal after activation
+function startContinuousMatrixRain(terminal) {
+    // Check if already has matrix rain
+    if (terminal.querySelector('.terminal-matrix-canvas')) return;
+    
+    // Create canvas for matrix rain
+    const canvas = document.createElement('canvas');
+    canvas.className = 'terminal-matrix-canvas';
+    canvas.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2;
+    `;
+    
+    terminal.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    const rect = terminal.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
+    // Matrix characters
+    const chars = 'ANOMFIN01011010CYBER01101HYPERFLUX010101'.split('');
+    const fontSize = 12;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+    
+    const drawMatrix = () => {
+        // Semi-transparent black to create fade effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#00ffa6';
+        ctx.font = `${fontSize}px monospace`;
+        
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+            
+            // Add glow effect to some characters
+            if (Math.random() > 0.95) {
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#00ffa6';
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.fillText(text, x, y);
+            
+            // Reset drop to top randomly or continue falling
+            if (y > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    };
+    
+    // Run matrix animation at ~20fps for performance
+    let matrixInterval = setInterval(drawMatrix, 50);
+    
+    // Pause matrix when page is hidden to save resources
+    const visibilityHandler = () => {
+        if (document.hidden) {
+            clearInterval(matrixInterval);
+        } else {
+            matrixInterval = setInterval(drawMatrix, 50);
+        }
+    };
+    
+    document.addEventListener('visibilitychange', visibilityHandler);
+    
+    // Cleanup function (optional - can be used to stop the animation later)
+    terminal._stopMatrixRain = () => {
+        clearInterval(matrixInterval);
+        document.removeEventListener('visibilitychange', visibilityHandler);
+        canvas.remove();
+    };
 }
 
 // Left-edge floating green box with cyclops eye effect
@@ -1251,32 +1484,56 @@ function initMobileVisualEnhancements() {
     
     const fontSize = 10;
     const columns = Math.floor(canvas.width / 50); // Wider columns for text
+
+    // Code snippets to display instead of Chinese characters
+    const codeSnippets = [
+        'AnomFIN', 'AnomTools', 'Jugi', 'JugiBot', 'JugiTools', 
+        'Kali Linux', 'Ubuntu v22.04', 'Teboil',
+        '01', '10', '11', '00', 
+        '{', '}', '[', ']', '(', ')', 
+        '<', '>', '/', '*', '+', '-', '=',
+        'def', 'var', 'fn', 'if', 'for'
+    ];
+    
+    const fontSize = 12;
+    const columns = Math.floor(canvas.width / fontSize);
+
     const drops = Array(columns).fill(1);
     
-    // Draw matrix rain
+    // Draw matrix rain with code snippets - slower and more subtle
     const drawMatrixRain = () => {
-        // Semi-transparent black to create fade effect
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        // More transparent black to create softer fade effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Green text
-        ctx.fillStyle = '#00ff96';
+        // Green text with reduced opacity for subtlety
+        ctx.fillStyle = 'rgba(0, 255, 150, 0.4)';
         ctx.font = `${fontSize}px monospace`;
         
         // Draw text
         for (let i = 0; i < drops.length; i++) {
+
             const text = charArray[Math.floor(Math.random() * charArray.length)];
             const x = i * 50 + 5;
             const y = drops[i] * fontSize;
             
             ctx.fillText(text, x, y);
+
+            const snippet = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+            
+            ctx.fillText(snippet, x, y);
             
             // Reset drop randomly or when it reaches bottom
             if (y > canvas.height && Math.random() > 0.975) {
                 drops[i] = 0;
             }
             
-            drops[i]++;
+            // Slower drop speed - increment less frequently
+            if (Math.random() > 0.5) {
+                drops[i]++;
+            }
         }
     };
     
@@ -1290,15 +1547,15 @@ function initMobileVisualEnhancements() {
         setTimeout(() => {
             matrixRainContainer.classList.add('active');
             
-            // Start matrix animation
-            let matrixInterval = setInterval(drawMatrixRain, 50);
+            // Start matrix animation - slower interval (100ms instead of 50ms)
+            let matrixInterval = setInterval(drawMatrixRain, 100);
             
             // Handle visibility changes to save resources
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     clearInterval(matrixInterval);
                 } else {
-                    matrixInterval = setInterval(drawMatrixRain, 50);
+                    matrixInterval = setInterval(drawMatrixRain, 100);
                 }
             });
             
@@ -1374,3 +1631,534 @@ function initMobileHyperCubeTrigger() {
         }
     }
 }
+
+// Mobile GitHub Hypercube Effect - Creative 3D rotating cube
+function initMobileHypercube() {
+    // Only run on mobile devices
+    if (window.innerWidth > 800) return;
+    
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+    
+    // Create hypercube container
+    const hypercubeContainer = document.createElement('div');
+    hypercubeContainer.className = 'mobile-hypercube';
+    
+    // Create canvas for hypercube
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    hypercubeContainer.appendChild(canvas);
+    document.body.appendChild(hypercubeContainer);
+    
+    // Set canvas size
+    const setCanvasSize = () => {
+        canvas.width = 200;
+        canvas.height = 200;
+    };
+    setCanvasSize();
+    
+    // 4D Hypercube vertices (tesseract)
+    const vertices4D = [
+        [-1, -1, -1, -1], [1, -1, -1, -1], [1, 1, -1, -1], [-1, 1, -1, -1],
+        [-1, -1, 1, -1], [1, -1, 1, -1], [1, 1, 1, -1], [-1, 1, 1, -1],
+        [-1, -1, -1, 1], [1, -1, -1, 1], [1, 1, -1, 1], [-1, 1, -1, 1],
+        [-1, -1, 1, 1], [1, -1, 1, 1], [1, 1, 1, 1], [-1, 1, 1, 1]
+    ];
+    
+    // Edges connecting vertices
+    const edges = [
+        // Inner cube
+        [0, 1], [1, 2], [2, 3], [3, 0],
+        [4, 5], [5, 6], [6, 7], [7, 4],
+        [0, 4], [1, 5], [2, 6], [3, 7],
+        // Outer cube
+        [8, 9], [9, 10], [10, 11], [11, 8],
+        [12, 13], [13, 14], [14, 15], [15, 12],
+        [8, 12], [9, 13], [10, 14], [11, 15],
+        // Connections between cubes
+        [0, 8], [1, 9], [2, 10], [3, 11],
+        [4, 12], [5, 13], [6, 14], [7, 15]
+    ];
+    
+    let angleXY = 0;
+    let angleZW = 0;
+    let angleXZ = 0;
+    
+    // Rotation matrices for 4D
+    function rotateXY(vertices, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return vertices.map(v => [
+            v[0] * cos - v[1] * sin,
+            v[0] * sin + v[1] * cos,
+            v[2], v[3]
+        ]);
+    }
+    
+    function rotateZW(vertices, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return vertices.map(v => [
+            v[0], v[1],
+            v[2] * cos - v[3] * sin,
+            v[2] * sin + v[3] * cos
+        ]);
+    }
+    
+    function rotateXZ(vertices, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return vertices.map(v => [
+            v[0] * cos - v[2] * sin,
+            v[1],
+            v[0] * sin + v[2] * cos,
+            v[3]
+        ]);
+    }
+    
+    // Project 4D to 3D then to 2D
+    function project4Dto2D(vertices) {
+        const distance3D = 3;
+        const distance2D = 2.5;
+        
+        // Project 4D to 3D
+        const vertices3D = vertices.map(v => {
+            const w = 1 / (distance3D - v[3]);
+            return [v[0] * w, v[1] * w, v[2] * w];
+        });
+        
+        // Project 3D to 2D
+        return vertices3D.map(v => {
+            const z = 1 / (distance2D - v[2]);
+            return [v[0] * z, v[1] * z];
+        });
+    }
+    
+    function drawHypercube() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Apply rotations
+        let rotated = rotateXY(vertices4D, angleXY);
+        rotated = rotateZW(rotated, angleZW);
+        rotated = rotateXZ(rotated, angleXZ);
+        
+        // Project to 2D
+        const projected = project4Dto2D(rotated);
+        
+        // Draw edges
+        const scale = 40;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        ctx.strokeStyle = 'rgba(0, 255, 166, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(0, 255, 166, 0.8)';
+        
+        edges.forEach(([i, j]) => {
+            ctx.beginPath();
+            ctx.moveTo(
+                centerX + projected[i][0] * scale,
+                centerY + projected[i][1] * scale
+            );
+            ctx.lineTo(
+                centerX + projected[j][0] * scale,
+                centerY + projected[j][1] * scale
+            );
+            ctx.stroke();
+        });
+        
+        // Draw vertices
+        ctx.fillStyle = 'rgba(0, 255, 166, 0.9)';
+        ctx.shadowBlur = 12;
+        projected.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(centerX + p[0] * scale, centerY + p[1] * scale, 2, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        // Update rotation angles
+        angleXY += 0.008;
+        angleZW += 0.005;
+        angleXZ += 0.006;
+    }
+    
+    // Start after intro animation
+    setTimeout(() => {
+        hypercubeContainer.classList.add('active');
+        
+        let animationId;
+        const animate = () => {
+            drawHypercube();
+            animationId = requestAnimationFrame(animate);
+        };
+        animate();
+        
+        // Cleanup on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationId);
+            } else {
+                animate();
+            }
+        });
+    }, 3000);
+    
+    // Cleanup on resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 800) {
+            hypercubeContainer.remove();
+        }
+    });
+}
+
+// Mobile Particle Effect - Lightweight floating particles
+function initMobileParticles() {
+    // Only run on mobile devices
+    if (window.innerWidth > 800) return;
+    
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+    
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'mobile-particles';
+    
+    // Create canvas for particles
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    particleContainer.appendChild(canvas);
+    document.body.appendChild(particleContainer);
+    
+    // Set canvas size
+    const setCanvasSize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+    setCanvasSize();
+    window.addEventListener('resize', setCanvasSize);
+    
+    // Particle class
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.3;
+            this.vy = (Math.random() - 0.5) * 0.3;
+            this.life = Math.random() * 100 + 100;
+            this.maxLife = this.life;
+            this.size = Math.random() * 2 + 0.5;
+        }
+        
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life--;
+            
+            // Wrap around edges
+            if (this.x < 0) this.x = canvas.width;
+            if (this.x > canvas.width) this.x = 0;
+            if (this.y < 0) this.y = canvas.height;
+            if (this.y > canvas.height) this.y = 0;
+            
+            if (this.life <= 0) {
+                this.reset();
+            }
+        }
+        
+        draw() {
+            const alpha = this.life / this.maxLife;
+            ctx.fillStyle = `rgba(0, 255, 166, ${alpha * 0.4})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add glow
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(0, 255, 166, 0.5)';
+        }
+    }
+    
+    // Create particles - keep it lightweight (30 particles)
+    const particles = [];
+    for (let i = 0; i < 30; i++) {
+        particles.push(new Particle());
+    }
+    
+    function drawParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+    }
+    
+    // Start after intro animation
+    setTimeout(() => {
+        particleContainer.classList.add('active');
+        
+        let animationId;
+        const animate = () => {
+            drawParticles();
+            animationId = requestAnimationFrame(animate);
+        };
+        animate();
+        
+        // Cleanup on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationId);
+            } else {
+                animate();
+            }
+        });
+    }, 3500);
+    
+    // Cleanup on resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 800) {
+            particleContainer.remove();
+        }
+    });
+}
+
+// Chat Widget Integration
+function initChatWidget() {
+    // Create chat widget HTML structure
+    const chatWidget = document.createElement('div');
+    chatWidget.className = 'chat-widget';
+    chatWidget.innerHTML = `
+        <div class="chat-widget-header">
+            <div class="chat-widget-title">
+                <span class="status-indicator"></span>
+                <span>24/7 AnomFIN Chat</span>
+            </div>
+            <button class="chat-widget-close" aria-label="Close chat">&times;</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-message">
+                <div class="chat-message-avatar">🤖</div>
+                <div class="chat-message-content">
+                    <p>Tervetuloa AnomFIN-chattiin! Olen täällä auttamassa sinua palveluidemme kanssa.</p>
+                    <p>Voin vastata kysymyksiin sovelluskehityksestä, kyberturvasta ja hinnoittelusta. Miten voin auttaa?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <form class="chat-input-form" id="chat-form">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Kirjoita viestisi..." autocomplete="off">
+                <button type="submit" class="chat-send-btn" id="chat-send">Lähetä</button>
+            </form>
+        </div>
+    `;
+    
+    // Create chat toggle button
+    const chatToggleBtn = document.createElement('button');
+    chatToggleBtn.className = 'chat-toggle-btn';
+    chatToggleBtn.innerHTML = '💬';
+    chatToggleBtn.setAttribute('aria-label', 'Open chat');
+    
+    document.body.appendChild(chatWidget);
+    document.body.appendChild(chatToggleBtn);
+    
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatSendBtn = document.getElementById('chat-send');
+    const closeBtn = chatWidget.querySelector('.chat-widget-close');
+    
+    let conversationHistory = [];
+    
+    // Toggle chat widget
+    function toggleChat(show) {
+        if (show) {
+            chatWidget.classList.add('active');
+            chatToggleBtn.classList.add('hidden');
+            chatInput.focus();
+        } else {
+            chatWidget.classList.remove('active');
+            chatToggleBtn.classList.remove('hidden');
+        }
+    }
+    
+    chatToggleBtn.addEventListener('click', () => toggleChat(true));
+    closeBtn.addEventListener('click', () => toggleChat(false));
+    
+    // Make scroll companion clickable to open chat
+    setTimeout(() => {
+        const scrollCompanion = document.querySelector('.scroll-companion');
+        if (scrollCompanion) {
+            scrollCompanion.style.cursor = 'pointer';
+            scrollCompanion.addEventListener('click', () => toggleChat(true));
+            
+            // Add tooltip
+            const tooltip = document.createElement('div');
+            tooltip.style.cssText = `
+                position: absolute;
+                top: -40px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 255, 166, 0.9);
+                color: #000;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            `;
+            tooltip.textContent = 'Klikkaa avataksesi chat';
+            scrollCompanion.appendChild(tooltip);
+            
+            scrollCompanion.addEventListener('mouseenter', () => {
+                tooltip.style.opacity = '1';
+            });
+            
+            scrollCompanion.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        }
+    }, 2000);
+    
+    // Add user message to chat
+    function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${isUser ? 'user' : ''}`;
+        messageDiv.innerHTML = `
+            <div class="chat-message-avatar">${isUser ? '👤' : '🤖'}</div>
+            <div class="chat-message-content">
+                <p>${content}</p>
+            </div>
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Show typing indicator
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'chat-message typing-indicator';
+        typingDiv.innerHTML = `
+            <div class="chat-message-avatar">🤖</div>
+            <div class="chat-message-content">
+                <div class="chat-typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return typingDiv;
+    }
+    
+    // Send message to ChatGPT API
+    async function sendMessageToAPI(message) {
+        // Add user message to history
+        conversationHistory.push({
+            role: 'user',
+            content: message
+        });
+        
+        try {
+            // NOTE: In production, this should be a backend endpoint that handles the API key securely
+            // For now, this is a placeholder that simulates the ChatGPT response
+            const response = await simulateChatGPTResponse(message);
+            
+            // Add assistant response to history
+            conversationHistory.push({
+                role: 'assistant',
+                content: response
+            });
+            
+            return response;
+        } catch (error) {
+            console.error('Chat API Error:', error);
+            return 'Pahoittelen, mutta en voi vastata juuri nyt. Ota yhteyttä suoraan: info@anomfin.fi';
+        }
+    }
+    
+    // Simulate ChatGPT response (replace with actual API call in production)
+    async function simulateChatGPTResponse(message) {
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+        
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('hinta') || lowerMessage.includes('kustann') || lowerMessage.includes('maksa')) {
+            return 'AnomFIN tarjoaa kolme pääpakettia:\n\n' +
+                   '• Start (690€/kk): Alkuauditointi, peruskovennus ja koulutus\n' +
+                   '• Protect (1490€/kk): Start + 24/7 valvonta ja kuukausiraportit\n' +
+                   '• Elite (3490€/kk): Protect + 1h SLA ja laajennettu automaatio\n\n' +
+                   'Räätälöidyt sovellusprojektit hinnoitellaan erikseen. Haluatko kuulla lisää?';
+        } else if (lowerMessage.includes('kyberturva') || lowerMessage.includes('turva') || lowerMessage.includes('security')) {
+            return 'AnomFIN tarjoaa kattavat kyberturvaratkaisut:\n\n' +
+                   '• PhishHunterAI™ - huijausviestien tunnistus\n' +
+                   '• SMS Shield™ - tekstiviestihuijausten torjunta\n' +
+                   '• M365/Google kovennukset\n' +
+                   '• Incident-apuri ja 24/7 valvonta\n\n' +
+                   'Rakennamme PoC:n viikoissa ja viemme tuotantoon turvallisesti. Kiinnostaako demo?';
+        } else if (lowerMessage.includes('sovellus') || lowerMessage.includes('kehitys') || lowerMessage.includes('app')) {
+            return 'Kehitämme yksilöllisiä sovelluksia kaikille alustoille:\n\n' +
+                   '• Mobiilisovellukset (iOS & Android)\n' +
+                   '• Desktop-sovellukset (macOS, Windows, Linux)\n' +
+                   '• Web-sovellukset\n\n' +
+                   'Kyberturva on sisäänrakennettuna jokaisessa ratkaisussa. Toimitamme pienen toimivan version nopeasti ja kasvatamme tarpeen mukaan. Kerro lisää projektistasi?';
+        } else if (lowerMessage.includes('yhtey') || lowerMessage.includes('contact') || lowerMessage.includes('varaa')) {
+            return 'Otetaan yhteyttä! Voit:\n\n' +
+                   '• Varata 30 min kartoitus: info@anomfin.fi\n' +
+                   '• Soittaa: +358 40 123 4567\n' +
+                   '• Täyttää lomake verkkosivun Contact-osiossa\n\n' +
+                   'Vastaamme nopeasti ja sovitaan tapaaminen sinulle sopivaan aikaan.';
+        } else if (lowerMessage.includes('demo') || lowerMessage.includes('esittely') || lowerMessage.includes('poc')) {
+            return 'Erinomaista! Demossa näytämme:\n\n' +
+                   '• Miten ratkaisumme toimii käytännössä\n' +
+                   '• Integraatiomahdollisuudet\n' +
+                   '• PoC-toteutus viikoissa\n\n' +
+                   'Lähetä viesti osoitteeseen info@anomfin.fi tai täytä yhteydenottolomake niin sovitaan demo!';
+        } else {
+            return 'Kiitos viestistäsi! AnomFIN tarjoaa:\n\n' +
+                   '• Yksilöllisiä sovelluksia (mobile, desktop, web)\n' +
+                   '• Kyberturvaratkaisut ja 24/7 valvonta\n' +
+                   '• Auditoinnit ja penetraatiotestaus\n\n' +
+                   'Kysy minulta hinnoittelusta, palveluista tai varaa kartoitus. Miten voin auttaa?';
+        }
+    }
+    
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        addMessage(message, true);
+        chatInput.value = '';
+        
+        chatInput.disabled = true;
+        chatSendBtn.disabled = true;
+        
+        // Show typing indicator
+        const typingIndicator = showTypingIndicator();
+        const response = await sendMessageToAPI(message);
+
+        typingIndicator.remove();
+
+        addMessage(response, false);
+
+        chatInput.disabled = false;
+        chatSendBtn.disabled = false;
+        chatInput.focus();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Wait a bit before initializing chat to not interfere with other animations
+    setTimeout(initChatWidget, 2000);
+});

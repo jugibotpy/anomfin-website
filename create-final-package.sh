@@ -17,7 +17,37 @@ echo "🔧 Copying website files..."
 cp index.html "$TEMP_DIR/"
 cp -r css "$TEMP_DIR/"
 cp -r js "$TEMP_DIR/"
-cp -r assets "$TEMP_DIR/"
+cp -r assets "$TEMP_DIR/" 2>/dev/null || echo "No assets directory found"
+
+# Copy PHP backend files if they exist
+echo "🔧 Copying PHP backend files..."
+if [ -f "install.php" ]; then
+    cp install.php "$TEMP_DIR/"
+    echo "  ✓ install.php"
+fi
+if [ -f "connect.php" ]; then
+    cp connect.php "$TEMP_DIR/"
+    echo "  ✓ connect.php"
+fi
+if [ -f "ai_connect.php" ]; then
+    cp ai_connect.php "$TEMP_DIR/"
+    echo "  ✓ ai_connect.php"
+fi
+if [ -f ".env.example" ]; then
+    cp .env.example "$TEMP_DIR/"
+    echo "  ✓ .env.example"
+fi
+
+# Copy documentation files
+echo "📚 Copying documentation..."
+if [ -f "ASENNUSOHJEET.md" ]; then
+    cp ASENNUSOHJEET.md "$TEMP_DIR/"
+    echo "  ✓ ASENNUSOHJEET.md (Finnish)"
+fi
+if [ -f "SIMPLE_INSTALL_GUIDE.md" ]; then
+    cp SIMPLE_INSTALL_GUIDE.md "$TEMP_DIR/"
+    echo "  ✓ SIMPLE_INSTALL_GUIDE.md"
+fi
 
 echo "📝 Creating installation documentation..."
 
@@ -34,20 +64,60 @@ This package includes:
 - `js/` - JavaScript directory
   - `script.js` - Main JavaScript with animations and interactions
 - `assets/` - Images and resources
-  - `logo.png` - Company logo (used for cyclops mask effect)
+  - `logo.png` - Company logo
   - `logo.svg` - SVG version of logo
-  - `image2vector.svg` - Navigation logo
+- **PHP Backend** (optional):
+  - `install.php` - ONE-TIME installation wizard
+  - `connect.php` - Database connection handler
+  - `ai_connect.php` - AI service integration
+  - `.env.example` - Configuration template
+
+## Quick Installation (3 Steps)
+
+### Step 1: Extract Files
+Extract all files from final.zip to your web hosting:
+```bash
+unzip final.zip -d /path/to/webroot/
+```
+
+### Step 2: Set Permissions
+```bash
+chmod -R 755 /path/to/webroot/
+chmod 644 /path/to/webroot/*.php
+```
+
+### Step 3: Run Installation
+Open in your browser:
+```
+http://your-domain.com/install.php
+```
+
+Fill in:
+- Database name
+- Database username
+- Database password
+- (Optional) OpenAI API key
+
+Click "Asenna nyt" (Install Now)
+
+**That's it! Installation complete.**
 
 ## System Requirements
 
-- Web server capable of serving static HTML files (Apache, Nginx, or any HTTP server)
-- Modern web browser (Chrome, Firefox, Safari, Edge - latest versions)
-- No database or backend required for basic functionality
-- Optional: Email backend for contact form integration
+### Basic Website (HTML/CSS/JS only)
+- Web server (Apache, Nginx, or any HTTP server)
+- Modern web browser
+- No database or backend required
+
+### Full System with PHP Backend
+- PHP 7.4 or higher
+- MySQL 5.7+ or MariaDB 10.2+
+- Web server with PHP support
+- PHP extensions: pdo, pdo_mysql, curl, json, mbstring
 
 ## Installation Steps
 
-### Option 1: Simple Extraction (Recommended)
+### Option 1: Simple Extraction (Static Site)
 
 1. Extract all files from final.zip to your web server's document root
    ```bash
@@ -63,21 +133,58 @@ This package includes:
    - Local: http://localhost/
    - Production: https://yourdomain.com/
 
-### Option 2: Development Server
+### Option 2: Full Installation with PHP Backend
 
-For testing locally:
-
-1. Extract files to a directory
-2. Start a local server:
+1. **Extract files to web hosting**
    ```bash
-   # Python 3
-   python3 -m http.server 8080
-   
-   # Node.js
-   npx http-server -p 8080
-   
-   # PHP
-   php -S localhost:8080
+   unzip final.zip -d /var/www/html/
+   ```
+
+2. **Create MySQL database**
+   ```sql
+   CREATE DATABASE anomfin_db CHARACTER SET utf8mb4;
+   ```
+
+3. **Run install.php in browser**
+   ```
+   http://your-domain.com/install.php
+   ```
+
+4. **Fill in the form:**
+   - Database host (usually: localhost)
+   - Database name (e.g., anomfin_db)
+   - Database username
+   - Database password
+   - Port (default: 3306)
+   - AI API key (optional)
+
+5. **Click "Asenna nyt" (Install Now)**
+   - System tests database connection
+   - Creates .env configuration file
+   - Creates admin.php panel
+   - Installation complete!
+
+6. **Access admin panel**
+   ```
+   http://your-domain.com/admin.php
+   ```
+   Default password: admin123 (CHANGE THIS!)
+
+7. **Remove install.php for security**
+   ```bash
+   rm /var/www/html/install.php
+   ```
+
+## Auto-Detection Feature
+
+The install.php automatically detects existing database connection files:
+- connect.php
+- connection.php
+- database.php
+- config.php
+- db.php
+
+If found, it pre-fills the form with detected values.
    ```
 3. Open http://localhost:8080 in your browser
 
@@ -223,10 +330,28 @@ Thank you for choosing AnomFIN!
 
 This package contains everything you need to deploy the AnomFIN website.
 
-QUICK START:
+QUICK START (3 STEPS):
 1. Extract all files to your web server directory
-2. Read INSTALL.md for detailed instructions
-3. Access your website via browser
+2. Open browser: http://your-domain.com/install.php
+3. Fill in database details and click "Asenna nyt"
+
+Done! Your site is ready.
+
+WHAT'S INCLUDED:
+- Static website (HTML/CSS/JS)
+- PHP backend with database support
+- AI service integration
+- One-time installation wizard
+- Admin panel for management
+
+FOR STATIC SITE ONLY:
+Just upload files and access index.html - no installation needed!
+
+FOR FULL SYSTEM:
+1. Upload files to web hosting
+2. Create MySQL database
+3. Run install.php in browser
+4. Access admin.php panel
 
 For support, contact: info@anomfin.fi
 
