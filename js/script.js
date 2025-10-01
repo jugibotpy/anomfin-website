@@ -376,7 +376,7 @@ function initScrollCompanion() {
     ` : `
         <div class="companion-logo">
             <span class="companion-logo-main">AnomFIN</span>
-            <span class="companion-logo-sub">AnomTools HyperCube</span>
+            <span class="companion-logo-sub">24/7 CHAT</span>
         </div>
         <span class="companion-spark">Scroll Sync</span>
     `;
@@ -1852,4 +1852,251 @@ function initMobileParticles() {
         }
     });
 }
+
+// Chat Widget Integration
+function initChatWidget() {
+    // Create chat widget HTML structure
+    const chatWidget = document.createElement('div');
+    chatWidget.className = 'chat-widget';
+    chatWidget.innerHTML = `
+        <div class="chat-widget-header">
+            <div class="chat-widget-title">
+                <span class="status-indicator"></span>
+                <span>24/7 AnomFIN Chat</span>
+            </div>
+            <button class="chat-widget-close" aria-label="Close chat">&times;</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-message">
+                <div class="chat-message-avatar">🤖</div>
+                <div class="chat-message-content">
+                    <p>Tervetuloa AnomFIN-chattiin! Olen täällä auttamassa sinua palveluidemme kanssa.</p>
+                    <p>Voin vastata kysymyksiin sovelluskehityksestä, kyberturvasta ja hinnoittelusta. Miten voin auttaa?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <form class="chat-input-form" id="chat-form">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Kirjoita viestisi..." autocomplete="off">
+                <button type="submit" class="chat-send-btn" id="chat-send">Lähetä</button>
+            </form>
+        </div>
+    `;
+    
+    // Create chat toggle button
+    const chatToggleBtn = document.createElement('button');
+    chatToggleBtn.className = 'chat-toggle-btn';
+    chatToggleBtn.innerHTML = '💬';
+    chatToggleBtn.setAttribute('aria-label', 'Open chat');
+    
+    document.body.appendChild(chatWidget);
+    document.body.appendChild(chatToggleBtn);
+    
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatSendBtn = document.getElementById('chat-send');
+    const closeBtn = chatWidget.querySelector('.chat-widget-close');
+    
+    let conversationHistory = [];
+    
+    // Toggle chat widget
+    function toggleChat(show) {
+        if (show) {
+            chatWidget.classList.add('active');
+            chatToggleBtn.classList.add('hidden');
+            chatInput.focus();
+        } else {
+            chatWidget.classList.remove('active');
+            chatToggleBtn.classList.remove('hidden');
+        }
+    }
+    
+    chatToggleBtn.addEventListener('click', () => toggleChat(true));
+    closeBtn.addEventListener('click', () => toggleChat(false));
+    
+    // Make scroll companion clickable to open chat
+    setTimeout(() => {
+        const scrollCompanion = document.querySelector('.scroll-companion');
+        if (scrollCompanion) {
+            scrollCompanion.style.cursor = 'pointer';
+            scrollCompanion.addEventListener('click', () => toggleChat(true));
+            
+            // Add tooltip
+            const tooltip = document.createElement('div');
+            tooltip.style.cssText = `
+                position: absolute;
+                top: -40px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 255, 166, 0.9);
+                color: #000;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            `;
+            tooltip.textContent = 'Klikkaa avataksesi chat';
+            scrollCompanion.appendChild(tooltip);
+            
+            scrollCompanion.addEventListener('mouseenter', () => {
+                tooltip.style.opacity = '1';
+            });
+            
+            scrollCompanion.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        }
+    }, 2000);
+    
+    // Add user message to chat
+    function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${isUser ? 'user' : ''}`;
+        messageDiv.innerHTML = `
+            <div class="chat-message-avatar">${isUser ? '👤' : '🤖'}</div>
+            <div class="chat-message-content">
+                <p>${content}</p>
+            </div>
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Show typing indicator
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'chat-message typing-indicator';
+        typingDiv.innerHTML = `
+            <div class="chat-message-avatar">🤖</div>
+            <div class="chat-message-content">
+                <div class="chat-typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return typingDiv;
+    }
+    
+    // Send message to ChatGPT API
+    async function sendMessageToAPI(message) {
+        // Add user message to history
+        conversationHistory.push({
+            role: 'user',
+            content: message
+        });
+        
+        try {
+            // NOTE: In production, this should be a backend endpoint that handles the API key securely
+            // For now, this is a placeholder that simulates the ChatGPT response
+            const response = await simulateChatGPTResponse(message);
+            
+            // Add assistant response to history
+            conversationHistory.push({
+                role: 'assistant',
+                content: response
+            });
+            
+            return response;
+        } catch (error) {
+            console.error('Chat API Error:', error);
+            return 'Pahoittelen, mutta en voi vastata juuri nyt. Ota yhteyttä suoraan: info@anomfin.fi';
+        }
+    }
+    
+    // Simulate ChatGPT response (replace with actual API call in production)
+    async function simulateChatGPTResponse(message) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+        
+        const lowerMessage = message.toLowerCase();
+        
+        // Context-aware responses about AnomFIN services
+        if (lowerMessage.includes('hinta') || lowerMessage.includes('kustann') || lowerMessage.includes('maksa')) {
+            return 'AnomFIN tarjoaa kolme pääpakettia:\n\n' +
+                   '• Start (690€/kk): Alkuauditointi, peruskovennus ja koulutus\n' +
+                   '• Protect (1490€/kk): Start + 24/7 valvonta ja kuukausiraportit\n' +
+                   '• Elite (3490€/kk): Protect + 1h SLA ja laajennettu automaatio\n\n' +
+                   'Räätälöidyt sovellusprojektit hinnoitellaan erikseen. Haluatko kuulla lisää?';
+        } else if (lowerMessage.includes('kyberturva') || lowerMessage.includes('turva') || lowerMessage.includes('security')) {
+            return 'AnomFIN tarjoaa kattavat kyberturvaratkaisut:\n\n' +
+                   '• PhishHunterAI™ - huijausviestien tunnistus\n' +
+                   '• SMS Shield™ - tekstiviestihuijausten torjunta\n' +
+                   '• M365/Google kovennukset\n' +
+                   '• Incident-apuri ja 24/7 valvonta\n\n' +
+                   'Rakennamme PoC:n viikoissa ja viemme tuotantoon turvallisesti. Kiinnostaako demo?';
+        } else if (lowerMessage.includes('sovellus') || lowerMessage.includes('kehitys') || lowerMessage.includes('app')) {
+            return 'Kehitämme yksilöllisiä sovelluksia kaikille alustoille:\n\n' +
+                   '• Mobiilisovellukset (iOS & Android)\n' +
+                   '• Desktop-sovellukset (macOS, Windows, Linux)\n' +
+                   '• Web-sovellukset\n\n' +
+                   'Kyberturva on sisäänrakennettuna jokaisessa ratkaisussa. Toimitamme pienen toimivan version nopeasti ja kasvatamme tarpeen mukaan. Kerro lisää projektistasi?';
+        } else if (lowerMessage.includes('yhtey') || lowerMessage.includes('contact') || lowerMessage.includes('varaa')) {
+            return 'Otetaan yhteyttä! Voit:\n\n' +
+                   '• Varata 30 min kartoitus: info@anomfin.fi\n' +
+                   '• Soittaa: +358 40 123 4567\n' +
+                   '• Täyttää lomake verkkosivun Contact-osiossa\n\n' +
+                   'Vastaamme nopeasti ja sovitaan tapaaminen sinulle sopivaan aikaan.';
+        } else if (lowerMessage.includes('demo') || lowerMessage.includes('esittely') || lowerMessage.includes('poc')) {
+            return 'Erinomaista! Demossa näytämme:\n\n' +
+                   '• Miten ratkaisumme toimii käytännössä\n' +
+                   '• Integraatiomahdollisuudet\n' +
+                   '• PoC-toteutus viikoissa\n\n' +
+                   'Lähetä viesti osoitteeseen info@anomfin.fi tai täytä yhteydenottolomake niin sovitaan demo!';
+        } else {
+            return 'Kiitos viestistäsi! AnomFIN tarjoaa:\n\n' +
+                   '• Yksilöllisiä sovelluksia (mobile, desktop, web)\n' +
+                   '• Kyberturvaratkaisut ja 24/7 valvonta\n' +
+                   '• Auditoinnit ja penetraatiotestaus\n\n' +
+                   'Kysy minulta hinnoittelusta, palveluista tai varaa kartoitus. Miten voin auttaa?';
+        }
+    }
+    
+    // Handle form submission
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        addMessage(message, true);
+        chatInput.value = '';
+        
+        // Disable input while processing
+        chatInput.disabled = true;
+        chatSendBtn.disabled = true;
+        
+        // Show typing indicator
+        const typingIndicator = showTypingIndicator();
+        
+        // Get response from API
+        const response = await sendMessageToAPI(message);
+        
+        // Remove typing indicator
+        typingIndicator.remove();
+        
+        // Add bot response
+        addMessage(response, false);
+        
+        // Re-enable input
+        chatInput.disabled = false;
+        chatSendBtn.disabled = false;
+        chatInput.focus();
+    });
+}
+
+// Initialize chat widget when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Wait a bit before initializing chat to not interfere with other animations
+    setTimeout(initChatWidget, 2000);
+});
 
