@@ -15,8 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initLogoRectangleInteraction(); // Add matrix interaction
     initLeftEdgeBox(); // Add left-edge floating box
     initMobileVisualEnhancements(); // Add mobile visual enhancements
+    initMobileHyperCubeTrigger(); // Add mobile hypercube trigger
     initMobileHypercube(); // Add GitHub hypercube effect
     initMobileParticles(); // Add particle effect
+
 
     if (mobileMenu && navMenu) {
         mobileMenu.addEventListener('click', () => {
@@ -443,6 +445,7 @@ function initScrollCompanion() {
         services: 'Palvelut',
         platforms: 'Alustat',
         applications: 'Sovellukset',
+        softamme: 'Softamme',
         security: 'Kyberturva',
         pricing: 'Hinnoittelu',
         contact: 'Yhteys'
@@ -461,6 +464,7 @@ function initScrollCompanion() {
         services: 'Build Sprint',
         platforms: 'Omni Deploy',
         applications: 'GitHub Projects',
+        softamme: 'Open Source',
         security: 'SOC Hyperwatch',
         pricing: 'Selkeä hinnoittelu',
         contact: 'Yhteys valmis'
@@ -479,6 +483,7 @@ function initScrollCompanion() {
         services: 'Sprinttaa MVP tuotantoon – AnomTools valvoo laatua ja turvaa.',
         platforms: 'Julkaisemme yhdellä koodipohjalla kaikkiin päätelaitteisiin.',
         applications: 'Toteutetut projektit ja avoimet työkalut – inspiraatiota seuraavaan.',
+        softamme: 'Avoimen lähdekoodin periaatteet ja AnomFIN GitHub-projektit.',
         security: 'SOC Hyperwatch tarkkailee uhkia yhtä herkästi kuin liikegraafi.',
         pricing: 'Hinnoittelu pysyy kristallinkirkkaana koko matkan.',
         contact: 'Jutellaan – viedään ideasi tuotantoon turvallisesti.'
@@ -1473,6 +1478,13 @@ function initMobileVisualEnhancements() {
     setCanvasSize();
     window.addEventListener('resize', setCanvasSize);
     
+    // Matrix characters - AnomFIN project names and keywords
+    const chars = 'AnomFIN AnomTools Jugi JugiBot JugiTools Kali Linux Ubuntu v22.04 Teboil 01010110';
+    const charArray = chars.split(' ');
+    
+    const fontSize = 10;
+    const columns = Math.floor(canvas.width / 50); // Wider columns for text
+
     // Code snippets to display instead of Chinese characters
     const codeSnippets = [
         'AnomFIN', 'AnomTools', 'Jugi', 'JugiBot', 'JugiTools', 
@@ -1485,6 +1497,7 @@ function initMobileVisualEnhancements() {
     
     const fontSize = 12;
     const columns = Math.floor(canvas.width / fontSize);
+
     const drops = Array(columns).fill(1);
     
     // Draw matrix rain with code snippets - slower and more subtle
@@ -1497,8 +1510,15 @@ function initMobileVisualEnhancements() {
         ctx.fillStyle = 'rgba(0, 255, 150, 0.4)';
         ctx.font = `${fontSize}px monospace`;
         
-        // Draw characters
+        // Draw text
         for (let i = 0; i < drops.length; i++) {
+
+            const text = charArray[Math.floor(Math.random() * charArray.length)];
+            const x = i * 50 + 5;
+            const y = drops[i] * fontSize;
+            
+            ctx.fillText(text, x, y);
+
             const snippet = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
             const x = i * fontSize;
             const y = drops[i] * fontSize;
@@ -1556,6 +1576,60 @@ function initMobileVisualEnhancements() {
             matrixRainContainer.remove();
         }
     });
+}
+
+// Mobile HyperCube popup trigger
+function initMobileHyperCubeTrigger() {
+    if (window.innerWidth > 800) return;
+    
+    const trigger = document.getElementById('mobile-hypercube-trigger');
+    const companion = document.querySelector('.scroll-companion');
+    
+    if (!trigger || !companion) return;
+    
+    let isPopupVisible = false;
+    
+    trigger.addEventListener('click', () => {
+        if (!isPopupVisible) {
+            // Show the hypercube
+            companion.classList.add('mobile-popup');
+            
+            // Position it in the center of viewport
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const companionWidth = companion.offsetWidth || 280;
+            const companionHeight = companion.offsetHeight || 400;
+            
+            const x = (viewportWidth - companionWidth) / 2;
+            const y = (viewportHeight - companionHeight) / 2;
+            
+            companion.style.setProperty('--companion-x', `${x}px`);
+            companion.style.setProperty('--companion-y', `${y}px`);
+            
+            trigger.textContent = 'Piilota HyperCube ✕';
+            isPopupVisible = true;
+            
+            // Add click outside to close
+            setTimeout(() => {
+                document.addEventListener('click', closeOnClickOutside);
+            }, 100);
+        } else {
+            // Hide the hypercube
+            companion.classList.remove('mobile-popup');
+            trigger.textContent = 'Näytä HyperCube 🎯';
+            isPopupVisible = false;
+            document.removeEventListener('click', closeOnClickOutside);
+        }
+    });
+    
+    function closeOnClickOutside(e) {
+        if (isPopupVisible && !companion.contains(e.target) && e.target !== trigger) {
+            companion.classList.remove('mobile-popup');
+            trigger.textContent = 'Näytä HyperCube 🎯';
+            isPopupVisible = false;
+            document.removeEventListener('click', closeOnClickOutside);
+        }
+    }
 }
 
 // Mobile GitHub Hypercube Effect - Creative 3D rotating cube
@@ -2014,12 +2088,10 @@ function initChatWidget() {
     
     // Simulate ChatGPT response (replace with actual API call in production)
     async function simulateChatGPTResponse(message) {
-        // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
         
         const lowerMessage = message.toLowerCase();
         
-        // Context-aware responses about AnomFIN services
         if (lowerMessage.includes('hinta') || lowerMessage.includes('kustann') || lowerMessage.includes('maksa')) {
             return 'AnomFIN tarjoaa kolme pääpakettia:\n\n' +
                    '• Start (690€/kk): Alkuauditointi, peruskovennus ja koulutus\n' +
@@ -2060,43 +2132,33 @@ function initChatWidget() {
         }
     }
     
-    // Handle form submission
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const message = chatInput.value.trim();
         if (!message) return;
         
-        // Add user message
         addMessage(message, true);
         chatInput.value = '';
         
-        // Disable input while processing
         chatInput.disabled = true;
         chatSendBtn.disabled = true;
         
         // Show typing indicator
         const typingIndicator = showTypingIndicator();
-        
-        // Get response from API
         const response = await sendMessageToAPI(message);
-        
-        // Remove typing indicator
+
         typingIndicator.remove();
-        
-        // Add bot response
+
         addMessage(response, false);
-        
-        // Re-enable input
+
         chatInput.disabled = false;
         chatSendBtn.disabled = false;
         chatInput.focus();
     });
 }
 
-// Initialize chat widget when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Wait a bit before initializing chat to not interfere with other animations
     setTimeout(initChatWidget, 2000);
 });
-
