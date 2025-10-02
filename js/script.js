@@ -1482,9 +1482,6 @@ function initMobileVisualEnhancements() {
     const chars = 'AnomFIN AnomTools Jugi JugiBot JugiTools Kali Linux Ubuntu v22.04 Teboil 01010110';
     const charArray = chars.split(' ');
     
-    const fontSize = 10;
-    const columns = Math.floor(canvas.width / 50); // Wider columns for text
-
     // Code snippets to display instead of Chinese characters
     const codeSnippets = [
         'AnomFIN', 'AnomTools', 'Jugi', 'JugiBot', 'JugiTools', 
