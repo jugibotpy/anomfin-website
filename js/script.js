@@ -1511,11 +1511,6 @@ function initMobileVisualEnhancements() {
         for (let i = 0; i < drops.length; i++) {
 
             const text = charArray[Math.floor(Math.random() * charArray.length)];
-            const x = i * 50 + 5;
-            const y = drops[i] * fontSize;
-            
-            ctx.fillText(text, x, y);
-
             const snippet = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
             const x = i * fontSize;
             const y = drops[i] * fontSize;
