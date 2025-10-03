@@ -1031,9 +1031,14 @@ function activateRectangle() {
         rectangle.classList.remove('logo-entering');
         rectangle.classList.add('logo-blended', 'rectangle-activated');
         
-        // Trigger matrix animation after logo is blended
+        // Trigger terminal transformation (HULK effect) after logo blending
         setTimeout(() => {
-            launchMatrixAnimation(rectangle);
+            rectangle.classList.add('terminal-transform');
+            
+            // Trigger matrix animation after terminal transformation starts
+            setTimeout(() => {
+                launchMatrixAnimation(rectangle);
+            }, 300);
         }, 300);
     }, 1000); // Wait for logo blend animation to complete
 }
@@ -1056,7 +1061,7 @@ function launchMatrixAnimation(fromElement) {
         width: 100vw;
         height: 100vh;
         pointer-events: none;
-        z-index: 1000;
+        z-index: 900;
         overflow: hidden;
     `;
 
@@ -1185,10 +1190,10 @@ function startContinuousMatrixRain(terminal) {
             width: 100%;
             height: 100%;
             background-image: url('../assets/logo.png');
-            background-size: 50%;
+            background-size: 40%;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.3;
+            opacity: 0.35;
             pointer-events: none;
             z-index: 1;
             animation: logoBreath 4s ease-in-out infinite;
@@ -1216,12 +1221,12 @@ function startContinuousMatrixRain(terminal) {
     canvas.width = rect.width;
     canvas.height = rect.height;
     
-    // Matrix characters - include AnomFIN, AnomTools, JugiBot, JugiTools
+    // Matrix characters - include AnomFIN, AnomTools, JugiBot, JugiTools as complete words
     const textSnippets = ['AnomFIN', 'AnomTools', 'JugiBot', 'JugiTools', 'CYBER', 'HYPERFLUX', '01', '10', '11', '00'];
-    const chars = textSnippets.join('').split('');
     const fontSize = 12;
     const columns = Math.floor(canvas.width / fontSize);
     const drops = Array(columns).fill(1);
+    const columnTexts = Array(columns).fill(null).map(() => null); // Track current text for each column
     
     const drawMatrix = () => {
         // Semi-transparent black to create fade effect
@@ -1232,7 +1237,19 @@ function startContinuousMatrixRain(terminal) {
         ctx.font = `${fontSize}px monospace`;
         
         for (let i = 0; i < drops.length; i++) {
-            const text = chars[Math.floor(Math.random() * chars.length)];
+            // Select a text snippet or single character for this column
+            if (columnTexts[i] === null || drops[i] === 1) {
+                // Choose between full words and single characters
+                if (Math.random() > 0.5) {
+                    columnTexts[i] = textSnippets[Math.floor(Math.random() * textSnippets.length)];
+                } else {
+                    // Single random character for variety
+                    const singleChars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    columnTexts[i] = singleChars[Math.floor(Math.random() * singleChars.length)];
+                }
+            }
+            
+            const text = columnTexts[i];
             const x = i * fontSize;
             const y = drops[i] * fontSize;
             
@@ -1249,6 +1266,7 @@ function startContinuousMatrixRain(terminal) {
             // Reset drop to top randomly or continue falling
             if (y > canvas.height && Math.random() > 0.975) {
                 drops[i] = 0;
+                columnTexts[i] = null; // Reset text for next drop
             }
             drops[i]++;
         }
