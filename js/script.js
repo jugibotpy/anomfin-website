@@ -243,12 +243,18 @@ function initIntroOverlay() {
                 }
                 if (grid) {
                     grid.classList.add('square-excite', 'square-green');
-                    const onShakeEnd = () => {
+                    
+                    // Use setTimeout instead of animationend for reliability
+                    const shakeDuration = cssMs('--square-shake-duration-ms', 1000);
+                    setTimeout(() => {
                         grid.classList.remove('square-excite');
                         grid.classList.add('lively');
-                        grid.removeEventListener('animationend', onShakeEnd);
-                    };
-                    grid.addEventListener('animationend', onShakeEnd);
+                        
+                        // Trigger terminal transformation automatically after shake ends
+                        setTimeout(() => {
+                            activateRectangle();
+                        }, 500);
+                    }, shakeDuration);
                 }
                 orb && orb.classList.add('lively');
                 // Piilota intro overlay pehmeästi
@@ -1022,6 +1028,9 @@ function initLogoRectangleInteraction() {
 function activateRectangle() {
     const rectangle = document.querySelector('.hero-grid');
     if (!rectangle || matrixAnimationActive) return;
+
+    // Disable further intersection detection once activated
+    intersectionDetectionEnabled = false;
 
     // Add logo blending class first
     rectangle.classList.add('logo-entering');
