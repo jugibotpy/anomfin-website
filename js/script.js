@@ -1174,6 +1174,28 @@ function startContinuousMatrixRain(terminal) {
     // Check if already has matrix rain
     if (terminal.querySelector('.terminal-matrix-canvas')) return;
     
+    // Add logo background to terminal if not already present
+    if (!terminal.querySelector('.terminal-logo-bg')) {
+        const logoBg = document.createElement('div');
+        logoBg.className = 'terminal-logo-bg';
+        logoBg.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('../assets/logo.png');
+            background-size: 50%;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+            animation: logoBreath 4s ease-in-out infinite;
+        `;
+        terminal.appendChild(logoBg);
+    }
+    
     // Create canvas for matrix rain
     const canvas = document.createElement('canvas');
     canvas.className = 'terminal-matrix-canvas';
@@ -1194,8 +1216,9 @@ function startContinuousMatrixRain(terminal) {
     canvas.width = rect.width;
     canvas.height = rect.height;
     
-    // Matrix characters
-    const chars = 'ANOMFIN01011010CYBER01101HYPERFLUX010101'.split('');
+    // Matrix characters - include AnomFIN, AnomTools, JugiBot, JugiTools
+    const textSnippets = ['AnomFIN', 'AnomTools', 'JugiBot', 'JugiTools', 'CYBER', 'HYPERFLUX', '01', '10', '11', '00'];
+    const chars = textSnippets.join('').split('');
     const fontSize = 12;
     const columns = Math.floor(canvas.width / fontSize);
     const drops = Array(columns).fill(1);

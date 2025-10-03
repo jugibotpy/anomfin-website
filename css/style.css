@@ -1990,6 +1990,17 @@ textarea {
     }
 }
 
+@keyframes logoBreath {
+    0%, 100% {
+        opacity: 0.25;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.35;
+        transform: scale(1.02);
+    }
+}
+
 @keyframes rectangleActivation {
     0% {
         transform: scale(1);
@@ -2040,6 +2051,11 @@ textarea {
 
 .matrix-particle {
     will-change: transform, opacity;
+}
+
+/* Terminal logo background - visible behind matrix rain */
+.terminal-logo-bg {
+    will-change: opacity, transform;
 }
 
 /* Left-edge floating green box with cyclops eye effect */
