@@ -2,8 +2,8 @@
 let navbarRef = null;
 let navLogoRef = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    applyUserSettingsFromStorage();
+document.addEventListener('DOMContentLoaded', async () => {
+    await applyGlobalSettings();
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.querySelector('.nav-menu');
 
@@ -52,16 +52,98 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavbarChrome();
 });
 
-function applyUserSettingsFromStorage(){
-    try{
-        const raw = localStorage.getItem('anomfin:cssVars');
-        if(!raw) return;
-        const vars = JSON.parse(raw);
-        const root = document.documentElement;
-        Object.entries(vars).forEach(([k,v])=>{
-            if(k && v!=null) root.style.setProperty(k, v);
-        });
-    }catch(e){/* ignore */}
+const ANOMFIN_DEFAULT_SETTINGS = {
+    cssVars: {
+        '--intro-blackout-ms': '500ms',
+        '--intro-bg-fade-ms': '3000ms',
+        '--logo-reveal-ms': '2500ms',
+        '--logo-initial-opacity': '0.2',
+        '--logo-initial-blur': '80px',
+        '--logo-initial-brightness': '0.85',
+        '--logo-initial-scale': '2',
+        '--logo-move-duration-ms': '1000ms',
+        '--logo-move-delay-ms': '600ms',
+        '--logo-arc-x': '0.65',
+        '--logo-arc-dy': '60px',
+        '--grid-hue-duration-ms': '1800ms',
+        '--square-shake-duration-ms': '1000ms',
+        '--square-shake-amp': '14px',
+        '--square-scale-end': '1.25',
+        '--orb-float-duration-s': '8s',
+        '--grid-float-duration-s': '6s',
+        '--eyebrow-size': '1rem',
+        '--services-fade-delay-ms': '200ms',
+        '--neon': '#00FFA6',
+        '--square-green-rgba': '0,255,150',
+        '--logo-ease': 'cubic-bezier(.2,.8,.2,1)',
+    },
+    behaviors: {
+        reactHover: true,
+        reactContact: true,
+    },
+    preset: null,
+    meta: {}
+};
+
+async function applyGlobalSettings(){
+    const root = document.documentElement;
+    let settings = null;
+    try {
+        const response = await fetch('api/settings.php', { cache: 'no-store' });
+        if (response.ok) {
+            settings = await response.json();
+        }
+    } catch (error) {
+        console.warn('Settings fetch failed, fallback to cache', error);
+    }
+
+    if (!settings) {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const cached = localStorage.getItem('anomfin:lastSettings');
+                if (cached) {
+                    settings = JSON.parse(cached);
+                }
+            }
+        } catch (error) {
+            settings = null;
+        }
+    }
+
+    if (!settings || typeof settings !== 'object') {
+        settings = JSON.parse(JSON.stringify(ANOMFIN_DEFAULT_SETTINGS));
+    }
+
+    const cssVars = { ...ANOMFIN_DEFAULT_SETTINGS.cssVars, ...(settings.cssVars || {}) };
+    Object.entries(cssVars).forEach(([key, value]) => {
+        if (key && value != null) {
+            root.style.setProperty(key, value);
+        }
+    });
+
+    const behaviors = { ...ANOMFIN_DEFAULT_SETTINGS.behaviors, ...(settings.behaviors || {}) };
+    const bodyEl = document.body || document.getElementsByTagName('body')[0];
+    if (bodyEl) {
+        bodyEl.dataset.reactHover = behaviors.reactHover === false ? '0' : '1';
+        bodyEl.dataset.reactContact = behaviors.reactContact === false ? '0' : '1';
+    }
+
+    window.__ANOMFIN_SETTINGS = {
+        ...ANOMFIN_DEFAULT_SETTINGS,
+        ...settings,
+        cssVars,
+        behaviors
+    };
+
+    try {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('anomfin:lastSettings', JSON.stringify(window.__ANOMFIN_SETTINGS));
+        }
+    } catch (error) {
+        // ignore cache failures
+    }
+
+    return window.__ANOMFIN_SETTINGS;
 }
 
 // Smooth Scrolling for Navigation Links (skip skip-link)
@@ -228,11 +310,12 @@ function initIntroOverlay() {
             const varDY = parseFloat((getComputedStyle(document.documentElement).getPropertyValue('--logo-arc-dy')||'').replace('px','')) || 60;
             const midX = dx * varX;
             const midY = dy * varX - varDY;
+            const easingValue = getComputedStyle(document.documentElement).getPropertyValue('--logo-ease').trim() || 'cubic-bezier(.2,.8,.2,1)';
             const anim = logo.animate([
                 { transform: 'translate(0px,0px) scale(1)' },
                 { transform: `translate(${midX}px, ${midY}px) scale(${Math.max(1, scale*0.9)})` },
                 { transform: `translate(${dx}px, ${dy}px) scale(${scale})` }
-            ], { duration: moveMs, easing: (localStorage.getItem('anomfin:ease')||'cubic-bezier(.2,.8,.2,1)'), fill: 'forwards' });
+            ], { duration: moveMs, easing: easingValue, fill: 'forwards' });
 
             const onMoveEnd = () => {
                 // Neliö reagoi: tärisee, kasvaa ~20% ja vaihtaa vihreäksi
@@ -906,15 +989,13 @@ function initScrollCompanion() {
       }
     };
     // optional reactions
-    try{
-      const reactHover = (localStorage.getItem('anomfin:reactHover')||'1')==='1';
-      if(reactHover){
-        document.querySelectorAll('.service-card').forEach(card=>{
-          card.addEventListener('mouseenter', ()=>{ scaleTarget = 1.15; });
-          card.addEventListener('mouseleave', ()=>{ scaleTarget = 1; });
-        });
-      }
-    }catch(_){}
+    const reactHover = document.body.dataset.reactHover !== '0';
+    if(reactHover){
+      document.querySelectorAll('.service-card').forEach(card=>{
+        card.addEventListener('mouseenter', ()=>{ scaleTarget = 1.15; });
+        card.addEventListener('mouseleave', ()=>{ scaleTarget = 1; });
+      });
+    }
   }
   // start after DOM ready + small delay for intro
   document.addEventListener('DOMContentLoaded', ()=> setTimeout(initFloatingGrid, 1200));
