@@ -45,10 +45,113 @@ foreach ($connectionFiles as $file) {
         if (preg_match('/DB_USER["\']?\s*[=:]\s*["\']?([^"\';\s]+)/i', $content, $matches)) {
             $detectedConfig['db_user'] = $matches[1];
         }
+        if (preg_match('/DB_PASSWORD["\']?\s*[=:]\s*["\']?([^"\';\s]+)/i', $content, $matches)) {
+            $detectedConfig['db_password'] = $matches[1];
+        }
+        if (preg_match('/DB_PORT["\']?\s*[=:]\s*["\']?(\d+)/i', $content, $matches)) {
+            $detectedConfig['db_port'] = (int) $matches[1];
+        }
         if (preg_match('/localhost|127\.0\.0\.1/i', $content) && !isset($detectedConfig['db_host'])) {
             $detectedConfig['db_host'] = 'localhost';
         }
         break;
+    }
+}
+
+/**
+ * Parse simple KEY=VALUE formatted files (like .env)
+ */
+function anomfin_parse_env_file(string $path): array
+{
+    if (!is_readable($path)) {
+        return [];
+    }
+
+    $result = [];
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+
+        if ($trimmed === '' || strpos($trimmed, '#') === 0) {
+            continue;
+        }
+
+        if (strpos($trimmed, '=') === false) {
+            continue;
+        }
+
+        [$key, $value] = explode('=', $trimmed, 2);
+        $result[trim($key)] = trim($value);
+    }
+
+    return $result;
+}
+
+$forceInstall = isset($_GET['force']);
+$existingDatabaseReady = false;
+$installationSource = null;
+$dbCheckStatus = null;
+
+if ($envExists && !$forceInstall) {
+    $installationComplete = true;
+    $installationSource = 'env';
+}
+
+$envConfig = $envExists ? anomfin_parse_env_file(__DIR__ . '/.env') : [];
+
+$connectionConfig = [
+    'db_host' => $envConfig['DB_HOST'] ?? ($detectedConfig['db_host'] ?? null),
+    'db_name' => $envConfig['DB_NAME'] ?? ($detectedConfig['db_name'] ?? null),
+    'db_user' => $envConfig['DB_USER'] ?? ($detectedConfig['db_user'] ?? null),
+    'db_password' => $envConfig['DB_PASSWORD'] ?? ($detectedConfig['db_password'] ?? ''),
+    'db_port' => (int) ($envConfig['DB_PORT'] ?? ($detectedConfig['db_port'] ?? 3306)),
+];
+
+if (!$installationComplete && !$forceInstall && $connectionConfig['db_host'] && $connectionConfig['db_name'] && $connectionConfig['db_user']) {
+    try {
+        $dsn = sprintf(
+            'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
+            $connectionConfig['db_host'],
+            $connectionConfig['db_port'],
+            $connectionConfig['db_name']
+        );
+
+        $pdo = new PDO($dsn, $connectionConfig['db_user'], $connectionConfig['db_password'] ?? '', [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+
+        $requiredTables = ['contact_messages', 'site_settings'];
+        $missingTables = [];
+
+        foreach ($requiredTables as $table) {
+            $stmt = $pdo->prepare('SHOW TABLES LIKE :table');
+            $stmt->execute(['table' => $table]);
+            if ($stmt->rowCount() === 0) {
+                $missingTables[] = $table;
+            }
+        }
+
+        if (empty($missingTables)) {
+            $existingDatabaseReady = true;
+            $installationComplete = true;
+            $installationSource = 'database';
+            $dbCheckStatus = [
+                'type' => 'success',
+                'message' => 'Asennusohjelma havaitsi olemassa olevan tietokantayhteyden ja vaaditut taulut.',
+            ];
+        } else {
+            $dbCheckStatus = [
+                'type' => 'warning',
+                'message' => 'Tietokantayhteys löytyi, mutta seuraavat taulut puuttuvat: ' . implode(', ', $missingTables) . '.',
+            ];
+        }
+    } catch (PDOException $e) {
+        $dbCheckStatus = [
+            'type' => 'error',
+            'message' => 'Tietokantayhteyden tarkistus epäonnistui: ' . $e->getMessage(),
+        ];
     }
 }
 
@@ -117,18 +220,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installationComplete) {
                 // Write .env file
                 if (file_put_contents(__DIR__ . '/.env', $envContent) !== false) {
                     @chmod(__DIR__ . '/.env', 0600);
-                    
+
                     // Create admin.php if it doesn't exist
                     if (!file_exists(__DIR__ . '/admin.php')) {
                         createAdminPage();
                     }
-                    
+
                     $success = true;
                     $installationComplete = true;
+                    $installationSource = 'fresh';
                 } else {
                     $errors[] = 'Tiedoston .env luominen epäonnistui. Tarkista kirjoitusoikeudet.';
                 }
-                
+
             } catch (PDOException $e) {
                 $errors[] = 'Tietokantayhteys epäonnistui: ' . htmlspecialchars($e->getMessage());
             }
@@ -508,6 +612,7 @@ try {
         .alert-error { background: rgba(255, 68, 68, 0.1); border: 1px solid var(--error); color: var(--error); }
         .alert-success { background: rgba(0, 255, 166, 0.1); border: 1px solid var(--success); color: var(--success); }
         .alert-info { background: rgba(98, 161, 255, 0.1); border: 1px solid var(--accent); color: var(--accent); }
+        .alert-warning { background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); color: var(--warning); }
         button { background: var(--accent); color: #08111f; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; font-family: inherit; width: 100%; }
         button:hover { background: #7ab5ff; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -529,6 +634,13 @@ try {
                 <div class="icon">✅</div>
                 <h2>Asennus valmis!</h2>
                 <p>Sovellus on asennettu ja valmis käytettäväksi.</p>
+                <?php if ($installationSource === 'database' && $dbCheckStatus): ?>
+                    <p class="hint" style="margin-top: 10px; color: var(--accent);">
+                        <?php echo htmlspecialchars($dbCheckStatus['message'], ENT_QUOTES, 'UTF-8'); ?>
+                    </p>
+                <?php elseif ($installationSource === 'env'): ?>
+                    <p class="hint" style="margin-top: 10px;">Nykyinen .env-konfiguraatio on käytössä.</p>
+                <?php endif; ?>
                 <div style="margin-top: 30px;">
                     <a href="admin.php" class="btn-secondary" style="background: var(--accent); color: #08111f; font-weight: 600;">Avaa Admin-paneeli</a>
                     <a href="index.html" class="btn-secondary">Siirry etusivulle</a>
@@ -543,6 +655,13 @@ try {
                         Löydetty tiedosto: <code><?php echo htmlspecialchars($detectedConfig['connection_file']); ?></code><br>
                     <?php endif; ?>
                     Tiedot on esitäytetty lomakkeeseen. Tarkista ja täydennä puuttuvat tiedot.
+                </div>
+            <?php endif; ?>
+
+            <?php if ($dbCheckStatus && $dbCheckStatus['type'] !== 'success'): ?>
+                <?php $alertClass = $dbCheckStatus['type'] === 'warning' ? 'alert-warning' : 'alert-error'; ?>
+                <div class="alert <?php echo $alertClass; ?>">
+                    <?php echo htmlspecialchars($dbCheckStatus['message'], ENT_QUOTES, 'UTF-8'); ?>
                 </div>
             <?php endif; ?>
 

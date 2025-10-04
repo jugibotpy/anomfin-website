@@ -7,7 +7,14 @@ Tämä on puhdas julkaisupaketti AnomFIN-verkkosivustolle. Paketti sisältää v
 ```
 anomfin-website/
 ├── index.html              # Pääsivu
-├── asetukset.html          # Asetussivu
+├── asetukset.php           # Admin-asetussivu (kirjautuminen)
+├── api/
+│   └── settings.php        # Julkinen rajapinta asetuksille
+├── config/
+│   ├── admin.config.php    # Hallintapaneelin määritykset
+│   └── settings-defaults.php # Oletusarvot animaatioille
+├── data/
+│   └── settings.json       # Palvelimelle tallennetut asetukset
 ├── install.php             # Asennusohjelma (kertaluontoinen)
 ├── css/
 │   └── style.css          # Tyylit
@@ -49,9 +56,10 @@ scp -r * käyttäjä@palvelin.fi:/polku/webroot/
 Varmista, että tiedostoilla on oikeat käyttöoikeudet:
 
 ```bash
-chmod 755 index.html asetukset.html
-chmod 644 install.php
+chmod 755 index.html asetukset.php
+chmod 644 install.php api/settings.php
 chmod -R 755 css/ js/ assets/
+chmod -R 750 config/ data/
 ```
 
 ### Vaihe 3: Suorita asennus
@@ -83,16 +91,16 @@ Jos olet suorittanut asennuksen `install.php`:lla:
 
 ## ⚙️ Asetukset
 
-Voit säätää sivuston asetuksia avaamalla `asetukset.html`:
-- Intro-animaatiot
-- Teemat
-- Visuaaliset efektit
+Voit säätää sivuston asetuksia kirjautumalla osoitteeseen `asetukset.php`:
+- Intro-animaatiot ja ajastukset
+- Neon-teemat ja värit
+- Käyttäytymislogiikka (hover- ja kontaktireaktiot)
 
-Asetukset tallennetaan selaimen localStorageen.
+Asetukset tallennetaan palvelimelle tiedostoon `data/settings.json`, jolloin muutokset näkyvät kaikille kävijöille. Asetusten tallentaminen vaatii salasanan (vaihda oletus arvo `config/admin.config.php` -tiedostossa).
 
 ## 🔧 Muokkaus
 
-- **Sisältö**: Muokkaa `index.html` ja `asetukset.html`
+- **Sisältö**: Muokkaa `index.html` ja hallintaa `asetukset.php`
 - **Tyylit**: Muokkaa `css/style.css`
 - **Toiminnallisuus**: Muokkaa `js/script.js`
 - **Kuvat**: Korvaa tiedostot `assets/`-kansiossa

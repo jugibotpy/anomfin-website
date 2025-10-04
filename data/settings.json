@@ -1,0 +1,35 @@
+{
+  "cssVars": {
+    "--intro-blackout-ms": "500ms",
+    "--intro-bg-fade-ms": "3000ms",
+    "--logo-reveal-ms": "2500ms",
+    "--logo-initial-opacity": "0.2",
+    "--logo-initial-blur": "80px",
+    "--logo-initial-brightness": "0.85",
+    "--logo-initial-scale": "2",
+    "--logo-move-duration-ms": "1000ms",
+    "--logo-move-delay-ms": "600ms",
+    "--logo-arc-x": "0.65",
+    "--logo-arc-dy": "60px",
+    "--grid-hue-duration-ms": "1800ms",
+    "--square-shake-duration-ms": "1000ms",
+    "--square-shake-amp": "14px",
+    "--square-scale-end": "1.25",
+    "--orb-float-duration-s": "8s",
+    "--grid-float-duration-s": "6s",
+    "--eyebrow-size": "1rem",
+    "--services-fade-delay-ms": "200ms",
+    "--neon": "#00FFA6",
+    "--square-green-rgba": "0,255,150",
+    "--logo-ease": "cubic-bezier(.2,.8,.2,1)"
+  },
+  "behaviors": {
+    "reactHover": true,
+    "reactContact": true
+  },
+  "preset": null,
+  "meta": {
+    "updated_at": "2024-01-01T00:00:00+00:00",
+    "updated_by": "Bootstrap"
+  }
+}
