@@ -1,62 +1,125 @@
-AnomFIN · Kyberturva- ja sovelluskehityssivusto
+# AnomFIN Website - Clean Release Package
 
-Ammattimainen, responsiivinen sivupohja AnomFINille (AnomTools-tiimi). Staattinen versio on juurihakemistossa; lisäksi mukana on kevyt Astro-yksisivuinen versio.
+Tämä on puhdas julkaisupaketti AnomFIN-verkkosivustolle. Paketti sisältää vain tuotantoon tarvittavat tiedostot.
 
-## Ominaisuudet
-
-- Responsiivinen ulkoasu ja moderni tummateema
-- Selkeä navigaatio, sankariosio ja palvelukortit
-- Hinnoittelu ja UKK-osiot
-- Yhteyslomake (valmis backend‑integraatiolle)
-- Sisältö JSONista (Astro-projektissa)
-
-## Pika-aloitus (staattinen sivu)
-
-1. Avaa `index.html` suoraan selaimessa
-2. Muokkaa sisältöä `index.html`, tyylejä `css/style.css`, skriptejä `js/script.js`
-3. Paketoi julkaisuun komennolla `./package.sh`
-
-Hakemistorakenne (staattinen):
+## 📦 Paketin sisältö
 
 ```
-├── index.html
+anomfin-website/
+├── index.html              # Pääsivu
+├── asetukset.html          # Asetussivu
+├── install.php             # Asennusohjelma (kertaluontoinen)
 ├── css/
-│   └── style.css
+│   └── style.css          # Tyylit
 ├── js/
-│   └── script.js
-├── assets/
-│   └── logo.svg
-└── docs/
+│   └── script.js          # JavaScript-toiminnallisuus
+└── assets/
+    ├── logo.png           # Logo (PNG)
+    ├── logo.svg           # Logo (SVG)
+    └── image2vector.svg   # Vektorigrafiikka
 ```
 
-## Astro-yksisivuinen (kokeilu)
+## �� Asennus (3 vaihetta)
 
-Kevyt Astro-projekti löytyy `astro/`-hakemistosta. Se käyttää JSON-sisältöä ja komponentteja.
+### Vaihe 1: Lataa tiedostot palvelimelle
 
-- Sivut/komponentit: `astro/src/pages/index.astro`, `astro/src/components/*`
-- Layout/tyylit: `astro/src/layouts/Base.astro`, `astro/public/css/style.css`
-- Sisältö: `astro/src/content/site.json`
-- Julkiset tiedostot: `astro/public/assets/logo.svg`, `astro/public/css/style.css`
+**FileZilla-ohjeet:**
 
-Aja paikallisesti (Node 18+):
+1. Lataa ja asenna [FileZilla](https://filezilla-project.org/)
+2. Yhdistä webhotelliisi:
+   - Host: `ftp.palveluntarjoajasi.fi`
+   - Username: `käyttäjätunnuksesi`
+   - Password: `salasanasi`
+   - Port: `21` (tai `22` SFTP:lle)
+3. Pura `v_final.zip` paikallisesti
+4. Siirrä kaikki tiedostot ja kansiot webhotellin juureen (esim. `/public_html/`)
+
+**Vaihtoehtoisesti komentorivillä:**
 
 ```bash
-cd astro
-npm install   # vaatii verkkoyhteyden
-npm run dev   # http://localhost:4321
+# Pura paketti
+unzip v_final.zip
+
+# Siirrä tiedostot palvelimelle
+scp -r * käyttäjä@palvelin.fi:/polku/webroot/
 ```
 
-Huom: Jos tätä ajetaan ympäristössä ilman verkkoa, asenna ja aja paikallisesti omalla koneellasi.
+### Vaihe 2: Aseta oikeudet
 
-## Julkaisu
+Varmista, että tiedostoilla on oikeat käyttöoikeudet:
 
-- Staattinen: kopioi juuren tiedostot palvelimelle tai käytä `./package.sh`
-- Astro: `npm run build` tuottaa `dist/`-hakemiston (voit julkaista esim. Vercel/Cloudflare Pages)
+```bash
+chmod 755 index.html asetukset.html
+chmod 644 install.php
+chmod -R 755 css/ js/ assets/
+```
 
-## Kehitysvinkit
+### Vaihe 3: Suorita asennus
 
-- Pidä tekstit yhdessä lähteessä (`site.json` tai Astro: `src/content/site.json`)
-- Lisää schema.org (Organization, Product, FAQ) ja meta‑tagit tuotannossa
-- Lomakkeelle taustapalvelu (esim. SMTP/Brevo) ja validointi
+1. Avaa selaimessa: `http://verkkotunnuksesi.fi/install.php`
+2. Täytä tietokantaan liittyvät tiedot:
+   - Tietokannan nimi
+   - Käyttäjätunnus
+   - Salasana
+   - Palvelin (yleensä `localhost`)
+3. Klikkaa **"Asenna nyt"**
+4. Asennus luo tarvittavat tietokantataulut ja määritykset
+5. **Poista `install.php` asennuksen jälkeen turvallisuussyistä**
+
+## 🎨 Käyttö
+
+### Staattinen sivu
+
+Jos et tarvitse tietokantaa, voit käyttää sivustoa suoraan:
+- Avaa `index.html` selaimessa
+- Sivusto toimii ilman PHP:ta tai tietokantaa
+
+### Dynaaminen sivu (PHP + tietokanta)
+
+Jos olet suorittanut asennuksen `install.php`:lla:
+- Sivusto toimii täysillä ominaisuuksilla
+- Yhteyslomake tallentaa viestit tietokantaan
+- Admin-paneeli käytettävissä
+
+## ⚙️ Asetukset
+
+Voit säätää sivuston asetuksia avaamalla `asetukset.html`:
+- Intro-animaatiot
+- Teemat
+- Visuaaliset efektit
+
+Asetukset tallennetaan selaimen localStorageen.
+
+## 🔧 Muokkaus
+
+- **Sisältö**: Muokkaa `index.html` ja `asetukset.html`
+- **Tyylit**: Muokkaa `css/style.css`
+- **Toiminnallisuus**: Muokkaa `js/script.js`
+- **Kuvat**: Korvaa tiedostot `assets/`-kansiossa
+
+## 📋 Vaatimukset
+
+**Staattiselle sivustolle:**
+- Webpalvelin (Apache, Nginx, jne.)
+- Moderni selain
+
+**PHP-ominaisuuksille:**
+- PHP 7.4 tai uudempi
+- MySQL 5.7 tai uudempi / MariaDB 10.2 tai uudempi
+- PDO PHP Data Objects -tuki
+- Apache mod_rewrite (suositeltu)
+
+## 🆘 Tuki
+
+Jos tarvitset apua asennuksessa tai käytössä:
+- **Sähköposti**: info@anomfin.fi
+- **Verkkosivusto**: https://anomfin.fi
+
+## 📄 Lisenssi
 
 © 2025 AnomFIN · Kaikki oikeudet pidätetään.
+
+---
+
+**Huom:** Tämä on puhdas julkaisupaketti. Kehitystiedostot, dokumentaatio ja testit on poistettu.
+Jos haluat jatkaa kehitystä, kloonaa täydellinen repository GitHubista.
