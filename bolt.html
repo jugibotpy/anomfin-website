@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AnomRace - Compare two Bolt rides in real-time">
+    <title>AnomRace - Bolt Ride Comparison</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/image2vector.svg" type="image/svg+xml">
+    <style>
+        /* Additional styles specific to bolt.html */
+        .bolt-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .bolt-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .bolt-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffa6, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .bolt-subtitle {
+            font-size: 1.125rem;
+            color: rgba(244, 247, 251, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bolt-inputs {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .bolt-inputs {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .input-group {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 255, 166, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .input-group:hover {
+            border-color: rgba(0, 255, 166, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-group.active {
+            border-color: #00ffa6;
+            box-shadow: 0 0 20px rgba(0, 255, 166, 0.3);
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            color: #00ffa6;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.875rem;
+            background: rgba(6, 7, 10, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #f4f7fb;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #00ffa6;
+            box-shadow: 0 0 0 3px rgba(0, 255, 166, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: rgba(244, 247, 251, 0.4);
+        }
+
+        .bolt-button {
+            background: linear-gradient(135deg, #00ffa6, #00d4ff);
+            color: #06070a;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 1rem;
+        }
+
+        .bolt-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 166, 0.3);
+        }
+
+        .bolt-button:active {
+            transform: translateY(0);
+        }
+
+        .bolt-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bolt-results {
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 3rem;
+            display: none;
+        }
+
+        .bolt-results.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .race-status {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 166, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .race-status h2 {
+            font-size: 1.5rem;
+            color: #00ffa6;
+            margin-bottom: 1rem;
+        }
+
+        .leader-info {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .eta-info {
+            color: rgba(244, 247, 251, 0.7);
+        }
+
+        .rides-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .rides-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .ride-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 255, 166, 0.2);
+        }
+
+        .ride-card.leading {
+            border-color: #00ffa6;
+            box-shadow: 0 0 25px rgba(0, 255, 166, 0.2);
+        }
+
+        .ride-card h3 {
+            color: #00ffa6;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ride-card.leading h3::after {
+            content: "🏆";
+            font-size: 1.25rem;
+        }
+
+        .ride-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-label {
+            color: rgba(244, 247, 251, 0.7);
+            font-size: 0.875rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #f4f7fb;
+        }
+
+        .error-message {
+            background: rgba(255, 50, 50, 0.1);
+            border: 1px solid rgba(255, 50, 50, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            color: #ff6b6b;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .loading-spinner {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .loading-spinner.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 166, 0.2);
+            border-top-color: #00ffa6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #00ffa6;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 166, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 166, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(0, 255, 166, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffa6, #00d4ff);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <a class="back-link" href="index.html">
+        <span>←</span>
+        <span>Back to AnomFIN</span>
+    </a>
+
+    <div class="bolt-container">
+        <div class="bolt-header">
+            <h1 class="bolt-title">AnomRace</h1>
+            <p class="bolt-subtitle">Compare two Bolt rides in real-time and see which one arrives first</p>
+        </div>
+
+        <div class="bolt-inputs">
+            <div class="input-group" id="input-group-1">
+                <label class="input-label" for="ride-url-1">Ride 1 URL</label>
+                <input 
+                    type="text" 
+                    id="ride-url-1" 
+                    class="input-field" 
+                    placeholder="https://ride.bolt.eu/route-sharing/?s=..."
+                >
+            </div>
+            <div class="input-group" id="input-group-2">
+                <label class="input-label" for="ride-url-2">Ride 2 URL</label>
+                <input 
+                    type="text" 
+                    id="ride-url-2" 
+                    class="input-field" 
+                    placeholder="https://ride.bolt.eu/route-sharing/?s=..."
+                >
+            </div>
+        </div>
+
+        <button class="bolt-button" id="compare-btn">Start Race Comparison</button>
+
+        <div class="error-message" id="error-message"></div>
+
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="bolt-results" id="results">
+            <div class="race-status">
+                <h2 id="status-title">Race Status</h2>
+                <p class="leader-info" id="leader-info">Calculating...</p>
+                <p class="eta-info" id="eta-info">Estimated arrival times</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="rides-grid">
+                <div class="ride-card" id="ride-card-1">
+                    <h3>Ride 1</h3>
+                    <div class="ride-info" id="ride-info-1">
+                        <div class="info-row">
+                            <span class="info-label">Status</span>
+                            <span class="info-value" id="status-1">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Distance Remaining</span>
+                            <span class="info-value" id="distance-1">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Current Speed</span>
+                            <span class="info-value" id="speed-1">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">ETA</span>
+                            <span class="info-value" id="eta-1">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ride-card" id="ride-card-2">
+                    <h3>Ride 2</h3>
+                    <div class="ride-info" id="ride-info-2">
+                        <div class="info-row">
+                            <span class="info-label">Status</span>
+                            <span class="info-value" id="status-2">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Distance Remaining</span>
+                            <span class="info-value" id="distance-2">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Current Speed</span>
+                            <span class="info-value" id="speed-2">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">ETA</span>
+                            <span class="info-value" id="eta-2">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/bolt.js"></script>
+</body>
+</html>
