@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnomFIN Snagen DRAGON Countdown</title>
+    <meta name="description" content="AnomFIN × AnomTools Snagen DRAGON Countdown – 30 minuutin neon-räjähtävä elämys savuefekteillä.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/image2vector.svg" type="image/svg+xml">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-primary: radial-gradient(circle at 20% 20%, rgba(0, 255, 214, 0.25), transparent 60%),
+                radial-gradient(circle at 80% 10%, rgba(255, 0, 204, 0.2), transparent 65%),
+                radial-gradient(circle at 50% 80%, rgba(0, 132, 255, 0.3), transparent 70%),
+                linear-gradient(135deg, #04010f 0%, #090225 45%, #02010f 100%);
+            --card-bg: rgba(6, 6, 28, 0.85);
+            --neon-primary: #00ffe1;
+            --neon-secondary: #9c4dff;
+            --accent: #ff4d94;
+            --text-primary: #f8fbff;
+            --text-muted: rgba(248, 251, 255, 0.7);
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url("assets/logo.png") center/contain no-repeat;
+            opacity: 0.08;
+            pointer-events: none;
+            filter: drop-shadow(0 0 40px rgba(0, 255, 225, 0.35));
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 65%);
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+
+        .code-stream {
+            position: fixed;
+            inset: -10% 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: -2;
+            opacity: 0.32;
+            mix-blend-mode: screen;
+        }
+
+        .code-track {
+            position: absolute;
+            width: 140%;
+            left: -20%;
+            top: -100%;
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            font-size: clamp(1rem, 1.1vw + 0.6rem, 1.35rem);
+            line-height: 1.6;
+            letter-spacing: 0.28em;
+            white-space: pre;
+            background: linear-gradient(180deg, rgba(0, 255, 225, 0.55), rgba(156, 77, 255, 0.45), rgba(255, 77, 148, 0.4));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 0 18px rgba(0, 255, 225, 0.25));
+            animation: scrollCode 18s linear infinite;
+            opacity: 0.6;
+        }
+
+        .code-track:nth-child(2) {
+            top: 50%;
+            animation-delay: -9s;
+            animation-duration: 16s;
+        }
+
+        @keyframes scrollCode {
+            from { transform: translate3d(0, -100%, 0); }
+            to { transform: translate3d(0, 100%, 0); }
+        }
+
+        .aura-orbit {
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 225, 0.35), transparent 60%);
+            filter: blur(12px);
+            animation: pulseOrbit 6s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes pulseOrbit {
+            0%, 100% { transform: scale(0.95); opacity: 0.65; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .counter-shell {
+            position: relative;
+            width: min(540px, calc(100% - 32px));
+            padding: 3.5rem 3rem;
+            border-radius: 28px;
+            background: var(--card-bg);
+            backdrop-filter: blur(22px) saturate(140%);
+            border: 1px solid rgba(0, 255, 225, 0.25);
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55), inset 0 0 80px rgba(156, 77, 255, 0.2);
+            text-align: center;
+        }
+
+        .counter-shell::after {
+            content: "";
+            position: absolute;
+            inset: 4px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+        }
+
+        .logo-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(0, 255, 225, 0.12), rgba(156, 77, 255, 0.18));
+            border: 1px solid rgba(0, 255, 225, 0.35);
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .logo-chip span {
+            color: var(--text-muted);
+        }
+
+        h1 {
+            font-size: clamp(1.9rem, 2.7vw + 1rem, 2.9rem);
+            margin: 0 0 1rem;
+            letter-spacing: -0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .word-snagen {
+            background: linear-gradient(135deg, #00ffe1 0%, #00b7ff 50%, #00ff9d 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 18px rgba(0, 255, 225, 0.5);
+            position: relative;
+        }
+
+        .word-snagen::after {
+            content: "";
+            position: absolute;
+            inset: -6px -12px;
+            border-radius: 18px;
+            background: radial-gradient(circle, rgba(0, 255, 225, 0.18), transparent 65%);
+            filter: blur(12px);
+            z-index: -1;
+        }
+
+        .word-dragon {
+            background: linear-gradient(135deg, #ff4d94 0%, #ff833a 45%, #ffd86a 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 24px rgba(255, 77, 148, 0.65), 0 0 40px rgba(255, 140, 74, 0.55);
+            letter-spacing: 0.06em;
+            position: relative;
+        }
+
+        .word-dragon::after {
+            content: "";
+            position: absolute;
+            inset: -10px -14px;
+            border-radius: 22px;
+            background: radial-gradient(circle, rgba(255, 77, 148, 0.2), transparent 70%);
+            filter: blur(16px);
+            z-index: -1;
+        }
+
+        p.subtitle {
+            margin: 0 auto 2.4rem;
+            max-width: 32ch;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.2rem;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 225, 0.9), rgba(156, 77, 255, 0.95));
+            color: #02010f;
+            font-weight: 700;
+            padding: 1.1rem 2.6rem;
+            border-radius: 999px;
+            font-size: 1.2rem;
+            letter-spacing: 0.04em;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 20px 50px rgba(0, 255, 225, 0.35);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 26px 60px rgba(156, 77, 255, 0.4);
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .primary-btn.is-running {
+            opacity: 0.9;
+            cursor: progress;
+        }
+
+        .timer-display {
+            font-variant-numeric: tabular-nums;
+            font-size: clamp(3.6rem, 4vw + 1rem, 5.5rem);
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--neon-primary);
+            text-shadow: 0 0 18px rgba(0, 255, 225, 0.6);
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 320px;
+            z-index: 2;
+        }
+
+        .timer-display::after {
+            content: "";
+            position: absolute;
+            inset: -10%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 225, 0.16), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .countdown-active .timer-display::after {
+            opacity: 1;
+            animation: timerSweep 1.2s linear infinite;
+        }
+
+        @keyframes timerSweep {
+            0% { transform: scale(1); opacity: 0.45; }
+            50% { transform: scale(1.08); opacity: 0.85; }
+            100% { transform: scale(1); opacity: 0.45; }
+        }
+
+        .timer-ring {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(0, 255, 225, 0.15), rgba(9, 2, 37, 0.1));
+            border: 1px solid rgba(0, 255, 225, 0.35);
+            box-shadow: inset 0 0 50px rgba(0, 255, 225, 0.18), 0 20px 70px rgba(0, 0, 0, 0.45);
+            overflow: hidden;
+        }
+
+        .timer-ring::after {
+            content: "";
+            position: absolute;
+            inset: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            opacity: 0.6;
+        }
+
+        .timer-ring::before {
+            content: "";
+            position: absolute;
+            inset: 10px;
+            border-radius: 50%;
+            border: 1px solid rgba(156, 77, 255, 0.35);
+            filter: blur(1px);
+            animation: rotateRing 12s linear infinite;
+        }
+
+        @keyframes rotateRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .timer-ring .ring-glow {
+            position: absolute;
+            border-radius: 50%;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            opacity: 0.8;
+            animation: swirlGlow 8s linear infinite;
+        }
+
+        .timer-ring .ring-glow--inner {
+            inset: 28px;
+            border: 1px solid rgba(0, 255, 225, 0.35);
+            box-shadow: 0 0 30px rgba(0, 255, 225, 0.32);
+        }
+
+        .timer-ring .ring-glow--outer {
+            inset: 6px;
+            border: 1px solid rgba(255, 77, 148, 0.25);
+            box-shadow: 0 0 40px rgba(255, 77, 148, 0.28);
+            animation-direction: reverse;
+            animation-duration: 10s;
+        }
+
+        .rotating-sigil {
+            position: absolute;
+            inset: 18px;
+            border-radius: 50%;
+            border: 1px dashed rgba(0, 255, 225, 0.3);
+            display: grid;
+            place-items: center;
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            font-family: "IBM Plex Mono", monospace;
+            text-transform: uppercase;
+            color: rgba(0, 255, 225, 0.35);
+            animation: swirlGlow 14s linear infinite;
+        }
+
+        .rotating-sigil::before {
+            content: "AnomFIN · Snagen · DRAGON · AnomTools";
+        }
+
+        .orbit-particle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(0, 255, 225, 0.6) 50%, transparent 100%);
+            box-shadow: 0 0 22px rgba(0, 255, 225, 0.75);
+            animation: floatDrift 6s ease-in-out infinite;
+        }
+
+        .orbit-particle--one { top: 18%; left: 12%; animation-delay: -1.4s; }
+        .orbit-particle--two { bottom: 14%; right: 10%; animation-delay: -3.1s; }
+        .orbit-particle--three { top: 40%; right: 14%; animation-delay: -4.2s; }
+
+        @keyframes swirlGlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes floatDrift {
+            0%, 100% { transform: translate3d(0, 0, 0); opacity: 1; }
+            50% { transform: translate3d(8px, -12px, 0) scale(1.2); opacity: 0.7; }
+        }
+
+        .dragon-strip {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2.6rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .dragon-strip span {
+            position: relative;
+            padding: 0.4rem 1.4rem;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(156, 77, 255, 0.2);
+        }
+
+        .dragon-strip span:first-child {
+            background: linear-gradient(135deg, rgba(0, 255, 225, 0.4), rgba(0, 183, 255, 0.35));
+            border-color: rgba(0, 255, 225, 0.55);
+            color: #001d1f;
+            text-shadow: 0 0 12px rgba(0, 255, 225, 0.65);
+        }
+
+        .dragon-strip span:nth-child(2) {
+            background: linear-gradient(135deg, rgba(255, 77, 148, 0.45), rgba(255, 131, 58, 0.4));
+            border-color: rgba(255, 131, 58, 0.6);
+            color: #2c0500;
+            text-shadow: 0 0 14px rgba(255, 77, 148, 0.65);
+        }
+
+        .dragon-strip span::after {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, transparent, rgba(0, 255, 225, 0.2));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .dragon-strip span.active::after {
+            opacity: 1;
+        }
+
+        .corner-code {
+            position: absolute;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: rgba(0, 255, 225, 0.25);
+            opacity: 0.85;
+            white-space: nowrap;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            animation: codeSweep 10s linear infinite;
+        }
+
+        .corner-code--top { top: 18px; left: 10%; }
+        .corner-code--bottom { bottom: 16px; right: 8%; animation-delay: -5s; }
+
+        @keyframes codeSweep {
+            0% { transform: translateX(-10%) skewX(-6deg); opacity: 0.4; }
+            50% { transform: translateX(12%) skewX(6deg); opacity: 0.85; }
+            100% { transform: translateX(-10%) skewX(-6deg); opacity: 0.4; }
+        }
+
+        .halo-spinner {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 225, 0.25);
+            filter: drop-shadow(0 0 24px rgba(0, 255, 225, 0.4));
+            mix-blend-mode: screen;
+            animation: haloSpin 12s linear infinite;
+            pointer-events: none;
+        }
+
+        .halo-spinner::after {
+            content: "";
+            position: absolute;
+            inset: -8px;
+            border-radius: inherit;
+            border: 1px dashed rgba(255, 77, 148, 0.35);
+            animation: haloSpin 8s linear infinite reverse;
+        }
+
+        .halo-spinner--left { top: 16%; left: -60px; }
+        .halo-spinner--right { bottom: 18%; right: -70px; animation-duration: 9s; }
+
+        @keyframes haloSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .finale {
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.55);
+            letter-spacing: 0.05em;
+        }
+
+        .finale strong {
+            color: var(--neon-secondary);
+        }
+
+        .countdown-active .primary-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 225, 0.5), rgba(156, 77, 255, 0.65));
+        }
+
+        .detonated .counter-shell {
+            opacity: 0;
+            transform: scale(0.85);
+            filter: blur(12px);
+            transition: opacity 0.8s ease, transform 0.8s ease, filter 1s ease;
+        }
+
+        .final-ten .timer-display {
+            color: #fffb91;
+            text-shadow: 0 0 25px rgba(255, 251, 145, 0.8), 0 0 60px rgba(255, 82, 129, 0.7);
+        }
+
+        .final-ten .timer-ring {
+            border-color: rgba(255, 82, 129, 0.65);
+            box-shadow: inset 0 0 70px rgba(255, 82, 129, 0.35), 0 20px 80px rgba(0, 0, 0, 0.55);
+            animation: pulseShard 0.8s ease-in-out infinite;
+        }
+
+        .final-ten .timer-ring::before {
+            border-color: rgba(255, 251, 145, 0.9);
+            animation-duration: 2s;
+        }
+
+        .final-ten .dragon-strip span.active {
+            background: rgba(255, 82, 129, 0.32);
+            border-color: rgba(255, 251, 145, 0.45);
+        }
+
+        .final-ten .ring-glow--outer {
+            animation-duration: 4s;
+            box-shadow: 0 0 80px rgba(255, 251, 145, 0.55);
+        }
+
+        .final-ten .rotating-sigil {
+            animation-duration: 5s;
+            color: rgba(255, 251, 145, 0.75);
+        }
+
+        .final-ten .halo-spinner {
+            animation-duration: 6s;
+            filter: drop-shadow(0 0 40px rgba(255, 251, 145, 0.65));
+        }
+
+        @keyframes pulseShard {
+            0%, 100% { transform: scale(1); }
+            45% { transform: scale(1.03); }
+            65% { transform: scale(0.97); }
+        }
+
+        body.detonated {
+            animation: blackout 1.6s forwards ease-in;
+        }
+
+        @keyframes blackout {
+            0% { filter: none; }
+            40% { filter: brightness(2) saturate(2); }
+            100% { filter: brightness(0); }
+        }
+
+        .smoke-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, rgba(20, 20, 20, 0.9), rgba(0, 0, 0, 0.98));
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 1.6s ease;
+            z-index: 10;
+        }
+
+        .smoke-layer.active {
+            opacity: 0.92;
+        }
+
+        .shockwave {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 82, 129, 0.2) 35%, transparent 70%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            z-index: 9;
+        }
+
+        .shockwave.active {
+            animation: shockwavePulse 1.8s ease-out forwards;
+        }
+
+        @keyframes shockwavePulse {
+            0% { transform: scale(0.5); opacity: 0.85; }
+            60% { transform: scale(1.3); opacity: 0.35; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .detonate-message {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 1.2s ease 0.4s, transform 1s ease 0.4s;
+            z-index: 11;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .detonate-message.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .detonate-message h2 {
+            font-size: clamp(2.2rem, 5vw, 3.6rem);
+            margin-bottom: 1.2rem;
+            letter-spacing: 0.08em;
+            color: #fffb91;
+        }
+
+        .detonate-message p {
+            max-width: 40ch;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 0.04em;
+        }
+
+        footer.signature {
+            position: absolute;
+            bottom: 24px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            letter-spacing: 0.18em;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        @media (max-width: 600px) {
+            .counter-shell {
+                padding: 2.6rem 1.8rem;
+            }
+
+            .timer-ring {
+                width: 230px;
+                height: 230px;
+            }
+
+            .timer-display {
+                min-width: 240px;
+                font-size: clamp(3rem, 10vw, 4.2rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="code-stream" aria-hidden="true">
+        <div class="code-track">0101 1100 0011 1110 SNAGEN DRAGON TEBOIL LINUX PHP PYTHON JUGI AnomFIN AnomTools 1010 0101&#10;1110 0101 0110 0101 DRAGON SNAGEN MATRIX CLOUD NEO CODESTREAM PYTHON PHP LINUX&#10;0101 1010 0101 1010 JUGI DRAGON CORE TEBOIL SNAGEN HYPER SYS ADMIN 0001 1111&#10;1010 0101 0011 0101 LINUX PHP PYTHON SNAGEN DRAGON MATRIX AnomFIN AnomTools&#10;0101 0110 1010 1101 TEBOIL LEGACY FUTURE QUANTUM FLARE DRAGON SNAGEN CODE</div>
+        <div class="code-track">1010 0101 0010 1100 DRAGON SNAGEN PYTHON LINUX PHP TEBOIL AnomFIN AnomTools&#10;0100 1110 0101 0001 MATRIX CORE RAVE SNAGEN DRAGON BYTECODE STREAMFLOW&#10;0101 1010 0101 1010 TEBOIL LINUX PHP PYTHON DRAGON SNAGEN QUASAR JUGI&#10;1111 0001 1010 0101 SNAGEN DRAGON HYPER THREAD LINUX PHP PYTHON TEBOIL&#10;0101 1010 0101 0011 AnomFIN AnomTools SNAGEN DRAGON LINUX PHP PYTHON</div>
+    </div>
+    <div class="aura-orbit" aria-hidden="true"></div>
+    <div class="counter-shell" id="counter-shell">
+        <div class="logo-chip" aria-hidden="true">
+            <strong>AnomFIN</strong>
+            <span>×</span>
+            <strong>AnomTools</strong>
+        </div>
+        <div class="halo-spinner halo-spinner--left" aria-hidden="true"></div>
+        <div class="halo-spinner halo-spinner--right" aria-hidden="true"></div>
+        <span class="corner-code corner-code--top" aria-hidden="true">SNAGEN · DRAGON · LINUX · PYTHON · TEBOIL · JUGI</span>
+        <span class="corner-code corner-code--bottom" aria-hidden="true">AnomFIN · AnomTools · Snagen · Dragon · Quantum · Flux</span>
+        <h1><span class="word-snagen">Snagen</span> <span class="word-dragon">DRAGON</span> Countdown</h1>
+        <p class="subtitle">Nautimme juuri hetkestä – paina nappia ja anna 30 minuutin neon-dragonkronometrin kuljettaa sinut kohti savuisia juhlia.</p>
+        <div class="control-panel">
+            <button class="primary-btn" id="start-btn">Nautimme juuri</button>
+            <div class="timer-ring">
+                <div class="ring-glow ring-glow--outer" aria-hidden="true"></div>
+                <div class="ring-glow ring-glow--inner" aria-hidden="true"></div>
+                <div class="rotating-sigil" aria-hidden="true"></div>
+                <div class="orbit-particle orbit-particle--one" aria-hidden="true"></div>
+                <div class="orbit-particle orbit-particle--two" aria-hidden="true"></div>
+                <div class="orbit-particle orbit-particle--three" aria-hidden="true"></div>
+                <div class="timer-display" id="timer-display" aria-live="polite">30:00</div>
+            </div>
+        </div>
+        <div class="dragon-strip" aria-hidden="true">
+            <span>Snagen Spark</span>
+            <span>DRAGON Flame</span>
+            <span>Teboil Matrix</span>
+            <span>Linux × Python</span>
+        </div>
+        <p class="finale">Snagen DRAGON Countdown powered by <strong>AnomFIN</strong> × <strong>AnomTools</strong></p>
+    </div>
+
+    <div class="smoke-layer" id="smoke-layer" aria-hidden="true"></div>
+    <div class="shockwave" id="shockwave" aria-hidden="true"></div>
+    <div class="detonate-message" id="detonate-message" role="alert" aria-live="assertive">
+        <div>
+            <h2>Savupurkautuminen täydellinen.</h2>
+            <p>AnomFIN × AnomTools Snagen DRAGON Countdown suli ilmaan. Neon jälki jää, mutta hetki jatkuu mielissä.</p>
+        </div>
+    </div>
+
+    <footer class="signature">© 2025 AnomFIN • AnomTools Snagen DRAGON</footer>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const timerDisplay = document.getElementById('timer-display');
+        const counterShell = document.getElementById('counter-shell');
+        const smokeLayer = document.getElementById('smoke-layer');
+        const shockwave = document.getElementById('shockwave');
+        const detonateMessage = document.getElementById('detonate-message');
+        const stripItems = Array.from(document.querySelectorAll('.dragon-strip span'));
+
+        const TOTAL_SECONDS = 30 * 60;
+        let countdownInterval = null;
+        let remainingSeconds = TOTAL_SECONDS;
+        let countdownEndTimestamp = null;
+        let audioContext = null;
+
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+            return `${minutes}:${seconds}`;
+        }
+
+        function triggerBeep() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.4, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.35);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.4);
+        }
+
+        function activateFinale() {
+            document.body.classList.add('detonated');
+            smokeLayer.classList.add('active');
+            shockwave.classList.add('active');
+            detonateMessage.classList.add('active');
+            stripItems.forEach(item => item.classList.remove('active'));
+            startBtn.classList.remove('is-running');
+            startBtn.textContent = 'Savupurkaus valmis';
+            startBtn.setAttribute('aria-label', 'Snagen DRAGON Countdown suoritettu');
+        }
+
+        function updateStripHighlight(index = -1) {
+            stripItems.forEach((item, idx) => {
+                item.classList.toggle('active', idx === index);
+            });
+        }
+
+        function updateStripByRemaining(seconds) {
+            let targetIndex = 0;
+            if (seconds <= 10) {
+                targetIndex = 3;
+            } else if (seconds <= 10 * 60) {
+                targetIndex = 2;
+            } else if (seconds <= 20 * 60) {
+                targetIndex = 1;
+            }
+            updateStripHighlight(targetIndex);
+        }
+
+        function setCountdownVisuals(seconds) {
+            timerDisplay.textContent = formatTime(seconds);
+            updateStripByRemaining(seconds);
+
+            if (seconds > 0 && seconds <= 10) {
+                counterShell.classList.add('final-ten');
+                triggerBeep();
+                timerDisplay.setAttribute('aria-label', `Loppuräjähdykseen ${seconds} sekuntia`);
+            } else {
+                counterShell.classList.remove('final-ten');
+                timerDisplay.removeAttribute('aria-label');
+            }
+        }
+
+        function startCountdown() {
+            if (countdownInterval) {
+                return;
+            }
+
+            startBtn.disabled = true;
+            startBtn.classList.add('is-running');
+            startBtn.textContent = 'Snagen DRAGON käynnissä';
+            startBtn.setAttribute('aria-label', 'Snagen DRAGON Countdown käynnissä');
+            counterShell.classList.add('countdown-active');
+            remainingSeconds = TOTAL_SECONDS;
+            updateStripHighlight(0);
+            setCountdownVisuals(remainingSeconds);
+            countdownEndTimestamp = Date.now() + TOTAL_SECONDS * 1000;
+
+            const tick = () => {
+                const now = Date.now();
+                const secondsLeft = Math.max(0, Math.ceil((countdownEndTimestamp - now) / 1000));
+
+                if (secondsLeft === remainingSeconds) {
+                    return;
+                }
+
+                remainingSeconds = secondsLeft;
+
+                if (remainingSeconds <= 0) {
+                    timerDisplay.textContent = '00:00';
+                    timerDisplay.removeAttribute('aria-label');
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                    counterShell.classList.remove('final-ten');
+                    counterShell.classList.remove('countdown-active');
+                    activateFinale();
+                    return;
+                }
+
+                setCountdownVisuals(remainingSeconds);
+            };
+
+            countdownInterval = setInterval(tick, 250);
+        }
+
+        startBtn.addEventListener('click', () => {
+            startCountdown();
+        });
+
+        // Accessibility: allow pressing Enter/Space while focused
+        startBtn.addEventListener('keyup', (event) => {
+            if ((event.code === 'Space' || event.code === 'Enter') && !countdownInterval) {
+                startCountdown();
+            }
+        });
+    </script>
+</body>
+</html>
