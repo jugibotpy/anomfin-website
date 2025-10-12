@@ -85,19 +85,48 @@
             background-clip: text;
             color: transparent;
             filter: drop-shadow(0 0 18px rgba(0, 255, 225, 0.25));
-            animation: scrollCode 18s linear infinite;
+            animation: scrollCode 12s linear infinite;
             opacity: 0.6;
         }
 
         .code-track:nth-child(2) {
             top: 50%;
-            animation-delay: -9s;
-            animation-duration: 16s;
+            animation-delay: -6s;
+            animation-duration: 10s;
         }
 
         @keyframes scrollCode {
             from { transform: translate3d(0, -100%, 0); }
             to { transform: translate3d(0, 100%, 0); }
+        }
+
+        .edge-sparks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            mix-blend-mode: screen;
+        }
+
+        .edge-sparks span {
+            position: absolute;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 251, 145, 0.9) 0%, rgba(255, 77, 148, 0.7) 55%, transparent 75%);
+            filter: blur(1px);
+            animation: floatSpark 6s ease-in-out infinite;
+        }
+
+        .edge-sparks span:nth-child(1) { top: 12%; left: 8%; animation-duration: 7s; }
+        .edge-sparks span:nth-child(2) { top: 24%; right: 10%; animation-duration: 5.5s; }
+        .edge-sparks span:nth-child(3) { bottom: 18%; left: 15%; animation-duration: 6.5s; }
+        .edge-sparks span:nth-child(4) { bottom: 8%; right: 18%; animation-duration: 5.8s; }
+
+        @keyframes floatSpark {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(0.85); opacity: 0.5; }
+            40% { transform: translate3d(18px, -26px, 0) scale(1.2); opacity: 1; }
+            70% { transform: translate3d(-12px, -8px, 0) scale(0.9); opacity: 0.7; }
         }
 
         .aura-orbit {
@@ -219,33 +248,81 @@
         }
 
         .primary-btn {
-            background: linear-gradient(135deg, rgba(0, 255, 225, 0.9), rgba(156, 77, 255, 0.95));
+            position: relative;
+            background: linear-gradient(135deg, rgba(0, 255, 225, 0.92), rgba(156, 77, 255, 0.98));
             color: #02010f;
             font-weight: 700;
-            padding: 1.1rem 2.6rem;
+            padding: 1.15rem 2.9rem;
             border-radius: 999px;
             font-size: 1.2rem;
             letter-spacing: 0.04em;
             border: none;
             cursor: pointer;
-            box-shadow: 0 20px 50px rgba(0, 255, 225, 0.35);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 22px 55px rgba(0, 255, 225, 0.38);
+            transition: transform 0.35s ease, box-shadow 0.35s ease, filter 0.35s ease;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .primary-btn::before {
+            content: "";
+            position: absolute;
+            inset: 4px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(0, 255, 225, 0.15));
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            z-index: -1;
+        }
+
+        .primary-btn::after {
+            content: "";
+            position: absolute;
+            width: 160%;
+            height: 160%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(0deg);
+            background: conic-gradient(from 0deg, rgba(0, 255, 225, 0.2), rgba(156, 77, 255, 0.05), rgba(255, 77, 148, 0.25), rgba(0, 255, 225, 0.2));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            filter: blur(12px);
+            z-index: -2;
         }
 
         .primary-btn:hover {
-            transform: translateY(-4px) scale(1.01);
-            box-shadow: 0 26px 60px rgba(156, 77, 255, 0.4);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 28px 70px rgba(156, 77, 255, 0.45);
         }
 
-        .primary-btn:disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-            box-shadow: none;
+        .primary-btn:hover::before,
+        .primary-btn:hover::after {
+            opacity: 1;
         }
 
         .primary-btn.is-running {
-            opacity: 0.9;
             cursor: progress;
+            filter: saturate(1.3);
+        }
+
+        .primary-btn.is-running::after {
+            opacity: 1;
+            animation: buttonAura 2.4s linear infinite;
+        }
+
+        .primary-btn.is-complete {
+            background: linear-gradient(135deg, rgba(255, 140, 74, 0.95), rgba(255, 77, 148, 0.92));
+            color: #080210;
+            box-shadow: 0 24px 65px rgba(255, 77, 148, 0.45);
+        }
+
+        .primary-btn.is-complete::before {
+            opacity: 1;
+        }
+
+        @keyframes buttonAura {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         .timer-display {
@@ -488,6 +565,78 @@
             to { transform: rotate(360deg); }
         }
 
+        .dragon-surge {
+            position: absolute;
+            inset: -160px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(0, 255, 225, 0.22), rgba(156, 77, 255, 0.12), rgba(255, 77, 148, 0.18), rgba(0, 255, 225, 0.22));
+            filter: blur(48px);
+            opacity: 0.28;
+            animation: dragonSurge 18s linear infinite;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .countdown-active .dragon-surge {
+            opacity: 0.42;
+            animation-duration: 12s;
+        }
+
+        @keyframes dragonSurge {
+            from { transform: rotate(0deg) scale(0.95); }
+            50% { transform: rotate(180deg) scale(1.05); }
+            to { transform: rotate(360deg) scale(0.95); }
+        }
+
+        .dragon-runes {
+            position: absolute;
+            inset: -140px;
+            pointer-events: none;
+            filter: drop-shadow(0 0 18px rgba(0, 255, 225, 0.35));
+            z-index: -1;
+        }
+
+        .dragon-runes span {
+            position: absolute;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.45em;
+            text-transform: uppercase;
+            color: rgba(0, 255, 225, 0.75);
+            border: 1px solid rgba(0, 255, 225, 0.32);
+            background: radial-gradient(circle, rgba(0, 255, 225, 0.2), transparent 70%);
+            animation: runeSpin 14s linear infinite;
+        }
+
+        .dragon-runes span:nth-child(2) {
+            top: 12%;
+            right: -30px;
+            animation-duration: 18s;
+            animation-direction: reverse;
+            color: rgba(255, 77, 148, 0.75);
+            border-color: rgba(255, 77, 148, 0.32);
+        }
+
+        .dragon-runes span:nth-child(3) {
+            bottom: -20px;
+            left: -40px;
+            animation-duration: 20s;
+            color: rgba(255, 251, 145, 0.85);
+            border-color: rgba(255, 251, 145, 0.4);
+        }
+
+        @keyframes runeSpin {
+            from { transform: rotate(0deg) translate3d(0, 0, 0) scale(0.95); }
+            50% { transform: rotate(180deg) translate3d(8px, -12px, 0) scale(1.1); }
+            to { transform: rotate(360deg) translate3d(0, 0, 0) scale(0.95); }
+        }
+
         .finale {
             margin-top: 1.5rem;
             font-size: 0.95rem;
@@ -524,6 +673,17 @@
         .final-ten .timer-ring::before {
             border-color: rgba(255, 251, 145, 0.9);
             animation-duration: 2s;
+        }
+
+        .final-ten .dragon-surge {
+            opacity: 0.6;
+            animation-duration: 6s;
+            filter: blur(30px);
+        }
+
+        .final-ten .dragon-runes span {
+            animation-duration: 8s;
+            filter: drop-shadow(0 0 24px rgba(255, 251, 145, 0.75));
         }
 
         .final-ten .dragon-strip span.active {
@@ -660,8 +820,20 @@
         <div class="code-track">0101 1100 0011 1110 SNAGEN DRAGON TEBOIL LINUX PHP PYTHON JUGI AnomFIN AnomTools 1010 0101&#10;1110 0101 0110 0101 DRAGON SNAGEN MATRIX CLOUD NEO CODESTREAM PYTHON PHP LINUX&#10;0101 1010 0101 1010 JUGI DRAGON CORE TEBOIL SNAGEN HYPER SYS ADMIN 0001 1111&#10;1010 0101 0011 0101 LINUX PHP PYTHON SNAGEN DRAGON MATRIX AnomFIN AnomTools&#10;0101 0110 1010 1101 TEBOIL LEGACY FUTURE QUANTUM FLARE DRAGON SNAGEN CODE</div>
         <div class="code-track">1010 0101 0010 1100 DRAGON SNAGEN PYTHON LINUX PHP TEBOIL AnomFIN AnomTools&#10;0100 1110 0101 0001 MATRIX CORE RAVE SNAGEN DRAGON BYTECODE STREAMFLOW&#10;0101 1010 0101 1010 TEBOIL LINUX PHP PYTHON DRAGON SNAGEN QUASAR JUGI&#10;1111 0001 1010 0101 SNAGEN DRAGON HYPER THREAD LINUX PHP PYTHON TEBOIL&#10;0101 1010 0101 0011 AnomFIN AnomTools SNAGEN DRAGON LINUX PHP PYTHON</div>
     </div>
+    <div class="edge-sparks" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
     <div class="aura-orbit" aria-hidden="true"></div>
     <div class="counter-shell" id="counter-shell">
+        <div class="dragon-surge" aria-hidden="true"></div>
+        <div class="dragon-runes" aria-hidden="true">
+            <span>Snagen</span>
+            <span>DRAGON</span>
+            <span>AnomFIN</span>
+        </div>
         <div class="logo-chip" aria-hidden="true">
             <strong>AnomFIN</strong>
             <span>×</span>
@@ -714,11 +886,15 @@
         const detonateMessage = document.getElementById('detonate-message');
         const stripItems = Array.from(document.querySelectorAll('.dragon-strip span'));
 
+        startBtn.setAttribute('aria-label', 'Käynnistä Snagen DRAGON Countdown');
+
         const TOTAL_SECONDS = 30 * 60;
         let countdownInterval = null;
         let remainingSeconds = TOTAL_SECONDS;
         let countdownEndTimestamp = null;
         let audioContext = null;
+        let isRunning = false;
+        let hasDetonated = false;
 
         function formatTime(totalSeconds) {
             const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -752,9 +928,30 @@
             shockwave.classList.add('active');
             detonateMessage.classList.add('active');
             stripItems.forEach(item => item.classList.remove('active'));
+        }
+
+        function resetFinale() {
+            document.body.classList.remove('detonated');
+            smokeLayer.classList.remove('active');
+            shockwave.classList.remove('active');
+            detonateMessage.classList.remove('active');
+            counterShell.classList.remove('final-ten');
+            counterShell.classList.remove('countdown-active');
             startBtn.classList.remove('is-running');
-            startBtn.textContent = 'Savupurkaus valmis';
-            startBtn.setAttribute('aria-label', 'Snagen DRAGON Countdown suoritettu');
+            startBtn.classList.remove('is-complete');
+            startBtn.textContent = 'Nautimme juuri';
+            startBtn.setAttribute('aria-label', 'Käynnistä Snagen DRAGON Countdown');
+            updateStripHighlight(-1);
+            timerDisplay.textContent = formatTime(TOTAL_SECONDS);
+            timerDisplay.removeAttribute('aria-label');
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            isRunning = false;
+            remainingSeconds = TOTAL_SECONDS;
+            countdownEndTimestamp = null;
+            hasDetonated = false;
         }
 
         function updateStripHighlight(index = -1) {
@@ -789,55 +986,78 @@
             }
         }
 
-        function startCountdown() {
+        function finalizeCountdown() {
+            timerDisplay.textContent = '00:00';
+            timerDisplay.removeAttribute('aria-label');
             if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            counterShell.classList.remove('final-ten');
+            counterShell.classList.remove('countdown-active');
+            isRunning = false;
+            hasDetonated = true;
+            activateFinale();
+            startBtn.classList.remove('is-running');
+            startBtn.classList.add('is-complete');
+            startBtn.textContent = 'Savupurkaus valmis – käynnistä uudelleen';
+            startBtn.setAttribute('aria-label', 'Snagen DRAGON Countdown suoritettu. Aloita uudelleen painamalla.');
+        }
+
+        function tick() {
+            if (!isRunning) {
                 return;
             }
 
-            startBtn.disabled = true;
+            const now = Date.now();
+            const secondsLeft = Math.max(0, Math.ceil((countdownEndTimestamp - now) / 1000));
+
+            if (secondsLeft === remainingSeconds) {
+                return;
+            }
+
+            remainingSeconds = secondsLeft;
+
+            if (remainingSeconds <= 0) {
+                finalizeCountdown();
+                return;
+            }
+
+            setCountdownVisuals(remainingSeconds);
+        }
+
+        function startCountdown() {
+            if (isRunning) {
+                return;
+            }
+
+            if (hasDetonated) {
+                resetFinale();
+            }
+
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+
+            isRunning = true;
+            remainingSeconds = TOTAL_SECONDS;
+            countdownEndTimestamp = Date.now() + TOTAL_SECONDS * 1000;
+            startBtn.classList.remove('is-complete');
             startBtn.classList.add('is-running');
             startBtn.textContent = 'Snagen DRAGON käynnissä';
             startBtn.setAttribute('aria-label', 'Snagen DRAGON Countdown käynnissä');
             counterShell.classList.add('countdown-active');
-            remainingSeconds = TOTAL_SECONDS;
             updateStripHighlight(0);
             setCountdownVisuals(remainingSeconds);
-            countdownEndTimestamp = Date.now() + TOTAL_SECONDS * 1000;
-
-            const tick = () => {
-                const now = Date.now();
-                const secondsLeft = Math.max(0, Math.ceil((countdownEndTimestamp - now) / 1000));
-
-                if (secondsLeft === remainingSeconds) {
-                    return;
-                }
-
-                remainingSeconds = secondsLeft;
-
-                if (remainingSeconds <= 0) {
-                    timerDisplay.textContent = '00:00';
-                    timerDisplay.removeAttribute('aria-label');
-                    clearInterval(countdownInterval);
-                    countdownInterval = null;
-                    counterShell.classList.remove('final-ten');
-                    counterShell.classList.remove('countdown-active');
-                    activateFinale();
-                    return;
-                }
-
-                setCountdownVisuals(remainingSeconds);
-            };
-
+            tick();
             countdownInterval = setInterval(tick, 250);
         }
 
-        startBtn.addEventListener('click', () => {
-            startCountdown();
-        });
+        startBtn.addEventListener('click', startCountdown);
 
-        // Accessibility: allow pressing Enter/Space while focused
         startBtn.addEventListener('keyup', (event) => {
-            if ((event.code === 'Space' || event.code === 'Enter') && !countdownInterval) {
+            if ((event.code === 'Space' || event.code === 'Enter') && !event.repeat) {
                 startCountdown();
             }
         });
