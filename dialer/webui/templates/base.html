@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harjun Raskaskone Dialer · AnomFIN</title>
+    <link rel="stylesheet" href="/static/main.css">
+    <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+<header>
+    <div class="branding">
+        <span class="logo">Harjun Raskaskone</span>
+        <span class="signature">Jugi@AnomFIN</span>
+    </div>
+    <nav>
+        <a href="/" hx-get="/" hx-target="main" hx-push-url="true">Hallintapaneeli</a>
+        <a href="/numbers" hx-get="/numbers" hx-target="#numbers" hx-swap="innerHTML">Numerot</a>
+        <a href="/settings" hx-get="/settings" hx-target="#settings" hx-swap="innerHTML">Asetukset</a>
+    </nav>
+</header>
+<main id="main">
+    {% block content %}{% endblock %}
+</main>
+<footer>
+    <p>© 2024 Harjun Raskaskone Oy · AnomFIN Dialer</p>
+</footer>
+</body>
+</html>

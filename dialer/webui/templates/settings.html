@@ -1,0 +1,31 @@
+<h2>Asetukset &amp; DNC</h2>
+<div class="settings-grid">
+    <div>
+        <h3>Ympäristömuuttujat</h3>
+        <ul class="settings-list">
+            <li><span>Twilio Account SID</span><span>{{ settings.twilio_account_sid|mask }}</span></li>
+            <li><span>Twilio Number</span><span>{{ settings.twilio_number }}</span></li>
+            <li><span>Agent Number</span><span>{{ settings.agent_number }}</span></li>
+            <li><span>Public Base URL</span><span>{{ settings.public_base_url }}</span></li>
+            <li><span>Dial Interval</span><span>{{ settings.dial_interval_seconds }} s</span></li>
+            <li><span>Backend</span><span>{{ settings.telephony_backend }}</span></li>
+            <li><span>SQLite</span><span>{{ settings.sqlite_path }}</span></li>
+            <li><span>Dry-run</span><span>{{ 'Kyllä' if settings.dry_run else 'Ei' }}</span></li>
+        </ul>
+    </div>
+    <div>
+        <h3>DNC-lista</h3>
+        <form hx-post="/dnc" hx-target="#settings" hx-swap="outerHTML" class="form-inline">
+            <label for="dnc-number">Lisää numero</label>
+            <input type="text" id="dnc-number" name="number" placeholder="050 555 5555">
+            <button type="submit" class="secondary">Lisää</button>
+        </form>
+        <ul class="dnc-list">
+            {% for number in dnc %}
+            <li>{{ number }}</li>
+            {% else %}
+            <li>Ei estettyjä numeroita.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
