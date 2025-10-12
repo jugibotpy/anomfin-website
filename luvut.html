@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AnomFIN | AnomTools – Suojattu lukujen ID-haku">
+    <title>AnomFIN | AnomTools – Luvut</title>
+    <link rel="preload" href="assets/logo.png" as="image" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/image2vector.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <style>
+        body.locked #secured-content {
+            filter: blur(18px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        body.locked::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 7, 10, 0.86);
+            backdrop-filter: blur(6px);
+            z-index: 999;
+        }
+
+        .guard-notice {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        body.locked .guard-notice {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .guard-dialog {
+            background: linear-gradient(160deg, rgba(6, 7, 10, 0.9) 0%, rgba(12, 16, 24, 0.95) 100%);
+            border: 1px solid rgba(0, 255, 166, 0.3);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 255, 166, 0.2);
+            border-radius: 24px;
+            padding: 2.75rem 3rem;
+            width: min(90vw, 420px);
+            text-align: center;
+        }
+
+        .guard-dialog h1 {
+            font-size: 1.85rem;
+            margin-bottom: 0.75rem;
+            color: var(--neon, #00ffa6);
+        }
+
+        .guard-dialog p {
+            color: #b6c2d6;
+            font-weight: 500;
+        }
+
+        .id-hero {
+            min-height: calc(100vh - 96px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 0;
+        }
+
+        .id-panel {
+            background: linear-gradient(160deg, rgba(6, 7, 10, 0.9) 0%, rgba(12, 16, 24, 0.75) 100%);
+            border: 1px solid rgba(0, 255, 166, 0.35);
+            box-shadow: 0 35px 120px rgba(0, 0, 0, 0.65), inset 0 0 55px rgba(0, 255, 166, 0.05);
+            border-radius: 32px;
+            padding: clamp(2.5rem, 5vw, 4.5rem);
+            max-width: 640px;
+            width: min(92vw, 640px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .id-panel::before {
+            content: "";
+            position: absolute;
+            inset: 8px;
+            border-radius: 26px;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 166, 0.2), transparent 55%),
+                        radial-gradient(circle at 80% 30%, rgba(0, 153, 255, 0.18), transparent 65%);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .id-panel::after {
+            content: "AnomFIN | AnomTools";
+            position: absolute;
+            bottom: 16px;
+            right: 24px;
+            font-size: 0.75rem;
+            letter-spacing: 0.24rem;
+            text-transform: uppercase;
+            color: rgba(182, 194, 214, 0.4);
+        }
+
+        .id-panel-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .id-panel-header {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .id-panel-header .eyebrow {
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.24rem;
+            color: rgba(0, 255, 166, 0.75);
+        }
+
+        .id-panel-header h1 {
+            font-size: clamp(2.1rem, 5vw, 2.8rem);
+            line-height: 1.15;
+            font-weight: 600;
+            text-shadow: 0 0 25px rgba(0, 255, 166, 0.25);
+        }
+
+        .id-panel-header p {
+            color: #c8d3e6;
+            font-size: 1.05rem;
+            max-width: 36ch;
+        }
+
+        .id-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .id-form label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e5ecf8;
+        }
+
+        .id-input-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.85rem;
+        }
+
+        .id-form input[type="text"] {
+            background: rgba(9, 12, 20, 0.8);
+            border: 1px solid rgba(0, 255, 166, 0.35);
+            border-radius: 14px;
+            padding: 0.9rem 1.1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #f6f9ff;
+            outline: none;
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .id-form input[type="text"]:focus {
+            border-color: rgba(0, 255, 166, 0.85);
+            box-shadow: 0 0 0 4px rgba(0, 255, 166, 0.15);
+        }
+
+        .id-form button {
+            background: linear-gradient(120deg, #00ffa6 0%, #00d4ff 100%);
+            border: none;
+            border-radius: 14px;
+            padding: 0.9rem 1.6rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #04111c;
+            cursor: pointer;
+            box-shadow: 0 15px 30px rgba(0, 255, 166, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .id-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 45px rgba(0, 255, 166, 0.32);
+        }
+
+        .id-result {
+            min-height: 72px;
+            display: grid;
+            align-content: center;
+            border-radius: 18px;
+            background: rgba(4, 8, 14, 0.85);
+            border: 1px solid rgba(0, 255, 166, 0.25);
+            padding: 1.35rem 1.5rem;
+            font-size: 1.1rem;
+            color: #d7e2f4;
+            letter-spacing: 0.05rem;
+        }
+
+        .id-result strong {
+            font-size: 1.4rem;
+            letter-spacing: 0.12rem;
+            color: #00ffa6;
+            text-shadow: 0 0 22px rgba(0, 255, 166, 0.35);
+        }
+
+        .id-hints {
+            display: grid;
+            gap: 0.6rem;
+            font-size: 0.92rem;
+            color: #8f9db8;
+        }
+
+        .id-hints li {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .id-hints li::before {
+            content: "✦";
+            color: rgba(0, 255, 166, 0.6);
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 720px) {
+            .id-input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .id-form button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="locked">
+    <a class="skip-link" href="#id-entry">Siirry sisältöön</a>
+
+    <div class="guard-notice" aria-live="assertive" aria-label="Sisältö lukittu">
+        <div class="guard-dialog">
+            <h1>AnomFIN HyperGate</h1>
+            <p>Syötä turvasalasana jatkaaksesi.</p>
+        </div>
+    </div>
+
+    <div id="secured-content">
+        <nav class="navbar" role="navigation" aria-label="Päävalikko">
+            <div class="nav-container">
+                <a class="nav-logo" href="index.html" aria-label="Takaisin AnomFIN etusivulle">
+                    <span class="nav-logo-aura" aria-hidden="true">
+                        <span class="nav-logo-orbit"></span>
+                        <span class="nav-logo-comet"></span>
+                        <span class="nav-logo-flare"></span>
+                    </span>
+                    <img src="assets/image2vector.svg" alt="AnomFIN | AnomTools logo" width="32" height="32" decoding="async">
+                    <div class="nav-logo-text">
+                        <h2>AnomFIN</h2>
+                        <span class="nav-logo-subtitle">AnomTools HyperFlux</span>
+                    </div>
+                </a>
+                <div class="nav-cta">
+                    <a href="mailto:info@anomfin.fi" class="nav-link nav-link-cta">Ota yhteyttä</a>
+                </div>
+            </div>
+        </nav>
+
+        <main id="main">
+            <section class="id-hero" id="id-entry">
+                <div class="id-panel">
+                    <div class="id-panel-content">
+                        <div class="id-panel-header">
+                            <span class="eyebrow">AnomFIN • AnomTools</span>
+                            <h1>Syötä ankkuri-ID ja muuta se lukumuotoon.</h1>
+                            <p>Kirjoita esimerkiksi <strong>e4</strong> tai <strong>a12</strong>. Järjestelmä muotoilee sen automaattisesti esimerkiksi muotoon <strong>E04</strong> ja tulostaa vastauksen.</p>
+                        </div>
+                        <form class="id-form" id="id-form">
+                            <label for="input-id">Anna ID</label>
+                            <div class="id-input-row">
+                                <input type="text" id="input-id" name="input-id" placeholder="esim. e4" autocomplete="off" required aria-describedby="id-help">
+                                <button type="submit">Muunna</button>
+                            </div>
+                            <p id="id-help">Kirjain kertoo sarjan, numerot yksilön. Kirjain muutetaan isoksi ja numerot täydennetään johtonollilla.</p>
+                        </form>
+                        <div class="id-result" id="id-result" aria-live="polite">
+                            Anna ID niin näytämme tuloksen.
+                        </div>
+                        <ul class="id-hints">
+                            <li>Käytä yhtä kirjainta ja numeroita – esimerkiksi e4 → E04.</li>
+                            <li>Ylimääräiset välilyönnit poistetaan automaattisesti.</li>
+                            <li>Kirjoita pidempi numero kuten b123 → B123.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        (function() {
+            const PASSWORD = 'jussi';
+            const MAX_ATTEMPTS = 3;
+            const body = document.body;
+
+            function requestAccess() {
+                let attempts = 0;
+                while (attempts < MAX_ATTEMPTS) {
+                    const input = window.prompt('Syötä salasana jatkaaksesi:');
+                    if (input === null) {
+                        attempts++;
+                        continue;
+                    }
+
+                    if (input.trim().toLowerCase() === PASSWORD) {
+                        body.classList.remove('locked');
+                        return true;
+                    }
+
+                    attempts++;
+                    alert('Väärä salasana. Yritä uudelleen.');
+                }
+
+                document.querySelector('.guard-dialog p').textContent = 'Pääsy evätty. Lataa sivu uudelleen yrittääksesi uudelleen.';
+                return false;
+            }
+
+            if (!requestAccess()) {
+                return;
+            }
+
+            const form = document.getElementById('id-form');
+            const inputField = document.getElementById('input-id');
+            const result = document.getElementById('id-result');
+
+            function formatId(value) {
+                if (!value) return null;
+                const trimmed = value.trim();
+                if (!trimmed) return null;
+
+                const match = trimmed.match(/^([a-zA-ZÅÄÖåäö])\s*([0-9]+)$/);
+                if (!match) {
+                    return null;
+                }
+
+                const letter = match[1].toLocaleUpperCase('fi-FI');
+                const digits = match[2];
+                const padLength = Math.max(2, digits.length);
+                const formattedDigits = digits.padStart(padLength, '0');
+                return `${letter}${formattedDigits}`;
+            }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formatted = formatId(inputField.value);
+                if (!formatted) {
+                    result.innerHTML = 'Tarkista ID. Käytä muotoa <strong>A12</strong>.';
+                    return;
+                }
+
+                result.innerHTML = `Tuloste: <strong>${formatted}</strong>`;
+            });
+        })();
+    </script>
+</body>
+</html>
