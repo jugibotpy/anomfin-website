@@ -1,257 +1,323 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AnomRace - Compare two Bolt rides in real-time">
-    <title>AnomRace - Bolt Ride Comparison</title>
+    <meta name="description" content="AnomRace by AnomFIN – vertaile useita Bolt-kyytejä reaaliaikaisesti kartalla ja tallenna tulokset.">
+    <title>AnomRace – Hyperkilpailu Bolt-kuljetuksille | AnomFIN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="assets/image2vector.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
-        /* Additional styles specific to bolt.html */
-        .bolt-container {
+        :root {
+            color-scheme: dark light;
+        }
+
+        body.anomrace-body {
+            font-family: 'Inter', sans-serif;
+            background: var(--anomrace-bg, #06070a);
+            color: var(--anomrace-text, #f4f7fb);
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        body.anomrace-body[data-theme="dark"] {
+            --anomrace-bg: radial-gradient(circle at top, #0a0d16 0%, #03040a 45%, #020207 100%);
+            --anomrace-surface: rgba(255, 255, 255, 0.05);
+            --anomrace-surface-strong: rgba(255, 255, 255, 0.12);
+            --anomrace-border: rgba(0, 255, 166, 0.2);
+            --anomrace-border-strong: rgba(0, 255, 166, 0.45);
+            --anomrace-text: #f4f7fb;
+            --anomrace-text-muted: rgba(244, 247, 251, 0.7);
+            --anomrace-input: rgba(6, 7, 10, 0.92);
+            --anomrace-input-border: rgba(255, 255, 255, 0.12);
+            --anomrace-shadow: 0 25px 80px rgba(0, 255, 166, 0.15);
+            --anomrace-tile-shadow: 0 14px 45px rgba(0, 0, 0, 0.35);
+            --anomrace-map-filter: invert(90%) hue-rotate(160deg) saturate(140%);
+        }
+
+        body.anomrace-body[data-theme="light"] {
+            --anomrace-bg: radial-gradient(circle at top, #f4f8ff 0%, #e5ecff 35%, #dbe7ff 100%);
+            --anomrace-surface: rgba(255, 255, 255, 0.85);
+            --anomrace-surface-strong: rgba(255, 255, 255, 0.95);
+            --anomrace-border: rgba(0, 108, 255, 0.25);
+            --anomrace-border-strong: rgba(0, 108, 255, 0.55);
+            --anomrace-text: #0f172a;
+            --anomrace-text-muted: rgba(15, 23, 42, 0.65);
+            --anomrace-input: rgba(255, 255, 255, 0.95);
+            --anomrace-input-border: rgba(15, 23, 42, 0.12);
+            --anomrace-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+            --anomrace-tile-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+            --anomrace-map-filter: none;
+        }
+
+        a.back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.6rem 1.1rem;
+            border-radius: 999px;
+            text-decoration: none;
+            background: rgba(0, 255, 166, 0.12);
+            border: 1px solid var(--anomrace-border);
+            color: var(--anomrace-text);
+            font-weight: 600;
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 40;
+        }
+
+        a.back-link:hover {
+            transform: translateX(-6px);
+            box-shadow: 0 10px 25px rgba(0, 255, 166, 0.25);
+        }
+
+        .bolt-container {
+            padding: 6rem 1.5rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
+            gap: 2rem;
         }
 
         .bolt-header {
             text-align: center;
-            margin-bottom: 3rem;
+            display: grid;
+            gap: 1rem;
         }
 
         .bolt-title {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 700;
-            background: linear-gradient(135deg, #00ffa6, #00d4ff);
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin: 0;
+            background: linear-gradient(130deg, #00ffa6 0%, #00d4ff 50%, #6a5bff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 1rem;
         }
 
         .bolt-subtitle {
-            font-size: 1.125rem;
-            color: rgba(244, 247, 251, 0.7);
-            max-width: 600px;
+            font-size: clamp(1rem, 1.9vw, 1.3rem);
+            color: var(--anomrace-text-muted);
+            max-width: 760px;
             margin: 0 auto;
         }
 
-        .bolt-inputs {
+        .bolt-meta-grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .meta-card {
+            background: var(--anomrace-surface);
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            border: 1px solid var(--anomrace-border);
+            box-shadow: var(--anomrace-tile-shadow);
+            text-align: center;
+        }
+
+        .meta-card span {
+            display: block;
+        }
+
+        .meta-card .meta-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #00ffa6;
+        }
+
+        body[data-theme="light"] .meta-card .meta-title {
+            color: #006cff;
+        }
+
+        .meta-card .meta-value {
+            margin-top: 0.45rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            z-index: 40;
+        }
+
+        .theme-toggle button {
+            border: none;
+            border-radius: 999px;
+            padding: 0.65rem 1.1rem;
+            background: var(--anomrace-surface);
+            border: 1px solid var(--anomrace-border);
+            color: var(--anomrace-text);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: var(--anomrace-tile-shadow);
+        }
+
+        .theme-toggle button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 255, 166, 0.25);
+        }
+
+        .ride-setup {
+            background: var(--anomrace-surface);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid var(--anomrace-border);
+            box-shadow: var(--anomrace-shadow);
+            display: grid;
             gap: 1.5rem;
-            width: 100%;
-            max-width: 800px;
-            margin-bottom: 2rem;
+        }
+
+        .ride-inputs {
+            display: grid;
+            gap: 1rem;
         }
 
         @media (min-width: 768px) {
-            .bolt-inputs {
-                grid-template-columns: 1fr 1fr;
+            .ride-inputs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
         .input-group {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid rgba(0, 255, 166, 0.2);
-            transition: all 0.3s ease;
+            background: var(--anomrace-surface-strong);
+            border-radius: 18px;
+            padding: 1.35rem 1.5rem 1.5rem;
+            border: 1px solid var(--anomrace-border);
+            position: relative;
+            transition: border 0.3s ease, transform 0.3s ease;
         }
 
-        .input-group:hover {
-            border-color: rgba(0, 255, 166, 0.4);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .input-group.active {
-            border-color: #00ffa6;
-            box-shadow: 0 0 20px rgba(0, 255, 166, 0.3);
+        .input-group:focus-within {
+            border-color: var(--anomrace-border-strong);
+            transform: translateY(-3px);
         }
 
         .input-label {
-            display: block;
+            display: flex;
+            justify-content: space-between;
             font-weight: 600;
-            color: #00ffa6;
-            margin-bottom: 0.75rem;
-            font-size: 0.875rem;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.78rem;
+            color: var(--anomrace-text-muted);
+            margin-bottom: 0.6rem;
         }
 
         .input-field {
             width: 100%;
-            padding: 0.875rem;
-            background: rgba(6, 7, 10, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #f4f7fb;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--anomrace-input-border);
+            background: var(--anomrace-input);
+            color: var(--anomrace-text);
+            font-size: 0.95rem;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
         }
 
         .input-field:focus {
             outline: none;
-            border-color: #00ffa6;
-            box-shadow: 0 0 0 3px rgba(0, 255, 166, 0.1);
+            border-color: var(--anomrace-border-strong);
+            box-shadow: 0 0 0 3px rgba(0, 255, 166, 0.18);
         }
 
-        .input-field::placeholder {
-            color: rgba(244, 247, 251, 0.4);
-        }
-
-        .bolt-button {
-            background: linear-gradient(135deg, #00ffa6, #00d4ff);
-            color: #06070a;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 1rem;
-        }
-
-        .bolt-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 255, 166, 0.3);
-        }
-
-        .bolt-button:active {
-            transform: translateY(0);
-        }
-
-        .bolt-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .bolt-results {
-            width: 100%;
-            max-width: 1000px;
-            margin-top: 3rem;
-            display: none;
-        }
-
-        .bolt-results.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .race-status {
-            text-align: center;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(0, 255, 166, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .race-status h2 {
-            font-size: 1.5rem;
-            color: #00ffa6;
-            margin-bottom: 1rem;
-        }
-
-        .leader-info {
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .eta-info {
-            color: rgba(244, 247, 251, 0.7);
-        }
-
-        .rides-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (min-width: 768px) {
-            .rides-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .ride-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid rgba(0, 255, 166, 0.2);
-        }
-
-        .ride-card.leading {
-            border-color: #00ffa6;
-            box-shadow: 0 0 25px rgba(0, 255, 166, 0.2);
-        }
-
-        .ride-card h3 {
-            color: #00ffa6;
-            margin-bottom: 1rem;
+        .input-actions {
+            position: absolute;
+            top: 1.1rem;
+            right: 1.1rem;
             display: flex;
-            align-items: center;
             gap: 0.5rem;
         }
 
-        .ride-card.leading h3::after {
-            content: "🏆";
-            font-size: 1.25rem;
+        .input-actions button {
+            background: transparent;
+            border: none;
+            color: var(--anomrace-text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, color 0.3s ease;
         }
 
-        .ride-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
+        .input-actions button:hover {
+            transform: scale(1.15);
+            color: #00ffa6;
         }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        body[data-theme="light"] .input-actions button:hover {
+            color: #006cff;
         }
 
-        .info-label {
-            color: rgba(244, 247, 251, 0.7);
-            font-size: 0.875rem;
+        .bolt-button {
+            justify-self: center;
+            background: linear-gradient(135deg, #00ffa6, #00d4ff);
+            color: #05060b;
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            border: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            box-shadow: 0 25px 50px rgba(0, 255, 166, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .info-value {
+        .bolt-button:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 60px rgba(0, 255, 166, 0.3);
+        }
+
+        .bolt-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .secondary-button {
+            padding: 0.85rem 1.6rem;
+            border-radius: 14px;
+            background: transparent;
+            border: 1px dashed var(--anomrace-border);
+            color: var(--anomrace-text);
             font-weight: 600;
-            color: #f4f7fb;
+            cursor: pointer;
+            transition: border 0.3s ease, transform 0.3s ease;
+        }
+
+        .secondary-button:hover {
+            border-style: solid;
+            transform: translateY(-2px);
         }
 
         .error-message {
-            background: rgba(255, 50, 50, 0.1);
-            border: 1px solid rgba(255, 50, 50, 0.3);
-            border-radius: 8px;
-            padding: 1rem;
-            color: #ff6b6b;
-            margin-top: 1rem;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 68, 68, 0.4);
+            background: rgba(255, 68, 68, 0.12);
+            color: #ff8484;
+            font-weight: 600;
             display: none;
         }
 
@@ -269,8 +335,6 @@
         .loading-spinner {
             display: none;
             justify-content: center;
-            align-items: center;
-            margin-top: 2rem;
         }
 
         .loading-spinner.active {
@@ -278,11 +342,11 @@
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 255, 166, 0.2);
-            border-top-color: #00ffa6;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
+            border: 3px solid rgba(0, 255, 166, 0.18);
+            border-top-color: #00ffa6;
             animation: spin 1s linear infinite;
         }
 
@@ -290,144 +354,605 @@
             to { transform: rotate(360deg); }
         }
 
-        .back-link {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
+        .notification-settings {
             display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
             align-items: center;
-            gap: 0.5rem;
-            color: #00ffa6;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 255, 166, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(0, 255, 166, 0.2);
-            transition: all 0.3s ease;
         }
 
-        .back-link:hover {
-            background: rgba(0, 255, 166, 0.2);
-            transform: translateX(-5px);
+        .notification-settings label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--anomrace-text-muted);
+            cursor: pointer;
+        }
+
+        .share-panel {
+            background: var(--anomrace-surface);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 18px;
+            padding: 1.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .share-panel.active {
+            display: flex;
+        }
+
+        .share-panel code {
+            background: var(--anomrace-input);
+            border: 1px solid var(--anomrace-input-border);
+            border-radius: 12px;
+            padding: 0.9rem 1rem;
+            word-break: break-all;
+        }
+
+        .share-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .share-actions button {
+            padding: 0.7rem 1.4rem;
+            border-radius: 12px;
+            border: 1px solid var(--anomrace-border);
+            background: transparent;
+            color: var(--anomrace-text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .share-actions button:hover {
+            transform: translateY(-2px);
+        }
+
+        .bolt-results {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .bolt-results.active {
+            display: flex;
+        }
+
+        .race-status {
+            background: var(--anomrace-surface);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--anomrace-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .race-status::after {
+            content: "";
+            position: absolute;
+            top: -40%;
+            right: -20%;
+            width: 50%;
+            height: 180%;
+            background: radial-gradient(circle, rgba(0, 255, 166, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .race-status h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .leader-info {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0.75rem 0 0.35rem;
+        }
+
+        .eta-info {
+            margin: 0;
+            color: var(--anomrace-text-muted);
         }
 
         .progress-bar {
+            margin-top: 1.5rem;
             width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
             overflow: hidden;
-            margin-top: 1rem;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #00ffa6, #00d4ff);
+            width: 0;
+            background: linear-gradient(90deg, #00ffa6 0%, #00d4ff 50%, #6a5bff 100%);
+            border-radius: 999px;
+            transition: width 0.6s ease;
+        }
+
+        .race-map-wrapper {
+            background: var(--anomrace-surface);
+            border-radius: 24px;
+            border: 1px solid var(--anomrace-border);
+            padding: 1.5rem;
+            box-shadow: var(--anomrace-shadow);
+        }
+
+        #race-map {
+            height: 380px;
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            filter: var(--anomrace-map-filter);
+        }
+
+        .rides-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 900px) {
+            .rides-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .ride-card {
+            background: var(--anomrace-surface);
+            border-radius: 24px;
+            border: 1px solid var(--anomrace-border);
+            padding: 1.5rem;
+            box-shadow: var(--anomrace-tile-shadow);
+            display: grid;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ride-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 166, 0.18), rgba(0, 212, 255, 0.1));
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .ride-card.leading {
+            border-color: var(--anomrace-border-strong);
+            transform: translateY(-4px);
+        }
+
+        .ride-card.leading::after {
+            opacity: 1;
+        }
+
+        .ride-card h3 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .ride-card h3 span {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--anomrace-text-muted);
+        }
+
+        .badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(0, 255, 166, 0.18);
+            color: #00ffa6;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        body[data-theme="light"] .badge {
+            background: rgba(0, 108, 255, 0.12);
+            color: #006cff;
+        }
+
+        .ride-info {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+
+        .info-label {
+            color: var(--anomrace-text-muted);
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .bracket-wrapper {
+            background: var(--anomrace-surface);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 24px;
+            padding: 2rem;
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .bracket-title {
+            margin: 0;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .bracket-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 900px) {
+            .bracket-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .bracket-column {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .bracket-match {
+            border: 1px dashed var(--anomrace-border);
+            border-radius: 18px;
+            padding: 1rem 1.25rem;
+            background: var(--anomrace-surface-strong);
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .bracket-match strong {
+            font-size: 0.95rem;
+        }
+
+        .stats-dashboard {
+            background: var(--anomrace-surface);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 24px;
+            padding: 2rem;
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .stats-dashboard h3 {
+            margin: 0;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        @media (min-width: 900px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .chart-card {
+            background: var(--anomrace-surface-strong);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 18px;
+            padding: 1rem;
+        }
+
+        .chart-card canvas {
+            width: 100% !important;
+            height: 220px !important;
+        }
+
+        .archive-section {
+            background: var(--anomrace-surface);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 24px;
+            padding: 2rem;
+            display: grid;
+            gap: 1.75rem;
+        }
+
+        .archive-section h3 {
+            margin: 0;
+        }
+
+        .archive-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 900px) {
+            .archive-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .archive-table-wrapper {
+            max-height: 320px;
+            overflow: auto;
+            border-radius: 18px;
+            border: 1px solid var(--anomrace-border);
+        }
+
+        table.archive-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--anomrace-surface-strong);
+        }
+
+        table.archive-table thead {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 255, 166, 0.12);
+        }
+
+        table.archive-table th,
+        table.archive-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .leaderboard-card {
+            background: var(--anomrace-surface-strong);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 18px;
+            padding: 1.5rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .leaderboard-card ol {
+            margin: 0;
+            padding-left: 1.2rem;
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--anomrace-text-muted);
+            font-style: italic;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+            color: var(--anomrace-text-muted);
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-swatch {
+            width: 14px;
+            height: 14px;
             border-radius: 4px;
-            transition: width 0.5s ease;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--anomrace-text-muted);
+            font-size: 0.85rem;
+        }
+
+        .signature {
+            font-weight: 700;
+            letter-spacing: 0.12em;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--anomrace-surface);
+            border: 1px solid var(--anomrace-border);
+            border-radius: 14px;
+            padding: 0.85rem 1.1rem;
+            font-size: 0.9rem;
+            box-shadow: var(--anomrace-tile-shadow);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            a.back-link {
+                top: 1rem;
+                left: 1rem;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .bolt-container {
+                padding-top: 5.5rem;
+            }
         }
     </style>
 </head>
-<body>
-    <a class="back-link" href="index.html">
+<body class="anomrace-body" data-theme="dark">
+    <div class="theme-toggle">
+        <button id="theme-toggle" type="button" aria-pressed="false">🌙 Tumma tila</button>
+    </div>
+    <a class="back-link" href="index.html" aria-label="Palaa AnomFIN etusivulle">
         <span>←</span>
-        <span>Back to AnomFIN</span>
+        <span>Takaisin AnomFINille</span>
     </a>
 
     <div class="bolt-container">
-        <div class="bolt-header">
-            <h1 class="bolt-title">AnomRace</h1>
-            <p class="bolt-subtitle">Compare two Bolt rides in real-time and see which one arrives first</p>
-        </div>
-
-        <div class="bolt-inputs">
-            <div class="input-group" id="input-group-1">
-                <label class="input-label" for="ride-url-1">Ride 1 URL</label>
-                <input 
-                    type="text" 
-                    id="ride-url-1" 
-                    class="input-field" 
-                    placeholder="https://ride.bolt.eu/route-sharing/?s=..."
-                >
+        <header class="bolt-header">
+            <h1 class="bolt-title">AnomRace Hyperflux</h1>
+            <p class="bolt-subtitle">Kilpailuta jopa neljä Bolt-kyytiä rinnakkain reaaliaikaisella kartalla, tallenna historiasi ja jaa ainutlaatuinen kilpailulinkki kavereille. Täysin AnomFIN HyperStack -turvattu simulaatioympäristö.</p>
+            <div class="bolt-meta-grid">
+                <div class="meta-card">
+                    <span class="meta-title">Live-visualisaatio</span>
+                    <span class="meta-value">Leaflet + AnomFIN Telemetria</span>
+                </div>
+                <div class="meta-card">
+                    <span class="meta-title">Kilpailuarkisto</span>
+                    <span class="meta-value">Autom. tuloskirjaus &amp; leaderboard</span>
+                </div>
+                <div class="meta-card">
+                    <span class="meta-title">Hyperjako</span>
+                    <span class="meta-value">Uniikit AnomRace-ID:t</span>
+                </div>
+                <div class="meta-card">
+                    <span class="meta-title">AnomFIN</span>
+                    <span class="meta-value signature">Jugi@AnomFIN</span>
+                </div>
             </div>
-            <div class="input-group" id="input-group-2">
-                <label class="input-label" for="ride-url-2">Ride 2 URL</label>
-                <input 
-                    type="text" 
-                    id="ride-url-2" 
-                    class="input-field" 
-                    placeholder="https://ride.bolt.eu/route-sharing/?s=..."
-                >
+        </header>
+
+        <section class="ride-setup" aria-labelledby="ride-setup-heading">
+            <div>
+                <h2 id="ride-setup-heading">Syötä Bolt-jako-osoitteet</h2>
+                <p class="bolt-subtitle" style="margin-top:0.35rem; font-size:0.95rem;">Lisää 2–4 kyytiä ja käynnistä AnomRace. Voit tallentaa kilpailun jakolinkiksi ja jatkaa siitä myöhemmin.</p>
             </div>
-        </div>
+            <div class="ride-inputs" id="ride-inputs" aria-live="polite"></div>
+            <div class="notification-settings">
+                <label><input type="checkbox" id="sound-toggle" checked> Äänitehosteet</label>
+                <label><input type="checkbox" id="notification-toggle" checked> Selainilmoitukset</label>
+            </div>
+            <div class="ride-setup-actions" style="display:flex; flex-wrap:wrap; gap:1rem;">
+                <button class="secondary-button" id="add-ride-btn" type="button">＋ Lisää kyyti</button>
+                <button class="bolt-button" id="compare-btn" type="button">Käynnistä AnomRace</button>
+            </div>
+            <div class="error-message" id="error-message" role="alert"></div>
+            <div class="loading-spinner" id="loading-spinner" role="status" aria-live="assertive">
+                <div class="spinner" aria-hidden="true"></div>
+            </div>
+        </section>
 
-        <button class="bolt-button" id="compare-btn">Start Race Comparison</button>
+        <section class="share-panel" id="share-panel" aria-live="polite">
+            <div>
+                <h3 style="margin:0 0 0.25rem 0;">Jaa kilpailu</h3>
+                <p style="margin:0; color:var(--anomrace-text-muted); font-size:0.9rem;">Kilpailu-ID: <strong id="share-race-id">-</strong></p>
+            </div>
+            <code id="share-link">https://anomfin.fi/bolt.html</code>
+            <div class="share-actions">
+                <button id="copy-link-btn" type="button">Kopioi linkki</button>
+                <button id="share-reset-btn" type="button">Lataa kilpailu-linkistä</button>
+            </div>
+        </section>
 
-        <div class="error-message" id="error-message"></div>
-
-        <div class="loading-spinner" id="loading-spinner">
-            <div class="spinner"></div>
-        </div>
-
-        <div class="bolt-results" id="results">
+        <section class="bolt-results" id="results" aria-live="polite">
             <div class="race-status">
-                <h2 id="status-title">Race Status</h2>
-                <p class="leader-info" id="leader-info">Calculating...</p>
-                <p class="eta-info" id="eta-info">Estimated arrival times</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                <h2 id="status-title">Valmiina lähtöön</h2>
+                <p class="leader-info" id="leader-info">Lisää kyydit ja starttaa kilpailu.</p>
+                <p class="eta-info" id="eta-info">ETA-päivitykset ilmestyvät tähän.</p>
+                <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="progress-fill" id="progress-fill"></div>
                 </div>
             </div>
 
-            <div class="rides-grid">
-                <div class="ride-card" id="ride-card-1">
-                    <h3>Ride 1</h3>
-                    <div class="ride-info" id="ride-info-1">
-                        <div class="info-row">
-                            <span class="info-label">Status</span>
-                            <span class="info-value" id="status-1">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Distance Remaining</span>
-                            <span class="info-value" id="distance-1">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Current Speed</span>
-                            <span class="info-value" id="speed-1">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">ETA</span>
-                            <span class="info-value" id="eta-1">-</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="race-map-wrapper">
+                <h3 style="margin-top:0;">Reaaliaikainen karttavisualisaatio</h3>
+                <div id="race-map" role="application" aria-label="Bolt-kilpailun kartta"></div>
+                <div class="legend" id="map-legend"></div>
+            </div>
 
-                <div class="ride-card" id="ride-card-2">
-                    <h3>Ride 2</h3>
-                    <div class="ride-info" id="ride-info-2">
-                        <div class="info-row">
-                            <span class="info-label">Status</span>
-                            <span class="info-value" id="status-2">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Distance Remaining</span>
-                            <span class="info-value" id="distance-2">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Current Speed</span>
-                            <span class="info-value" id="speed-2">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">ETA</span>
-                            <span class="info-value" id="eta-2">-</span>
-                        </div>
+            <div class="rides-grid" id="ride-cards"></div>
+
+            <div class="bracket-wrapper">
+                <h3 class="bracket-title">Turnauskaavio &amp; sijoitukset</h3>
+                <div class="bracket-grid" id="bracket-grid"></div>
+            </div>
+
+            <div class="stats-dashboard">
+                <h3>AnomRace-telemetria</h3>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h4 style="margin:0 0 0.5rem 0;">Nopeus (km/h)</h4>
+                        <canvas id="speed-chart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4 style="margin:0 0 0.5rem 0;">ETA kehitys (min)</h4>
+                        <canvas id="eta-chart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4 style="margin:0 0 0.5rem 0;">Reittitehokkuus (%)</h4>
+                        <canvas id="efficiency-chart"></canvas>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <div class="archive-section">
+                <h3>Historia-arkisto &amp; Hyperleaderboard</h3>
+                <div class="archive-grid">
+                    <div>
+                        <h4 style="margin:0 0 0.5rem 0;">Tallennetut kilpailut</h4>
+                        <div class="archive-table-wrapper">
+                            <table class="archive-table" id="archive-table">
+                                <thead>
+                                    <tr>
+                                        <th>Päivämäärä</th>
+                                        <th>Voittaja</th>
+                                        <th>Kesto</th>
+                                        <th>Keskinopeus</th>
+                                        <th>Kokonaismatka</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="archive-body">
+                                    <tr class="empty-state"><td colspan="5">Ei vielä tallennettuja kilpailuja.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="leaderboard-card">
+                        <h4 style="margin:0;">Nopeimmat suoritukset</h4>
+                        <ol id="leaderboard-list">
+                            <li class="empty-state">Kilpailut kirjataan automaattisesti tänne.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <p class="footer-note">Rakennettu rakkaudella • <span class="signature">AnomFIN HyperStudio</span> • Reaaliaikainen prototyyppi</p>
     </div>
 
-    <script src="js/bolt.js"></script>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="js/bolt.js" type="module"></script>
 </body>
 </html>
