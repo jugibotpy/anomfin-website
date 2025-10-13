@@ -1,0 +1,22 @@
+<h2>Soiton tila</h2>
+<div class="status">
+    <p><strong>Tila:</strong> {% if state.running %}Käynnissä{% else %}Valmiina{% endif %}</p>
+    <p><strong>Nykyinen numero:</strong> {{ state.current_number or '—' }}</p>
+    <p><strong>Status:</strong> {{ state.current_status or '—' }}</p>
+</div>
+<div class="controls">
+    <button hx-post="/dialing/start" hx-target="#dialing" hx-swap="outerHTML" class="primary">Käynnistä</button>
+    <button hx-post="/dialing/stop" hx-target="#dialing" hx-swap="outerHTML" class="secondary">Pysäytä</button>
+</div>
+<h3>Tuoreet tulokset</h3>
+<ul class="results">
+    {% for result in state.recent_results %}
+    <li>
+        <span class="number">{{ result['number'] }}</span>
+        <span class="status">{{ result['status'] }}</span>
+        {% if result.get('reason') %}<span class="reason">{{ result['reason'] }}</span>{% endif %}
+    </li>
+    {% else %}
+    <li>Ei soittoja vielä.</li>
+    {% endfor %}
+</ul>

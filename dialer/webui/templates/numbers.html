@@ -1,0 +1,23 @@
+<h2>Numerolista</h2>
+<form hx-post="/numbers" hx-target="#numbers" hx-swap="outerHTML" class="form-inline">
+    <label for="number">Lisää numero</label>
+    <input type="text" id="number" name="number" placeholder="040 123 4567" required>
+    <button type="submit" class="primary">Tallenna</button>
+</form>
+<button hx-post="/numbers/clear" hx-target="#numbers" hx-swap="outerHTML" class="danger">Tyhjennä lista</button>
+<table class="numbers">
+    <thead>
+        <tr><th>#</th><th>Numero</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    {% for number in numbers %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ number }}</td>
+            <td>{% if number in dnc %}DNC{% else %}Valmis{% endif %}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="3">Ei numeroita vielä.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>

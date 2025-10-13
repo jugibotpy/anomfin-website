@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+    <h1>Harjun Raskaskone – outbound dialer</h1>
+    <p>Suunniteltu sarjapuhelukampanjoihin, Twilio-integraatioon ja suomenkieliseen IVR-virtaan. Yksi soitto kerrallaan – vastuullisesti.</p>
+    <div class="cta-group">
+        <button hx-post="/dialing/start" hx-trigger="click" hx-target="#dialing" hx-swap="outerHTML" class="primary">Käynnistä soitto</button>
+        <button hx-post="/dialing/stop" hx-trigger="click" hx-target="#dialing" hx-swap="outerHTML" class="secondary">Pysäytä</button>
+    </div>
+</section>
+<section class="grid">
+    <article class="card" id="dialing" hx-get="/dialing" hx-trigger="load, every 5s" hx-swap="outerHTML">
+        {% include "dialing.html" %}
+    </article>
+    <article class="card" id="numbers" hx-get="/numbers" hx-trigger="load" hx-swap="outerHTML">
+        {% include "numbers.html" %}
+    </article>
+    <article class="card" id="settings" hx-get="/settings" hx-trigger="load" hx-swap="outerHTML">
+        {% include "settings.html" %}
+    </article>
+</section>
+<section class="card">
+    <h2>Viimeisimmät tapahtumat</h2>
+    <table class="events">
+        <thead>
+            <tr><th>Aika (UTC)</th><th>Numero</th><th>Tapahtuma</th><th>Call SID</th></tr>
+        </thead>
+        <tbody>
+            {% for row in events %}
+            <tr>
+                <td>{{ row["ts"] }}</td>
+                <td>{{ row["number"] }}</td>
+                <td>{{ row["event"] }}</td>
+                <td>{{ row["call_sid"] }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">Ei tapahtumia vielä.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
