@@ -191,6 +191,141 @@
             box-shadow: 0 18px 45px rgba(0, 255, 166, 0.32);
         }
 
+        .id-user-picker {
+            display: grid;
+            gap: 0.65rem;
+            padding: 1.2rem 1.35rem;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 166, 0.25);
+            background: rgba(4, 8, 14, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .id-user-picker::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 12% 18%, rgba(0, 255, 166, 0.18), transparent 55%),
+                        radial-gradient(circle at 88% 30%, rgba(0, 153, 255, 0.14), transparent 65%);
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .id-user-picker > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .id-user-picker-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .id-user-picker-header label {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16rem;
+            color: rgba(0, 255, 166, 0.78);
+            font-weight: 600;
+        }
+
+        .user-active-pill {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.14rem;
+            color: #04111c;
+            background: linear-gradient(120deg, #00ffa6 0%, #00d4ff 100%);
+            border-radius: 999px;
+            padding: 0.35rem 0.85rem;
+            box-shadow: 0 10px 25px rgba(0, 255, 166, 0.25);
+        }
+
+        .user-slider-track {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .user-slider-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #8f9db8;
+            cursor: pointer;
+            transition: color 0.2s ease, text-shadow 0.2s ease;
+        }
+
+        .user-slider-label.active {
+            color: #e5ecf8;
+            text-shadow: 0 0 16px rgba(0, 255, 166, 0.35);
+        }
+
+        .user-slider-track input[type="range"] {
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(0, 255, 166, 0.6), rgba(0, 153, 255, 0.45));
+            outline: none;
+            box-shadow: inset 0 0 0 1px rgba(0, 255, 166, 0.4);
+        }
+
+        .user-slider-track input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(120deg, #00ffa6 0%, #00d4ff 100%);
+            border: 2px solid rgba(4, 17, 28, 0.85);
+            box-shadow: 0 12px 24px rgba(0, 255, 166, 0.32);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .user-slider-track input[type="range"]::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(120deg, #00ffa6 0%, #00d4ff 100%);
+            border: 2px solid rgba(4, 17, 28, 0.85);
+            box-shadow: 0 12px 24px rgba(0, 255, 166, 0.32);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .user-slider-track input[type="range"]:active::-webkit-slider-thumb,
+        .user-slider-track input[type="range"]:active::-moz-range-thumb {
+            transform: scale(1.05);
+        }
+
+        .id-user-picker .user-help {
+            font-size: 0.82rem;
+            color: #8f9db8;
+            margin: 0;
+        }
+
+        .id-user-picker .user-status {
+            font-size: 0.82rem;
+            margin: 0;
+            color: #8f9db8;
+            transition: color 0.2s ease;
+        }
+
+        .id-user-picker .user-status[data-state="loading"] {
+            color: rgba(0, 255, 166, 0.8);
+        }
+
+        .id-user-picker .user-status[data-state="error"] {
+            color: #ff7b8a;
+        }
+
+        .id-user-picker .user-status[data-state="ok"] {
+            color: #a7ffe0;
+        }
+
         .id-result {
             min-height: 72px;
             display: grid;
@@ -282,6 +417,19 @@
                             <h1>Syötä ankkuri-ID ja muuta se lukumuotoon.</h1>
                             <p>Kirjoita esimerkiksi <strong>e4</strong> tai <strong>a12</strong>. Järjestelmä muotoilee sen automaattisesti esimerkiksi muotoon <strong>E04</strong> ja tulostaa vastauksen.</p>
                         </div>
+                        <div class="id-user-picker" role="group" aria-labelledby="user-picker-label">
+                            <div class="id-user-picker-header">
+                                <label id="user-picker-label" for="user-slider">Valitse taulukko</label>
+                                <span id="user-picker-active" class="user-active-pill">WILTSU</span>
+                            </div>
+                            <div class="user-slider-track">
+                                <span class="user-slider-label active" data-index="0">WILTSU</span>
+                                <input type="range" id="user-slider" min="0" max="1" value="0" step="1" aria-labelledby="user-picker-label">
+                                <span class="user-slider-label" data-index="1">TOMPPA</span>
+                            </div>
+                            <p class="user-help">Tuloste haetaan final_logolla.html -pohjaisesta datalähteestä (Wiltsu / Tomppa).</p>
+                            <p id="user-status" class="user-status" data-state="idle">Valmiina noutamaan taulukon.</p>
+                        </div>
                         <form class="id-form" id="id-form">
                             <label for="input-id">Anna ID</label>
                             <div class="id-input-row">
@@ -339,6 +487,75 @@
             const form = document.getElementById('id-form');
             const inputField = document.getElementById('input-id');
             const result = document.getElementById('id-result');
+            const userSlider = document.getElementById('user-slider');
+            const userActive = document.getElementById('user-picker-active');
+            const userStatus = document.getElementById('user-status');
+            const userLabels = document.querySelectorAll('.user-slider-label');
+
+            const DATA_ENDPOINT = 'luvut.php';
+            const USERS = ['WILTSU', 'TOMPPA'];
+            const cache = new Map();
+            let activeUser = USERS[0];
+
+            function setStatus(message, state = 'idle') {
+                if (!userStatus) return;
+                userStatus.textContent = message;
+                userStatus.setAttribute('data-state', state);
+            }
+
+            function updateActiveUserDisplay() {
+                userActive.textContent = activeUser;
+                userLabels.forEach((label, index) => {
+                    const isActive = USERS[index] === activeUser;
+                    label.classList.toggle('active', isActive);
+                });
+            }
+
+            async function ensureUserTable(user) {
+                if (cache.has(user)) {
+                    return cache.get(user);
+                }
+                setStatus(`Ladataan ${user}-taulukkoa…`, 'loading');
+                try {
+                    const response = await fetch(`${DATA_ENDPOINT}?user=${encodeURIComponent(user)}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    const payload = await response.json();
+                    if (!payload.ok || !payload.codes) {
+                        throw new Error(payload.error || 'Tuntematon virhe datalähteessä');
+                    }
+                    cache.set(user, payload.codes);
+                    setStatus(`${user}-taulukko päivitetty.`, 'ok');
+                    return payload.codes;
+                } catch (error) {
+                    console.error(error);
+                    setStatus(`Virhe: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+
+            function selectUserByIndex(index) {
+                const idx = Math.max(0, Math.min(USERS.length - 1, index));
+                activeUser = USERS[idx];
+                userSlider.value = String(idx);
+                updateActiveUserDisplay();
+                ensureUserTable(activeUser).catch(() => {});
+            }
+
+            userSlider.addEventListener('input', () => {
+                selectUserByIndex(Number(userSlider.value));
+            });
+
+            userLabels.forEach(label => {
+                label.addEventListener('click', () => {
+                    const index = Number(label.getAttribute('data-index')) || 0;
+                    selectUserByIndex(index);
+                });
+            });
+
+            updateActiveUserDisplay();
+            ensureUserTable(activeUser).catch(() => {});
 
             function formatId(value) {
                 if (!value) return null;
@@ -357,15 +574,24 @@
                 return `${letter}${formattedDigits}`;
             }
 
-            form.addEventListener('submit', function(event) {
+            form.addEventListener('submit', async function(event) {
                 event.preventDefault();
                 const formatted = formatId(inputField.value);
                 if (!formatted) {
                     result.innerHTML = 'Tarkista ID. Käytä muotoa <strong>A12</strong>.';
                     return;
                 }
-
-                result.innerHTML = `Tuloste: <strong>${formatted}</strong>`;
+                try {
+                    const table = await ensureUserTable(activeUser);
+                    const code = table ? table[formatted] : null;
+                    if (code) {
+                        result.innerHTML = `Tuloste (${activeUser}): <strong>${code}</strong>`;
+                    } else {
+                        result.innerHTML = `Taulukossa ei ole arvoa tunnisteelle <strong>${formatted}</strong> (${activeUser}).`;
+                    }
+                } catch (error) {
+                    result.innerHTML = `Tulosteen haku epäonnistui: <strong>${error.message}</strong>.`;
+                }
             });
         })();
     </script>
