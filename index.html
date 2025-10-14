@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" href="assets/image2vector.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/logotp.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/logo.png">
     <link rel="canonical" href="https://anomfin.fi" />
     <meta property="og:type" content="website" />
@@ -40,7 +40,7 @@
                     <span class="nav-logo-comet"></span>
                     <span class="nav-logo-flare"></span>
                 </span>
-                <img src="assets/image2vector.svg" alt="AnomFIN | AnomTools logo" width="32" height="32" decoding="async">
+                <img src="assets/logotp.png" alt="AnomFIN | AnomTools logo" width="32" height="32" decoding="async">
                 <div class="nav-logo-text">
                     <h2>AnomFIN</h2>
                     <span class="nav-logo-subtitle">AnomTools HyperFlux</span>
@@ -72,13 +72,30 @@
         <section id="home" class="hero" data-section="hero">
             <div class="hero-container">
                 <div class="hero-content">
-                    <p class="eyebrow eyebrow-big"><span class="flare-boost">Yksilöllinen</span> sovelluskehitys &amp; kyberturva</p>
-                    <h1 class="hero-title">Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.</h1>
-                    <p class="hero-subtitle">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
+                    <p class="eyebrow eyebrow-big" data-content-key="heroEyebrow"><span class="flare-boost" data-content-key="heroHighlight">Yksilöllinen</span> sovelluskehitys &amp; kyberturva</p>
+                    <h1 class="hero-title" data-content-key="heroTitle">Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.</h1>
+                    <p class="hero-subtitle" data-content-key="heroSubtitle">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
                     <div class="hero-buttons">
                         <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn btn-primary">Varaa 30 min kartoitus</a>
                         <a href="#services" class="btn btn-secondary">Tutustu palveluihin</a>
                         <a href="AnomCounter.html" class="btn btn-ghost">Snagen DRAGON Countdown</a>
+                    </div>
+                    <div class="link-shortener" id="link-shortener">
+                        <form class="shortener-form" id="short-link-form" novalidate>
+                            <div class="shortener-fields">
+                                <label class="sr-only" for="shortener-target">Pitkä osoite</label>
+                                <input type="url" id="shortener-target" name="target" placeholder="Liitä pitkä URL (https://...)" autocomplete="off" required>
+                                <label class="sr-only" for="shortener-alias">Lyhytkoodi</label>
+                                <input type="text" id="shortener-alias" name="alias" placeholder="Alias (max 4 merkkiä)" autocomplete="off" maxlength="4" pattern="[A-Za-z0-9]{1,4}">
+                            </div>
+                            <button type="submit" class="btn btn-primary shortener-submit">Luo lyhyt linkki</button>
+                        </form>
+                        <p class="shortener-status" id="shortener-status" role="status" aria-live="polite"></p>
+                        <div class="shortener-result" id="shortener-result" hidden>
+                            <span class="result-label">Lyhyt linkki</span>
+                            <a href="#" id="shortener-link" target="_blank" rel="noopener noreferrer">anomfin.fi/?s=anom</a>
+                            <button type="button" class="copy-short-link" id="shortener-copy">Kopioi</button>
+                        </div>
                     </div>
                     <ul class="hero-metrics">
                         <li>
@@ -106,29 +123,53 @@
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title fade-in-smooth">Palvelumme</h2>
-                    <p class="section-tag">"Koodia, joka kantaa – tänään ja huomenna."</p>
-                    <p class="section-sub">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
+                    <p class="section-tag" data-content-key="serviceTagline">"Koodia, joka kantaa – tänään ja huomenna."</p>
+                    <p class="section-sub" data-content-key="serviceIntro">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
                 </div>
-                <div class="services-grid">
+                <div class="services-grid premium">
                     <article class="service-card">
-                        <div class="service-icon">🧩</div>
-                        <h3>Räätälöidyt sovellukset</h3>
-                        <p>Suunnittelemme ja toteutamme <strong>mobiili</strong>-, <strong>desktop</strong>- ja <strong>web</strong>-sovelluksia, jotka istuvat prosesseihinne.</p>
+                        <div class="service-icon">⚡</div>
+                        <h3>Kotisivupalvelut HyperLaunch</h3>
+                        <p>Responsiivinen yrityssivusto, optimointi ja jälkiseuranta.</p>
+                        <ul class="service-points">
+                            <li>Ylläpito ja tietoturvapäivitykset 5 vuodeksi</li>
+                            <li>Domain + webhotelli sisältyy</li>
+                            <li>HyperFlux-analytiikka ja suorituskykyraportit</li>
+                        </ul>
+                        <div class="service-price">499 €</div>
+                    </article>
+                    <article class="service-card highlight">
+                        <div class="service-icon">📱</div>
+                        <h3>Mobiili &amp; Desktop -sovellukset</h3>
+                        <p>iOS, Android, Windows, macOS ja Linux – yksi tiimi, sama turvallinen koodi.</p>
+                        <ul class="service-points">
+                            <li>UI/UX-suunnittelu ja prototyypit</li>
+                            <li>Integraatiot CRM/ERP -järjestelmiin</li>
+                            <li>Kyberturva ja kovennukset vakiopalveluna</li>
+                        </ul>
+                        <div class="service-price">Demo ilmaiseksi · Alk. 999 €</div>
                     </article>
                     <article class="service-card">
-                        <div class="service-icon">🛡️</div>
-                        <h3>Kyberturvaratkaisut</h3>
-                        <p>Huijausviestien tunnistus, SMS-suojaus ja turvalliset integraatiot – käytännönläheisesti.</p>
+                        <div class="service-icon">🧠</div>
+                        <h3>Laajat monialustasovellukset</h3>
+                        <p>Järjestelmät, jotka yhdistävät IoT:n, pilven ja tekoälyn.</p>
+                        <ul class="service-points">
+                            <li>DevSecOps-putki ja jatkuva toimitus</li>
+                            <li>Skalaarinen mikroarkkitehtuuri</li>
+                            <li>Audit trail, SSO ja compliance</li>
+                        </ul>
+                        <div class="service-price">Alk. 2 999 €</div>
                     </article>
                     <article class="service-card">
-                        <div class="service-icon">🧪</div>
-                        <h3>Auditoinnit &amp; testaus</h3>
-                        <p>Sovellusten kovennukset ja penetraatiotestaus. Selkokielinen raportti ja korjauslista.</p>
-                    </article>
-                    <article class="service-card">
-                        <div class="service-icon">📈</div>
-                        <h3>24/7 valvonta &amp; ylläpito</h3>
-                        <p>Automaattiset hälytykset, triage ja kuukausiraportit. Jatkuva kehitys.</p>
+                        <div class="service-icon">🤖</div>
+                        <h3>AI-asiakaspalvelubotit</h3>
+                        <p>Tuki 24/7 OpenAI-, Azure- ja on-prem -malleilla.</p>
+                        <ul class="service-points">
+                            <li>Finnish GPT -sovitus ja tietoturvatarkastus</li>
+                            <li>Käyttöönotto verkkosivuille, sovelluksiin ja WhatsAppiin</li>
+                            <li>Raportit ja jatkuva koulutus dataanne vasten</li>
+                        </ul>
+                        <div class="service-price">Alk. 499 € + kuukausilisenssi</div>
                     </article>
                 </div>
             </div>
@@ -140,7 +181,7 @@
                     <p class="eyebrow">Julkaisut kaikille päätelaitteille</p>
                     <h2 class="section-title">Alustat</h2>
                 </div>
-                <div class="platforms-grid" role="list">
+                <div class="platforms-grid" role="list" id="platform-chiplist">
                     <div class="platform-chip" role="listitem">iOS</div>
                     <div class="platform-chip" role="listitem">Android</div>
                     <div class="platform-chip" role="listitem">macOS</div>
@@ -148,6 +189,7 @@
                     <div class="platform-chip" role="listitem">Linux</div>
                     <div class="platform-chip" role="listitem">Web</div>
                 </div>
+                <div class="platform-visual-gallery" id="platform-visuals" aria-live="polite"></div>
             </div>
         </section>
 
@@ -158,7 +200,7 @@
                     <h2 class="section-title">Sovellukset</h2>
                     <p class="section-sub">Esimerkkejä toteutetuista ratkaisuista ja avoimista projekteista.</p>
                 </div>
-                <div class="applications-grid" id="applications-grid">
+                <div class="applications-gallery" id="applications-gallery">
                     <div class="loading-placeholder">
                         <div class="loading-spinner"></div>
                         <p>Ladataan projekteja...</p>
@@ -190,18 +232,25 @@
                     </div>
                     <div class="softamme-projects">
                         <h3>Projektimme</h3>
-                        <div class="project-tags">
-                            <span class="project-tag">AnomFIN</span>
-                            <span class="project-tag">AnomTools</span>
-                            <span class="project-tag">Jugi</span>
-                            <span class="project-tag">JugiBot</span>
-                            <span class="project-tag">JugiTools</span>
-                            <span class="project-tag">HRK</span>
-                            <span class="project-tag">iPeili</span>
-                            <span class="project-tag">LexAI</span>
+                        <div class="softamme-deck" id="softamme-deck">
+                            <article class="soft-card">
+                                <h4>AnomFIN HyperFlux</h4>
+                                <p>Realtime SOC-hallintapaneeli, joka seuraa liikennettä ja triggaa automaattiset toimenpiteet.</p>
+                                <span class="soft-stack">Stack: Go · TypeScript · Suricata</span>
+                            </article>
+                            <article class="soft-card">
+                                <h4>JugiBot v4</h4>
+                                <p>Monikielinen asiakaspalvelubotti OpenAI- ja Azure-yhteyksillä, hallintanäkymä asetuksineen.</p>
+                                <span class="soft-stack">Stack: Python · FastAPI · GPT-4.1</span>
+                            </article>
+                            <article class="soft-card">
+                                <h4>LexAI</h4>
+                                <p>Tekoälyjuristi, joka tiivistää sopimukset, nostaa riskikohdat ja tuottaa muutos-ehdotukset.</p>
+                                <span class="soft-stack">Stack: Next.js · LangChain · Pinecone</span>
+                            </article>
                         </div>
                         <p class="softamme-tech">
-                            <strong>Teknologiat:</strong> Kali Linux, Ubuntu v22.04, Python, TypeScript, Go, Docker
+                            <strong>Teknologiat:</strong> Kali Linux, Ubuntu v22.04, Python, TypeScript, Go, Docker, Terraform, Azure
                         </p>
                     </div>
                     <div class="softamme-cta">
@@ -347,7 +396,7 @@
     <footer class="footer">
         <div class="container footer-content">
             <div class="footer-brand">
-                <img src="assets/logo.svg" alt="" width="28" height="28">
+                <img src="assets/logotp.png" alt="" width="28" height="28">
                 <div>
                     <strong>AnomFIN</strong>
                     <p>Rakennamme turvallisia sovelluksia kaikille alustoille.</p>

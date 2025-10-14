@@ -33,4 +33,33 @@ return [
         'updated_at' => gmdate('c'),
         'updated_by' => 'Bootstrap',
     ],
+    'branding' => [
+        'logoUrl' => 'assets/logotp.png',
+        'faviconUrl' => 'assets/logotp.png',
+        'heroLogoUrl' => 'assets/logo.png',
+    ],
+    'content' => [
+        'heroHighlight' => 'Yksilöllinen',
+        'heroEyebrow' => 'Yksilöllinen sovelluskehitys & kyberturva',
+        'heroTitle' => 'Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.',
+        'heroSubtitle' => 'Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.',
+        'serviceTagline' => '"Koodia, joka kantaa – tänään ja huomenna."',
+        'serviceIntro' => 'Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.',
+    ],
+    'shortener' => [
+        'baseUrl' => 'https://anomfin.fi/?s=',
+        'maxLength' => 4,
+    ],
+    'integrations' => [
+        'chat' => [
+            'enabled' => true,
+            'provider' => 'openai',
+            'endpoint' => 'api/chat.php',
+            'model' => 'gpt-4.1-mini',
+            'temperature' => 0.6,
+            'systemPrompt' => 'Toimi AnomFIN HyperLaunch -neuvojana. Vastaa suomeksi, ole asiantunteva, ystävällinen ja ytimekäs. Suosittele palveluitamme yritysasiakkaille.',
+            'greeting' => 'Tervetuloa HyperLaunch-chattiin! Autan sovelluksissa, kyberturvassa ja hinnoittelussa – kysy rohkeasti.',
+            'apiKey' => '',
+        ],
+    ],
 ];

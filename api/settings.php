@@ -14,6 +14,10 @@ $defaults = require __DIR__ . '/../config/settings-defaults.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $payload = loadSettings($settingsFile, $defaults);
+    if (isset($payload['integrations']['chat']['apiKey'])) {
+        $payload['integrations']['chat']['hasApiKey'] = $payload['integrations']['chat']['apiKey'] !== '';
+        unset($payload['integrations']['chat']['apiKey']);
+    }
     echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     return;
 }
@@ -54,7 +58,9 @@ $allowedEases = [
     'linear',
 ];
 
-$sanitized = $defaults;
+$current = loadSettings($settingsFile, $defaults);
+
+$sanitized = $current;
 $sanitized['cssVars'] = sanitizeCssVars($input['cssVars'] ?? [], $defaults['cssVars']);
 
 $ease = $input['ease'] ?? $sanitized['cssVars']['--logo-ease'];
@@ -68,6 +74,30 @@ $sanitized['behaviors'] = [
     'reactHover' => !empty($behaviors['reactHover']),
     'reactContact' => !empty($behaviors['reactContact']),
 ];
+
+$sanitized['branding'] = sanitizeBranding(
+    $input['branding'] ?? [],
+    $defaults['branding'] ?? [],
+    $current['branding'] ?? ($defaults['branding'] ?? [])
+);
+
+$sanitized['content'] = sanitizeContent(
+    $input['content'] ?? [],
+    $defaults['content'] ?? [],
+    $current['content'] ?? ($defaults['content'] ?? [])
+);
+
+$sanitized['shortener'] = sanitizeShortener(
+    $input['shortener'] ?? [],
+    $defaults['shortener'] ?? [],
+    $current['shortener'] ?? ($defaults['shortener'] ?? [])
+);
+
+$sanitized['integrations']['chat'] = sanitizeChatIntegration(
+    $input['integrations']['chat'] ?? [],
+    $defaults['integrations']['chat'] ?? [],
+    $current['integrations']['chat'] ?? ($defaults['integrations']['chat'] ?? [])
+);
 
 $preset = $input['preset'] ?? null;
 if (!in_array($preset, ['drama', 'fast', 'soft', null, ''], true)) {
@@ -108,6 +138,26 @@ function loadSettings(string $file, array $defaults): array
     }
     if (isset($data['behaviors']) && is_array($data['behaviors'])) {
         $merged['behaviors'] = array_merge($defaults['behaviors'], $data['behaviors']);
+    }
+    if (isset($data['branding']) && is_array($data['branding'])) {
+        $merged['branding'] = array_merge($defaults['branding'] ?? [], $data['branding']);
+    } else {
+        $merged['branding'] = $defaults['branding'] ?? [];
+    }
+    if (isset($data['content']) && is_array($data['content'])) {
+        $merged['content'] = array_merge($defaults['content'] ?? [], $data['content']);
+    } else {
+        $merged['content'] = $defaults['content'] ?? [];
+    }
+    if (isset($data['shortener']) && is_array($data['shortener'])) {
+        $merged['shortener'] = array_merge($defaults['shortener'] ?? [], $data['shortener']);
+    } else {
+        $merged['shortener'] = $defaults['shortener'] ?? [];
+    }
+    if (isset($data['integrations']['chat']) && is_array($data['integrations']['chat'])) {
+        $merged['integrations']['chat'] = array_merge($defaults['integrations']['chat'] ?? [], $data['integrations']['chat']);
+    } else {
+        $merged['integrations']['chat'] = $defaults['integrations']['chat'] ?? [];
     }
     if (array_key_exists('preset', $data)) {
         $merged['preset'] = $data['preset'];
@@ -174,6 +224,101 @@ function sanitizeCssVars(array $input, array $defaults): array
         }
     }
     return $sanitized;
+}
+
+function sanitizeBranding(array $input, array $defaults, array $current): array
+{
+    $base = array_merge($defaults, $current);
+
+    return [
+        'logoUrl' => sanitizeUrlOrRelative($input['logoUrl'] ?? $base['logoUrl'] ?? 'assets/logotp.png', $base['logoUrl'] ?? 'assets/logotp.png'),
+        'faviconUrl' => sanitizeUrlOrRelative($input['faviconUrl'] ?? $base['faviconUrl'] ?? 'assets/logotp.png', $base['faviconUrl'] ?? 'assets/logotp.png'),
+        'heroLogoUrl' => sanitizeUrlOrRelative($input['heroLogoUrl'] ?? $base['heroLogoUrl'] ?? 'assets/logo.png', $base['heroLogoUrl'] ?? 'assets/logo.png'),
+    ];
+}
+
+function sanitizeContent(array $input, array $defaults, array $current): array
+{
+    $base = array_merge($defaults, $current);
+
+    return [
+        'heroHighlight' => sanitizeText($input['heroHighlight'] ?? $base['heroHighlight']),
+        'heroEyebrow' => sanitizeText($input['heroEyebrow'] ?? $base['heroEyebrow']),
+        'heroTitle' => sanitizeText($input['heroTitle'] ?? $base['heroTitle']),
+        'heroSubtitle' => sanitizeRichText($input['heroSubtitle'] ?? $base['heroSubtitle']),
+        'serviceTagline' => sanitizeRichText($input['serviceTagline'] ?? $base['serviceTagline']),
+        'serviceIntro' => sanitizeRichText($input['serviceIntro'] ?? $base['serviceIntro']),
+    ];
+}
+
+function sanitizeShortener(array $input, array $defaults, array $current): array
+{
+    $base = array_merge($defaults, $current);
+    $baseUrl = sanitizeUrlOrRelative($input['baseUrl'] ?? $base['baseUrl'], $base['baseUrl']);
+    $maxLength = isset($input['maxLength']) ? (int) $input['maxLength'] : (int) ($base['maxLength'] ?? 4);
+    $maxLength = max(1, min($maxLength, 12));
+
+    return [
+        'baseUrl' => $baseUrl,
+        'maxLength' => $maxLength,
+    ];
+}
+
+function sanitizeChatIntegration(array $input, array $defaults, array $current): array
+{
+    $base = array_merge($defaults, $current);
+
+    $sanitized = [
+        'enabled' => !empty($input['enabled']),
+        'provider' => sanitizeText($input['provider'] ?? $base['provider']),
+        'endpoint' => sanitizeUrlOrRelative($input['endpoint'] ?? $base['endpoint'], $base['endpoint']),
+        'model' => sanitizeText($input['model'] ?? $base['model']),
+        'temperature' => max(0.0, min((float) ($input['temperature'] ?? $base['temperature'] ?? 0.6), 2.0)),
+        'systemPrompt' => sanitizeRichText($input['systemPrompt'] ?? $base['systemPrompt']),
+        'greeting' => sanitizeRichText($input['greeting'] ?? $base['greeting']),
+        'apiKey' => $base['apiKey'] ?? '',
+    ];
+
+    if (array_key_exists('apiKey', $input)) {
+        $candidate = trim((string) $input['apiKey']);
+        if ($candidate === '') {
+            $sanitized['apiKey'] = '';
+        } elseif ($candidate !== '__KEEP__') {
+            $sanitized['apiKey'] = $candidate;
+        }
+    }
+
+    return $sanitized;
+}
+
+function sanitizeUrlOrRelative($value, string $fallback): string
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return $fallback;
+    }
+
+    if (filter_var($value, FILTER_VALIDATE_URL)) {
+        return $value;
+    }
+
+    if (preg_match('~^[A-Za-z0-9_./-]+$~', $value)) {
+        return $value;
+    }
+
+    return $fallback;
+}
+
+function sanitizeText($value): string
+{
+    return trim(filter_var((string) $value, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW));
+}
+
+function sanitizeRichText($value): string
+{
+    $allowed = '<strong><em><b><i><span><br>'; 
+    $text = strip_tags((string) $value, $allowed);
+    return trim($text);
 }
 
 function sanitizeNumber($value, string $default, float $min, float $max): string

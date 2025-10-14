@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     navLogoRef = document.querySelector('.nav-logo');
 
     initIntroOverlay();
+    setupHeroFlash();
     initNavLogoHalo(navLogoRef);
     initLogoRectangleInteraction(); // Add matrix interaction
     initLeftEdgeBox(); // Add left-edge floating box
@@ -42,12 +43,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Contact form handling
     initContactForm();
+    initLinkShortener();
 
     // Scroll companion
     initScrollCompanion();
 
     // Applications section
     initApplicationsSection();
+    initPlatformShowcase();
 
     updateNavbarChrome();
 });
@@ -82,7 +85,34 @@ const ANOMFIN_DEFAULT_SETTINGS = {
         reactContact: true,
     },
     preset: null,
-    meta: {}
+    meta: {},
+    branding: {
+        logoUrl: 'assets/logotp.png',
+        faviconUrl: 'assets/logotp.png'
+    },
+    content: {
+        heroHighlight: 'Yksilöllinen',
+        heroEyebrow: 'Yksilöllinen sovelluskehitys & kyberturva',
+        heroTitle: 'Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.',
+        heroSubtitle: 'Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.',
+        serviceTagline: '"Koodia, joka kantaa – tänään ja huomenna."',
+        serviceIntro: 'Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.'
+    },
+    integrations: {
+        chat: {
+            enabled: true,
+            provider: 'openai',
+            endpoint: 'api/chat.php',
+            model: 'gpt-4.1-mini',
+            temperature: 0.6,
+            systemPrompt: 'Toimi AnomFIN HyperLaunch -neuvojana. Vastaa suomeksi, ole asiantunteva, ystävällinen ja ytimekäs. Suosittele palveluitamme yritysasiakkaille.',
+            greeting: 'Tervetuloa AnomFIN-chattiin! Olen täällä auttamassa sinua palveluidemme kanssa.'
+        }
+    },
+    shortener: {
+        baseUrl: 'https://anomfin.fi/?s=',
+        maxLength: 4
+    }
 };
 
 async function applyGlobalSettings(){
@@ -128,11 +158,28 @@ async function applyGlobalSettings(){
         bodyEl.dataset.reactContact = behaviors.reactContact === false ? '0' : '1';
     }
 
+    const branding = { ...ANOMFIN_DEFAULT_SETTINGS.branding, ...(settings.branding || {}) };
+    const content = { ...ANOMFIN_DEFAULT_SETTINGS.content, ...(settings.content || {}) };
+    const shortener = { ...ANOMFIN_DEFAULT_SETTINGS.shortener, ...(settings.shortener || {}) };
+    const rawIntegrations = settings.integrations || {};
+    const chatIntegration = {
+        ...ANOMFIN_DEFAULT_SETTINGS.integrations.chat,
+        ...(rawIntegrations.chat || {})
+    };
+    const integrations = { chat: chatIntegration };
+
+    applyBranding(branding);
+    applyDynamicContent(content);
+
     window.__ANOMFIN_SETTINGS = {
         ...ANOMFIN_DEFAULT_SETTINGS,
         ...settings,
         cssVars,
-        behaviors
+        behaviors,
+        branding,
+        content,
+        integrations,
+        shortener
     };
 
     try {
@@ -144,6 +191,155 @@ async function applyGlobalSettings(){
     }
 
     return window.__ANOMFIN_SETTINGS;
+}
+
+function applyBranding(branding = {}) {
+    const navLogo = document.querySelector('.nav-logo img');
+    if (navLogo && branding.logoUrl) {
+        navLogo.src = branding.logoUrl;
+        navLogo.srcset = '';
+    }
+
+    const footerLogo = document.querySelector('.footer-brand img');
+    if (footerLogo && branding.logoUrl) {
+        footerLogo.src = branding.logoUrl;
+        footerLogo.srcset = '';
+    }
+
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon && branding.faviconUrl) {
+        favicon.href = branding.faviconUrl;
+    }
+
+    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    if (appleIcon && branding.logoUrl) {
+        appleIcon.href = branding.logoUrl;
+    }
+}
+
+let heroTitleAnimationTimeouts = [];
+let heroTitleSpans = [];
+
+function applyDynamicContent(content = {}) {
+    const highlightEl = document.querySelector('[data-content-key="heroHighlight"]');
+    const highlightValue = content.heroHighlight || highlightEl?.textContent || '';
+    if (highlightEl && highlightValue) {
+        highlightEl.textContent = highlightValue;
+    }
+
+    const eyebrowEl = document.querySelector('[data-content-key="heroEyebrow"]');
+    if (eyebrowEl) {
+        if (!eyebrowEl.dataset.baseText) {
+            eyebrowEl.dataset.baseText = eyebrowEl.textContent.trim();
+        }
+        const baseText = content.heroEyebrow || eyebrowEl.dataset.baseText;
+        const highlightNode = highlightEl || eyebrowEl.querySelector('[data-content-key="heroHighlight"]');
+        if (highlightNode) {
+            const normalizedBase = baseText || '';
+            let remainder = normalizedBase;
+            const highlightText = highlightNode.textContent || '';
+            if (highlightText) {
+                const lowerBase = normalizedBase.toLowerCase();
+                const lowerHighlight = highlightText.toLowerCase();
+                const index = lowerBase.indexOf(lowerHighlight);
+                if (index !== -1) {
+                    remainder = (normalizedBase.slice(0, index) + normalizedBase.slice(index + highlightText.length)).trim();
+                }
+            }
+            eyebrowEl.innerHTML = '';
+            highlightNode.classList.add('flare-boost');
+            highlightNode.setAttribute('data-content-key', 'heroHighlight');
+            eyebrowEl.appendChild(highlightNode);
+            if (remainder) {
+                eyebrowEl.appendChild(document.createTextNode(` ${remainder}`));
+            }
+        } else {
+            eyebrowEl.textContent = baseText;
+        }
+    }
+
+    const heroSubtitleEl = document.querySelector('[data-content-key="heroSubtitle"]');
+    if (heroSubtitleEl && content.heroSubtitle) {
+        heroSubtitleEl.innerHTML = content.heroSubtitle;
+    }
+
+    const serviceTagEl = document.querySelector('[data-content-key="serviceTagline"]');
+    if (serviceTagEl && content.serviceTagline) {
+        serviceTagEl.innerHTML = content.serviceTagline;
+    }
+
+    const serviceIntroEl = document.querySelector('[data-content-key="serviceIntro"]');
+    if (serviceIntroEl && content.serviceIntro) {
+        serviceIntroEl.innerHTML = content.serviceIntro;
+    }
+
+    setupHeroTitleAnimation(content.heroTitle);
+}
+
+function setupHeroTitleAnimation(newTitle) {
+    const heroTitle = document.querySelector('.hero-title');
+    if (!heroTitle) return;
+
+    if (!heroTitle.dataset.sourceText) {
+        heroTitle.dataset.sourceText = heroTitle.textContent.trim();
+    }
+
+    const text = typeof newTitle === 'string' && newTitle.trim().length
+        ? newTitle.trim()
+        : heroTitle.dataset.sourceText || heroTitle.textContent.trim();
+
+    heroTitle.dataset.sourceText = text;
+
+    heroTitleAnimationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    heroTitleAnimationTimeouts = [];
+    heroTitleSpans = [];
+
+    heroTitle.innerHTML = '';
+
+    [...text].forEach(char => {
+        if (char === ' ') {
+            heroTitle.appendChild(document.createTextNode(' '));
+            return;
+        }
+        const span = document.createElement('span');
+        span.className = 'hero-letter';
+        span.textContent = char;
+        heroTitle.appendChild(span);
+        heroTitleSpans.push(span);
+    });
+
+    heroTitleSpans.forEach((span, index) => {
+        span.classList.remove('hero-letter-active');
+        const timeoutId = setTimeout(() => {
+            span.classList.add('hero-letter-active');
+        }, 110 * index + 180);
+        heroTitleAnimationTimeouts.push(timeoutId);
+    });
+}
+
+let heroFlashRef = null;
+let heroFlashTimeout = null;
+
+function setupHeroFlash() {
+    if (heroFlashRef) return heroFlashRef;
+    const visual = document.querySelector('.hero-visual');
+    if (!visual) return null;
+    heroFlashRef = document.createElement('div');
+    heroFlashRef.className = 'hero-flash';
+    visual.appendChild(heroFlashRef);
+    return heroFlashRef;
+}
+
+function triggerHeroFlash() {
+    const flash = heroFlashRef || setupHeroFlash();
+    if (!flash) return;
+    flash.classList.add('active');
+    if (heroFlashTimeout) {
+        clearTimeout(heroFlashTimeout);
+    }
+    heroFlashTimeout = setTimeout(() => {
+        flash.classList.remove('active');
+    }, 420);
 }
 
 // Smooth Scrolling for Navigation Links (skip skip-link)
@@ -206,6 +402,135 @@ function initContactForm() {
     });
 }
 
+function initLinkShortener() {
+    const form = document.getElementById('short-link-form');
+    if (!form) return;
+
+    const targetInput = document.getElementById('shortener-target');
+    const aliasInput = document.getElementById('shortener-alias');
+    const statusEl = document.getElementById('shortener-status');
+    const resultEl = document.getElementById('shortener-result');
+    const linkEl = document.getElementById('shortener-link');
+    const copyBtn = document.getElementById('shortener-copy');
+
+    if (!targetInput || !aliasInput || !statusEl || !resultEl || !linkEl || !copyBtn) {
+        return;
+    }
+
+    const shortenerSettings = window.__ANOMFIN_SETTINGS?.shortener || ANOMFIN_DEFAULT_SETTINGS.shortener;
+    const baseUrl = shortenerSettings.baseUrl || 'https://anomfin.fi/?s=';
+    const maxLength = Number(shortenerSettings.maxLength) || 4;
+
+    const setStatus = (message, type = 'info') => {
+        statusEl.textContent = message || '';
+        statusEl.dataset.type = type;
+    };
+
+    const toggleLoading = (isLoading) => {
+        const submitBtn = form.querySelector('.shortener-submit');
+        if (submitBtn) {
+            submitBtn.disabled = isLoading;
+        }
+        form.classList.toggle('is-loading', Boolean(isLoading));
+    };
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const urlValue = targetInput.value.trim();
+        const aliasValue = aliasInput.value.trim();
+
+        setStatus('');
+        resultEl.hidden = true;
+
+        if (!urlValue) {
+            setStatus('Anna lyhennettävä URL.', 'error');
+            targetInput.focus();
+            return;
+        }
+
+        let parsedUrl;
+        try {
+            parsedUrl = new URL(urlValue);
+        } catch (error) {
+            setStatus('URL näyttää virheelliseltä – tarkista osoite.', 'error');
+            targetInput.focus();
+            return;
+        }
+
+        if (aliasValue && (aliasValue.length > maxLength || !/^[A-Za-z0-9]+$/.test(aliasValue))) {
+            setStatus(`Alias saa sisältää enintään ${maxLength} merkkiä (A-Z, 0-9).`, 'error');
+            aliasInput.focus();
+            return;
+        }
+
+        toggleLoading(true);
+        setStatus('Luodaan lyhyt linkki...', 'info');
+
+        try {
+            const response = await fetch('tausta.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: parsedUrl.toString(),
+                    alias: aliasValue || undefined,
+                    maxLength
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Palvelin vastasi tilakoodilla ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (!data || !data.success) {
+                const message = data?.error || 'Lyhennystä ei voitu luoda juuri nyt.';
+                setStatus(message, 'error');
+                showNotification(message, 'error');
+                return;
+            }
+
+            const shortUrl = data.shortUrl || `${baseUrl}${data.code || ''}`;
+            linkEl.textContent = shortUrl;
+            linkEl.href = shortUrl;
+            resultEl.hidden = false;
+            setStatus('Lyhyt linkki luotu! Kopioi ja jaa turvallisesti.', 'success');
+            showNotification('Lyhyt linkki on valmis – HyperLaunch valmiina jakoon.', 'success');
+        } catch (error) {
+            console.error('Link shortener error:', error);
+            setStatus('Palvelimeen ei saatu yhteyttä. Yritä hetken kuluttua uudelleen.', 'error');
+            showNotification('Lyhennys epäonnistui – tarkista yhteys tai ota yhteyttä AnomFIN-tiimiin.', 'error');
+        } finally {
+            toggleLoading(false);
+        }
+    });
+
+    copyBtn.addEventListener('click', async () => {
+        if (resultEl.hidden) {
+            return;
+        }
+        const value = linkEl.href;
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(value);
+            } else {
+                const tempInput = document.createElement('input');
+                tempInput.value = value;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                tempInput.remove();
+            }
+            setStatus('Lyhyt linkki kopioitu leikepöydälle.', 'success');
+            showNotification('Kopioitu! Jaetaan turvallisesti.', 'success');
+        } catch (error) {
+            console.error('Clipboard copy failed:', error);
+            setStatus('Kopiointi epäonnistui – kopioi manuaalisesti.', 'error');
+        }
+    });
+}
+
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(String(email).toLowerCase());
@@ -251,6 +576,27 @@ function showNotification(message, type = 'info') {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 5000);
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (char) => {
+        switch (char) {
+            case '&': return '&amp;';
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '"': return '&quot;';
+            case "'": return '&#39;';
+            default: return char;
+        }
+    });
+}
+
+function safeUrl(url, fallback = '#') {
+    const trimmed = String(url || '').trim();
+    if (!trimmed) return fallback;
+    if (/^(https?:|mailto:|tel:)/i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith('#') || trimmed.startsWith('/')) return trimmed;
+    return fallback;
 }
 
 function initIntroOverlay() {
@@ -476,6 +822,12 @@ function initScrollCompanion() {
         'Avoin lähdekoodi, vahva yhteisö. AnomFIN, AnomTools, Jugi-ekosysteemi – Kali Linux ja Ubuntu v22.04 tukevat kehitystyötä.' : 
         'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.';
     
+    const chatDockMarkup = isMobile ? '' : `
+            <div class="chat-dock" id="chat-dock" aria-live="polite">
+                <p class="sr-only">HyperLaunch chat -paneeli</p>
+            </div>
+    `;
+
     companion.innerHTML = `
         <div class="companion-core">
             <div class="companion-header">
@@ -509,6 +861,7 @@ function initScrollCompanion() {
                 </div>
             </div>
             <div class="companion-trail" aria-hidden="true"></div>
+            ${chatDockMarkup}
         </div>
     `;
 
@@ -730,7 +1083,11 @@ function initScrollCompanion() {
             rafId = requestAnimationFrame(animate);
         }
     });
-    
+
+    if (!isMobile) {
+        initChatWidget();
+    }
+
     // Add mobile trigger button for Softamme on mobile devices
     if (isMobile) {
         const triggerButton = document.createElement('button');
@@ -1114,6 +1471,7 @@ function activateRectangle() {
     intersectionDetectionEnabled = false;
 
     // Add logo blending class first
+    triggerHeroFlash();
     rectangle.classList.add('logo-entering');
     
     // After logo blends in, activate terminal and start matrix animation
@@ -1136,6 +1494,7 @@ function activateRectangle() {
 function launchMatrixAnimation(fromElement) {
     if (matrixAnimationActive) return;
     matrixAnimationActive = true;
+    triggerHeroFlash();
 
     const rect = fromElement.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -1279,14 +1638,15 @@ function startContinuousMatrixRain(terminal) {
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('../assets/logo.png');
-            background-size: 40%;
+            background-image: url('assets/logo.png');
+            background-size: 52%;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.35;
+            opacity: 0.5;
             pointer-events: none;
             z-index: 1;
-            animation: logoBreath 4s ease-in-out infinite;
+            animation: logoBreath 5s ease-in-out infinite;
+            mix-blend-mode: screen;
         `;
         terminal.appendChild(logoBg);
     }
@@ -1437,80 +1797,206 @@ function initLeftEdgeBox() {
     animate();
 }
 
-// GitHub Applications Section
-const GITHUB_REPOS = [
-    'AnomFIN/anomfin-website',
-    'AnomFIN/hrk',
-    'AnomFIN/jugitube',
-    'AnomFIN/iPeili',
-    'AnomFIN/lexai'
+const PLATFORM_SHOWCASE_DATA = [
+    {
+        name: 'iOS',
+        badge: 'SwiftUI',
+        type: 'phone',
+        code: `struct HyperFluxView: View {\n    var body: some View {\n        VStack(spacing: 12) {\n            Text("AnomFIN HyperFlux")\n                .font(.headline)\n                .foregroundStyle(.mint)\n            Text("audit trail: OK")\n                .font(.caption)\n                .foregroundStyle(.secondary)\n        }\n        .padding(20)\n        .background(.ultraThinMaterial)\n        .cornerRadius(20)\n    }\n}`,
+        footer: ['Secure Enclave', 'FaceID login']
+    },
+    {
+        name: 'Android',
+        badge: 'Jetpack',
+        type: 'phone',
+        code: `@Composable\nfun HyperLaunchCard() {\n    Column(Modifier.padding(20)) {\n        Text("Kyberturva")\n        Text("PhishHunterAI™")\n        Text("24/7 SOC hyperwatch")\n    }\n}`,
+        footer: ['Kotlin · Compose', 'Material You']
+    },
+    {
+        name: 'macOS',
+        badge: 'Swift',
+        type: 'laptop',
+        code: `import HyperFluxKit\nlet client = HyperFlux()\nclient.stream(.securityFeed) { event in\n    print("🔐", event.summary)\n}`,
+        footer: ['Universal binary', 'M3 optimized']
+    },
+    {
+        name: 'Windows',
+        badge: 'WinUI 3',
+        type: 'desktop',
+        code: `public sealed partial class Dashboard : Window {\n    public Dashboard() {\n        InitializeComponent();\n        Telemetry.Connect("anomfin-hyperflux");\n    }\n}`,
+        footer: ['Azure AD login', 'WPF/WinUI bridge']
+    },
+    {
+        name: 'Linux',
+        badge: 'GTK',
+        type: 'desktop',
+        code: `#!/usr/bin/env python3\nfrom hyperflux import Monitor\nmonitor = Monitor()\nfor alert in monitor.stream():\n    print(alert.to_cli())`,
+        footer: ['Ubuntu 22.04 LTS', 'Systemd services']
+    },
+    {
+        name: 'Web',
+        badge: 'Next.js',
+        type: 'browser',
+        code: `export default function Hero() {\n  return (\n    <section className="hero">\n      <h1>AnomFIN HyperLaunch</h1>\n      <p>SSR + Edge + SOC ready</p>\n    </section>\n  );\n}`,
+        footer: ['TypeScript', 'Vercel Edge']
+    }
 ];
 
-function initApplicationsSection() {
-    const applicationsGrid = document.getElementById('applications-grid');
-    if (!applicationsGrid) return;
+function initPlatformShowcase() {
+    const container = document.getElementById('platform-visuals');
+    if (!container) return;
 
-    // Fallback data in case GitHub API fails
-    const fallbackData = {
-        'AnomFIN/anomfin-website': {
-            name: 'anomfin-website',
-            description: 'AnomFIN yrityswebsite - modernit sovellus- ja kyberturvaratkaisut',
-            html_url: 'https://github.com/AnomFIN/anomfin-website',
-            language: 'HTML',
-            topics: ['website', 'cybersecurity', 'applications']
-        },
-        'AnomFIN/hrk': {
-            name: 'hrk',
-            description: 'HRK - Human Resource Kit: henkilöstöhallinnon työkalupakki',
-            html_url: 'https://github.com/AnomFIN/hrk',
-            language: 'JavaScript',
-            topics: ['hr', 'management', 'tools']
-        },
-        'AnomFIN/jugitube': {
-            name: 'jugitube',
-            description: 'JugiTube - Suomalainen videoalusta ja sisällönhallintajärjestelmä',
-            html_url: 'https://github.com/AnomFIN/jugitube',
-            language: 'TypeScript',
-            topics: ['video', 'streaming', 'cms']
-        },
-        'AnomFIN/iPeili': {
-            name: 'iPeili',
-            description: 'iPeili - Älykäs peilisovellus IoT-laitteille',
-            html_url: 'https://github.com/AnomFIN/iPeili',
-            language: 'Python',
-            topics: ['iot', 'smart-mirror', 'python']
-        },
-        'AnomFIN/lexai': {
-            name: 'lexai',
-            description: 'LexAI - Tekoälyavusteinen lakitekstien analysointityökalu',
-            html_url: 'https://github.com/AnomFIN/lexai',
-            language: 'Python',
-            topics: ['ai', 'legal', 'nlp']
+    container.innerHTML = '';
+
+    PLATFORM_SHOWCASE_DATA.forEach((item, index) => {
+        const card = document.createElement('article');
+        card.className = 'device-card';
+        const header = document.createElement('div');
+        header.className = 'device-header';
+
+        const name = document.createElement('span');
+        name.className = 'device-name';
+        name.textContent = item.name;
+
+        const badge = document.createElement('span');
+        badge.className = 'device-badge';
+        badge.textContent = item.badge;
+
+        header.appendChild(name);
+        header.appendChild(badge);
+
+        const shell = document.createElement('div');
+        shell.className = item.type === 'phone' ? 'device-shell phone' : 'device-shell';
+
+        if (item.type === 'phone') {
+            const notch = document.createElement('div');
+            notch.className = 'device-notch';
+            shell.appendChild(notch);
         }
-    };
 
-    // Try to fetch from GitHub API first, fall back to static data
+        const screen = document.createElement('div');
+        screen.className = 'device-screen';
+        const code = document.createElement('pre');
+        code.textContent = item.code;
+        screen.appendChild(code);
+        shell.appendChild(screen);
+
+        const footer = document.createElement('div');
+        footer.className = 'device-footer';
+        (item.footer || []).forEach(label => {
+            const span = document.createElement('span');
+            span.textContent = label;
+            footer.appendChild(span);
+        });
+
+        card.appendChild(header);
+        card.appendChild(shell);
+        card.appendChild(footer);
+
+        if (index === 0) {
+            card.style.boxShadow = '0 32px 85px rgba(0, 255, 166, 0.22)';
+        }
+
+        container.appendChild(card);
+    });
+}
+
+// GitHub Applications Section
+const PORTFOLIO_BASE = [
+    {
+        key: 'hyperlaunch',
+        repo: 'anomfin-website',
+        title: 'HyperLaunch™ yritysweb + SOC-näkymä',
+        category: 'Kyberturva · Web',
+        status: 'LIVE',
+        summary: 'Rakensimme responsiivisen HyperLaunch-terminaalin: yrityssivusto, 24/7 SOC-dashboard ja myyntiputki samassa paketissa.',
+        stats: [
+            { label: 'Go-live', value: '6 viikkoa' },
+            { label: 'Ylläpito', value: 'SOC 24/7', accent: true },
+            { label: 'Paketti', value: '499 € + ylläpito' }
+        ],
+        tags: ['Astro', 'Next.js', 'AnomTools', 'Kyberturva'],
+        link: { label: 'Katso GitHubissa', url: 'https://github.com/AnomFIN/anomfin-website', external: true },
+        featured: true
+    },
+    {
+        key: 'jugibot',
+        repo: 'jugitube',
+        title: 'JugiBot OmniDesk – monikanavainen asiakaspalvelu',
+        category: 'AI-asiakaspalvelu',
+        status: 'Pilotointi',
+        summary: 'OpenAI- ja Azure-integroitu botti, joka hoitaa yhteydenotot WhatsAppista webiin – sisäänrakennettu riskienhallinta ja lokitus.',
+        stats: [
+            { label: 'Vasteaika', value: '1.6 s' },
+            { label: 'Kielituki', value: 'fi · en · sv', accent: true },
+            { label: 'Hinnoittelu', value: '499 € + 89 €/kk' }
+        ],
+        tags: ['TypeScript', 'FastAPI', 'Azure OpenAI', 'LangChain'],
+        link: { label: 'Pyydä JugiBot-demo', url: '#contact', external: false }
+    },
+    {
+        key: 'hrk',
+        repo: 'hrk',
+        title: 'HRK – henkilöstöhallinnon kyberturva-alusta',
+        category: 'Sovellus · Kyberturva',
+        status: 'Käytössä',
+        summary: 'Sähköinen perehdytys, käyttöoikeusvalvonta ja tietovuotovahti yhdessä näkymässä – pilvessä ja on-prem.',
+        stats: [
+            { label: 'Käyttöönotto', value: '4 viikkoa' },
+            { label: 'Audit lokit', value: 'ISO 27001', accent: true },
+            { label: 'Projektit', value: 'alk. 999 €' }
+        ],
+        tags: ['React', 'Node.js', 'PostgreSQL', 'SIEM'],
+        link: { label: 'Tutustu HRK-repoon', url: 'https://github.com/AnomFIN/hrk', external: true }
+    },
+    {
+        key: 'lexai',
+        repo: 'lexai',
+        title: 'LexAI – sopimusjuridiikan tekoäly',
+        category: 'AI · Lakipalvelut',
+        status: 'Beta',
+        summary: 'Analysoi sopimuksia, nostaa riskikohdat ja ehdottaa korjauksia. Rakennettu suomalaiseen lainsäädäntöön.',
+        stats: [
+            { label: 'Analyysi', value: '< 30 s' },
+            { label: 'Integraatiot', value: 'SharePoint · M-Files', accent: true },
+            { label: 'Laajennus', value: 'alk. 2 999 €' }
+        ],
+        tags: ['Next.js', 'Python', 'LangChain', 'Pinecone'],
+        link: { label: 'Avaa LexAI', url: 'https://github.com/AnomFIN/lexai', external: true }
+    }
+];
+
+const GITHUB_REPOS = PORTFOLIO_BASE
+    .map(item => item.repo)
+    .filter(Boolean)
+    .map(repo => `AnomFIN/${repo}`);
+
+function initApplicationsSection() {
+    const gallery = document.getElementById('applications-gallery');
+    if (!gallery) return;
+
+    const renderFallback = () => renderPortfolioGallery(gallery, PORTFOLIO_BASE);
+
     fetchGitHubRepos()
         .then(repos => {
-            if (repos && repos.length > 0) {
-                displayApplications(repos);
+            if (Array.isArray(repos) && repos.length) {
+                renderPortfolioGallery(gallery, enrichPortfolioWithRepos(repos));
             } else {
-                // Use fallback data
-                const fallbackRepos = GITHUB_REPOS.map(repo => fallbackData[repo]).filter(Boolean);
-                displayApplications(fallbackRepos);
+                renderFallback();
             }
         })
         .catch(error => {
-            console.warn('GitHub API failed, using fallback data:', error);
-            const fallbackRepos = GITHUB_REPOS.map(repo => fallbackData[repo]).filter(Boolean);
-            displayApplications(fallbackRepos);
+            console.warn('GitHub API failed, using curated portfolio', error);
+            renderFallback();
         });
 }
 
 async function fetchGitHubRepos() {
     try {
         const repoPromises = GITHUB_REPOS.map(async (repo) => {
-            const response = await fetch(`https://api.github.com/repos/${repo}`);
+            const response = await fetch(`https://api.github.com/repos/${repo}`, {
+                headers: { 'Accept': 'application/vnd.github+json' }
+            });
             if (response.ok) {
                 return await response.json();
             }
@@ -1518,69 +2004,144 @@ async function fetchGitHubRepos() {
         });
 
         const repos = await Promise.all(repoPromises);
-        return repos.filter(repo => repo !== null);
+        return repos.filter(Boolean);
     } catch (error) {
         throw error;
     }
 }
 
-function displayApplications(repos) {
-    const applicationsGrid = document.getElementById('applications-grid');
-    if (!applicationsGrid) return;
-
-    // Clear loading placeholder
-    applicationsGrid.innerHTML = '';
-
+function enrichPortfolioWithRepos(repos = []) {
+    const repoMap = new Map();
     repos.forEach(repo => {
-        const card = createApplicationCard(repo);
-        applicationsGrid.appendChild(card);
+        if (repo?.name) {
+            repoMap.set(repo.name.toLowerCase(), repo);
+        }
+    });
+
+    const curated = PORTFOLIO_BASE.map(item => {
+        const repo = item.repo ? repoMap.get(item.repo.toLowerCase()) : null;
+        const link = { ...(item.link || {}) };
+        const tags = new Set(item.tags || []);
+        const stats = (item.stats || []).map(stat => ({ ...stat }));
+
+        if (repo) {
+            if (repo.html_url) {
+                link.url = repo.html_url;
+            }
+            if (Array.isArray(repo.topics)) {
+                repo.topics.slice(0, 3).forEach(topic => tags.add(topic.replace(/-/g, ' ')));
+            }
+            if (repo.language) {
+                tags.add(repo.language);
+            }
+            if (typeof repo.stargazers_count === 'number' && repo.stargazers_count > 0) {
+                stats.push({ label: 'GitHub ⭐', value: repo.stargazers_count.toString(), accent: true });
+            }
+        }
+
+        return {
+            ...item,
+            link,
+            tags: Array.from(tags),
+            stats
+        };
+    });
+
+    const curatedRepoNames = new Set(PORTFOLIO_BASE.map(item => (item.repo || '').toLowerCase()).filter(Boolean));
+    const extras = repos
+        .filter(repo => repo?.name && !curatedRepoNames.has(repo.name.toLowerCase()))
+        .map(repo => createRepoPortfolioItem(repo));
+
+    return [...curated, ...extras];
+}
+
+function createRepoPortfolioItem(repo) {
+    const tags = new Set();
+    if (repo.language) {
+        tags.add(repo.language);
+    }
+    if (Array.isArray(repo.topics)) {
+        repo.topics.slice(0, 3).forEach(topic => tags.add(topic.replace(/-/g, ' ')));
+    }
+
+    const stats = [];
+    if (typeof repo.stargazers_count === 'number' && repo.stargazers_count > 0) {
+        stats.push({ label: 'GitHub ⭐', value: repo.stargazers_count.toString(), accent: true });
+    }
+    if (typeof repo.forks_count === 'number' && repo.forks_count > 0) {
+        stats.push({ label: 'Forkit', value: repo.forks_count.toString() });
+    }
+
+    return {
+        key: `repo-${repo.name}`,
+        title: repo.name,
+        category: 'GitHub · Open Source',
+        status: 'Avoin',
+        summary: repo.description || 'Tutustu avoimeen projektiin GitHubissa.',
+        stats,
+        tags: Array.from(tags),
+        link: { label: 'Avaa GitHub', url: repo.html_url, external: true }
+    };
+}
+
+function renderPortfolioGallery(container, items) {
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!Array.isArray(items) || !items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'error-message';
+        empty.textContent = 'Portfolio päivitetään parhaillaan – pyydä demo ja katsotaan ratkaisuja yhdessä.';
+        container.appendChild(empty);
+        return;
+    }
+
+    items.forEach((item, index) => {
+        container.appendChild(createPortfolioCard(item, index));
     });
 }
 
-function createApplicationCard(repo) {
+function createPortfolioCard(item, index) {
     const card = document.createElement('article');
-    card.className = 'application-card';
+    card.className = 'portfolio-card';
+    if (item.featured || index === 0) {
+        card.classList.add('featured');
+    }
 
-    const icon = getRepoIcon(repo.language || 'Code');
-    const techTags = (repo.topics || []).slice(0, 3).map(topic => 
-        `<span class="tech-tag">${topic}</span>`
-    ).join('');
+    const categoryPill = item.category ? `<span class="meta-pill">${escapeHtml(item.category)}</span>` : '';
+    const statusPill = item.status ? `<span class="meta-pill secondary">${escapeHtml(item.status)}</span>` : '';
+
+    const statsHtml = Array.isArray(item.stats) && item.stats.length
+        ? `<ul class="portfolio-stats">${item.stats.map((stat, idx) => {
+            const classes = [''];
+            if (stat.accent || idx % 2 === 1) classes.push('alt');
+            return `<li class="${classes.join(' ').trim()}"><span class="stat-label">${escapeHtml(stat.label)}</span><span class="stat-value">${escapeHtml(stat.value)}</span></li>`;
+        }).join('')}</ul>`
+        : '';
+
+    const tagsHtml = Array.isArray(item.tags) && item.tags.length
+        ? `<div class="portfolio-tags">${item.tags.map(tag => `<span class="portfolio-tag">${escapeHtml(tag)}</span>`).join('')}</div>`
+        : '';
+
+    const link = item.link;
+    const actionHtml = link && link.url
+        ? `<a class="portfolio-cta" href="${safeUrl(link.url)}" ${link.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(link.label || 'Tutustu')}<span aria-hidden="true">→</span></a>`
+        : '';
 
     card.innerHTML = `
-        <div class="application-header">
-            <div class="application-icon">${icon}</div>
-            <h3 class="application-title">${repo.name}</h3>
+        <div class="portfolio-meta">
+            <span>${categoryPill}</span>
+            <span>${statusPill}</span>
         </div>
-        <p class="application-description">
-            ${repo.description || 'Ei kuvausta saatavilla.'}
-        </p>
-        <div class="application-tech">
-            ${repo.language ? `<span class="tech-tag">${repo.language}</span>` : ''}
-            ${techTags}
-        </div>
-        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="application-link">
-            Katso GitHubissa
-        </a>
+        <h3>${escapeHtml(item.title)}</h3>
+        <p>${escapeHtml(item.summary)}</p>
+        ${statsHtml}
+        ${tagsHtml}
+        ${actionHtml}
     `;
 
     return card;
-}
-
-function getRepoIcon(language) {
-    const icons = {
-        'HTML': '🌐',
-        'JavaScript': '⚡',
-        'TypeScript': '🔷',
-        'Python': '🐍',
-        'Java': '☕',
-        'C++': '⚙️',
-        'CSS': '🎨',
-        'Go': '🚀',
-        'Rust': '🦀',
-        'default': '💾'
-    };
-    
-    return icons[language] || icons.default;
 }
 
 // Mobile Visual Enhancements - Matrix Rain Effect
@@ -2051,120 +2612,111 @@ function initMobileParticles() {
 }
 
 // Chat Widget Integration
+let chatWidgetInstance = null;
+
 function initChatWidget() {
-    // Create chat widget HTML structure
-    const chatWidget = document.createElement('div');
-    chatWidget.className = 'chat-widget';
-    chatWidget.innerHTML = `
+    if (chatWidgetInstance) return;
+
+    const dock = document.querySelector('.chat-dock');
+    if (!dock) return;
+
+    const chatDefaults = ANOMFIN_DEFAULT_SETTINGS.integrations.chat;
+    const chatSettings = {
+        ...chatDefaults,
+        ...(window.__ANOMFIN_SETTINGS?.integrations?.chat || {})
+    };
+
+    dock.innerHTML = '';
+
+    if (!chatSettings.enabled) {
+        const disabledNote = document.createElement('p');
+        disabledNote.className = 'chat-disabled-note';
+        disabledNote.textContent = 'HyperLaunch-chat on pois päältä. Aktivoi se asetuksista, kun API-avain on valmiina.';
+        dock.appendChild(disabledNote);
+        return;
+    }
+
+    const hasApiKey = Boolean(chatSettings.apiKey || chatSettings.hasApiKey);
+    const providerLabel = (chatSettings.provider || 'AI').toString().toUpperCase();
+    const statusLabel = hasApiKey ? 'Online' : 'Odottaa API-avainta';
+    const modelLabel = chatSettings.model || 'gpt-4.1-mini';
+    const widgetId = `hyperlaunch-chat-${Date.now().toString(36)}`;
+
+    const widget = document.createElement('section');
+    widget.className = 'chat-widget active';
+    widget.innerHTML = `
         <div class="chat-widget-header">
             <div class="chat-widget-title">
-                <span class="status-indicator"></span>
-                <span>24/7 AnomFIN Chat</span>
+                <strong>HyperLaunch Chat</strong>
+                <span class="status-indicator">${statusLabel} · ${providerLabel}</span>
+                <span>${escapeHtml(modelLabel)}</span>
             </div>
-            <button class="chat-widget-close" aria-label="Close chat">&times;</button>
+            <button class="chat-widget-close" type="button" aria-expanded="true" aria-controls="${widgetId}-messages">
+                Piilota
+            </button>
         </div>
-        <div class="chat-messages" id="chat-messages">
-            <div class="chat-message">
-                <div class="chat-message-avatar">🤖</div>
-                <div class="chat-message-content">
-                    <p>Tervetuloa AnomFIN-chattiin! Olen täällä auttamassa sinua palveluidemme kanssa.</p>
-                    <p>Voin vastata kysymyksiin sovelluskehityksestä, kyberturvasta ja hinnoittelusta. Miten voin auttaa?</p>
-                </div>
-            </div>
-        </div>
+        <div class="chat-messages" id="${widgetId}-messages" role="log" aria-live="polite"></div>
         <div class="chat-input-container">
-            <form class="chat-input-form" id="chat-form">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Kirjoita viestisi..." autocomplete="off">
-                <button type="submit" class="chat-send-btn" id="chat-send">Lähetä</button>
+            <form class="chat-input-form" id="${widgetId}-form" novalidate>
+                <input type="text" class="chat-input" id="${widgetId}-input" placeholder="Kirjoita viestisi..." autocomplete="off" required>
+                <button type="submit" class="chat-send-btn">Lähetä</button>
             </form>
         </div>
     `;
-    
-    // Create chat toggle button
-    const chatToggleBtn = document.createElement('button');
-    chatToggleBtn.className = 'chat-toggle-btn';
-    chatToggleBtn.innerHTML = '💬';
-    chatToggleBtn.setAttribute('aria-label', 'Open chat');
-    
-    document.body.appendChild(chatWidget);
-    document.body.appendChild(chatToggleBtn);
-    
-    const chatMessages = document.getElementById('chat-messages');
-    const chatForm = document.getElementById('chat-form');
-    const chatInput = document.getElementById('chat-input');
-    const chatSendBtn = document.getElementById('chat-send');
-    const closeBtn = chatWidget.querySelector('.chat-widget-close');
-    
-    let conversationHistory = [];
-    
-    // Toggle chat widget
-    function toggleChat(show) {
-        if (show) {
-            chatWidget.classList.add('active');
-            chatToggleBtn.classList.add('hidden');
-            chatInput.focus();
-        } else {
-            chatWidget.classList.remove('active');
-            chatToggleBtn.classList.remove('hidden');
+
+    dock.appendChild(widget);
+    chatWidgetInstance = widget;
+
+    const messagesEl = widget.querySelector('.chat-messages');
+    const form = widget.querySelector('.chat-input-form');
+    const input = widget.querySelector('.chat-input');
+    const sendBtn = widget.querySelector('.chat-send-btn');
+    const toggleBtn = widget.querySelector('.chat-widget-close');
+
+    const conversationHistory = [];
+    if (chatSettings.systemPrompt) {
+        conversationHistory.push({ role: 'system', content: chatSettings.systemPrompt });
+    }
+
+    function setExpanded(expanded) {
+        widget.classList.toggle('chat-collapsed', !expanded);
+        toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        toggleBtn.textContent = expanded ? 'Piilota' : 'Avaa';
+        if (expanded && !input.disabled) {
+            input.focus();
         }
     }
-    
-    chatToggleBtn.addEventListener('click', () => toggleChat(true));
-    closeBtn.addEventListener('click', () => toggleChat(false));
-    
-    // Make scroll companion clickable to open chat
-    setTimeout(() => {
-        const scrollCompanion = document.querySelector('.scroll-companion');
-        if (scrollCompanion) {
-            scrollCompanion.style.cursor = 'pointer';
-            scrollCompanion.addEventListener('click', () => toggleChat(true));
-            
-            // Add tooltip
-            const tooltip = document.createElement('div');
-            tooltip.style.cssText = `
-                position: absolute;
-                top: -40px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 255, 166, 0.9);
-                color: #000;
-                padding: 0.5rem 1rem;
-                border-radius: 8px;
-                font-size: 0.8rem;
-                font-weight: 600;
-                white-space: nowrap;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease;
-            `;
-            tooltip.textContent = 'Klikkaa avataksesi chat';
-            scrollCompanion.appendChild(tooltip);
-            
-            scrollCompanion.addEventListener('mouseenter', () => {
-                tooltip.style.opacity = '1';
-            });
-            
-            scrollCompanion.addEventListener('mouseleave', () => {
-                tooltip.style.opacity = '0';
-            });
-        }
-    }, 2000);
-    
-    // Add user message to chat
-    function addMessage(content, isUser = false) {
+
+    toggleBtn.addEventListener('click', () => {
+        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        setExpanded(!expanded);
+    });
+
+    function addMessage(content, isUser = false, pushToHistory = true) {
+        const safeContent = String(content || '').trim();
+        if (!safeContent) return;
+
         const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message ${isUser ? 'user' : ''}`;
+        messageDiv.className = `chat-message${isUser ? ' user' : ''}`;
+
+        const paragraphs = safeContent
+            .split(/\n+/)
+            .map(line => `<p>${escapeHtml(line)}</p>`)
+            .join('');
+
         messageDiv.innerHTML = `
             <div class="chat-message-avatar">${isUser ? '👤' : '🤖'}</div>
-            <div class="chat-message-content">
-                <p>${content}</p>
-            </div>
+            <div class="chat-message-content">${paragraphs}</div>
         `;
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        messagesEl.appendChild(messageDiv);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        if (pushToHistory) {
+            conversationHistory.push({ role: isUser ? 'user' : 'assistant', content: safeContent });
+        }
     }
-    
-    // Show typing indicator
+
     function showTypingIndicator() {
         const typingDiv = document.createElement('div');
         typingDiv.className = 'chat-message typing-indicator';
@@ -2178,110 +2730,92 @@ function initChatWidget() {
                 </div>
             </div>
         `;
-        chatMessages.appendChild(typingDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        messagesEl.appendChild(typingDiv);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
         return typingDiv;
     }
-    
-    // Send message to ChatGPT API
-    async function sendMessageToAPI(message) {
-        // Add user message to history
-        conversationHistory.push({
-            role: 'user',
-            content: message
+
+    function trimHistory() {
+        const limit = 8;
+        if (conversationHistory.length > limit) {
+            const systemMessages = conversationHistory.filter(entry => entry.role === 'system');
+            const dialogue = conversationHistory.filter(entry => entry.role !== 'system');
+            const trimmedDialogue = dialogue.slice(-limit);
+            conversationHistory.length = 0;
+            conversationHistory.push(...systemMessages, ...trimmedDialogue);
+        }
+        return conversationHistory.filter(entry => entry.role !== 'system');
+    }
+
+    async function requestChatCompletion(message) {
+        const payload = {
+            message,
+            history: trimHistory(),
+            systemPrompt: chatSettings.systemPrompt || '',
+            model: chatSettings.model || chatDefaults.model,
+            temperature: typeof chatSettings.temperature === 'number'
+                ? chatSettings.temperature
+                : chatDefaults.temperature
+        };
+
+        const endpoint = chatSettings.endpoint || chatDefaults.endpoint;
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-        
-        try {
-            // NOTE: In production, this should be a backend endpoint that handles the API key securely
-            // For now, this is a placeholder that simulates the ChatGPT response
-            const response = await simulateChatGPTResponse(message);
-            
-            // Add assistant response to history
-            conversationHistory.push({
-                role: 'assistant',
-                content: response
-            });
-            
-            return response;
-        } catch (error) {
-            console.error('Chat API Error:', error);
-            return 'Pahoittelen, mutta en voi vastata juuri nyt. Ota yhteyttä suoraan: info@anomfin.fi';
+
+        if (!response.ok) {
+            throw new Error(`Chat endpoint returned ${response.status}`);
         }
-    }
-    
-    // Simulate ChatGPT response (replace with actual API call in production)
-    async function simulateChatGPTResponse(message) {
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-        
-        const lowerMessage = message.toLowerCase();
-        
-        if (lowerMessage.includes('hinta') || lowerMessage.includes('kustann') || lowerMessage.includes('maksa')) {
-            return 'AnomFIN tarjoaa kolme pääpakettia:\n\n' +
-                   '• Start (690€/kk): Alkuauditointi, peruskovennus ja koulutus\n' +
-                   '• Protect (1490€/kk): Start + 24/7 valvonta ja kuukausiraportit\n' +
-                   '• Elite (3490€/kk): Protect + 1h SLA ja laajennettu automaatio\n\n' +
-                   'Räätälöidyt sovellusprojektit hinnoitellaan erikseen. Haluatko kuulla lisää?';
-        } else if (lowerMessage.includes('kyberturva') || lowerMessage.includes('turva') || lowerMessage.includes('security')) {
-            return 'AnomFIN tarjoaa kattavat kyberturvaratkaisut:\n\n' +
-                   '• PhishHunterAI™ - huijausviestien tunnistus\n' +
-                   '• SMS Shield™ - tekstiviestihuijausten torjunta\n' +
-                   '• M365/Google kovennukset\n' +
-                   '• Incident-apuri ja 24/7 valvonta\n\n' +
-                   'Rakennamme PoC:n viikoissa ja viemme tuotantoon turvallisesti. Kiinnostaako demo?';
-        } else if (lowerMessage.includes('sovellus') || lowerMessage.includes('kehitys') || lowerMessage.includes('app')) {
-            return 'Kehitämme yksilöllisiä sovelluksia kaikille alustoille:\n\n' +
-                   '• Mobiilisovellukset (iOS & Android)\n' +
-                   '• Desktop-sovellukset (macOS, Windows, Linux)\n' +
-                   '• Web-sovellukset\n\n' +
-                   'Kyberturva on sisäänrakennettuna jokaisessa ratkaisussa. Toimitamme pienen toimivan version nopeasti ja kasvatamme tarpeen mukaan. Kerro lisää projektistasi?';
-        } else if (lowerMessage.includes('yhtey') || lowerMessage.includes('contact') || lowerMessage.includes('varaa')) {
-            return 'Otetaan yhteyttä! Voit:\n\n' +
-                   '• Varata 30 min kartoitus: info@anomfin.fi\n' +
-                   '• Soittaa: +358 40 123 4567\n' +
-                   '• Täyttää lomake verkkosivun Contact-osiossa\n\n' +
-                   'Vastaamme nopeasti ja sovitaan tapaaminen sinulle sopivaan aikaan.';
-        } else if (lowerMessage.includes('demo') || lowerMessage.includes('esittely') || lowerMessage.includes('poc')) {
-            return 'Erinomaista! Demossa näytämme:\n\n' +
-                   '• Miten ratkaisumme toimii käytännössä\n' +
-                   '• Integraatiomahdollisuudet\n' +
-                   '• PoC-toteutus viikoissa\n\n' +
-                   'Lähetä viesti osoitteeseen info@anomfin.fi tai täytä yhteydenottolomake niin sovitaan demo!';
-        } else {
-            return 'Kiitos viestistäsi! AnomFIN tarjoaa:\n\n' +
-                   '• Yksilöllisiä sovelluksia (mobile, desktop, web)\n' +
-                   '• Kyberturvaratkaisut ja 24/7 valvonta\n' +
-                   '• Auditoinnit ja penetraatiotestaus\n\n' +
-                   'Kysy minulta hinnoittelusta, palveluista tai varaa kartoitus. Miten voin auttaa?';
+
+        const data = await response.json();
+        if (!data || !data.success || !data.reply) {
+            throw new Error(data?.error || 'Chatbot ei vastannut');
         }
+
+        return String(data.reply);
     }
-    
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const message = chatInput.value.trim();
-        if (!message) return;
-        
-        addMessage(message, true);
-        chatInput.value = '';
-        
-        chatInput.disabled = true;
-        chatSendBtn.disabled = true;
-        
-        // Show typing indicator
+
+    if (chatSettings.greeting) {
+        addMessage(chatSettings.greeting, false, true);
+    } else {
+        addMessage('Tervetuloa HyperLaunchiin! Vastaan sovelluskehitystä ja kyberturvaa koskeviin kysymyksiin.', false, true);
+    }
+
+    setExpanded(true);
+
+    if (!hasApiKey) {
+        input.disabled = true;
+        sendBtn.disabled = true;
+        addMessage('Syötä OpenAI API -avain asetuksista niin aktivoimme chatin välittömästi.', false, false);
+        return;
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const message = input.value.trim();
+        if (!message) {
+            return;
+        }
+
+        addMessage(message, true, true);
+        input.value = '';
+        input.focus();
+
         const typingIndicator = showTypingIndicator();
-        const response = await sendMessageToAPI(message);
+        sendBtn.disabled = true;
 
-        typingIndicator.remove();
-
-        addMessage(response, false);
-
-        chatInput.disabled = false;
-        chatSendBtn.disabled = false;
-        chatInput.focus();
+        try {
+            const reply = await requestChatCompletion(message);
+            typingIndicator.remove();
+            addMessage(reply, false, true);
+        } catch (error) {
+            console.error('Chat error:', error);
+            typingIndicator.remove();
+            addMessage('Jokin meni vikaan – voit aina lähettää viestiä osoitteeseen info@anomfin.fi.', false, false);
+        } finally {
+            sendBtn.disabled = false;
+        }
     });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Wait a bit before initializing chat to not interfere with other animations
-    setTimeout(initChatWidget, 2000);
-});

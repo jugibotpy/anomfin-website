@@ -48,7 +48,12 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 $settings = loadSettings($settingsFile, $defaults);
-$settingsJson = json_encode($settings, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+$settingsForClient = $settings;
+if (isset($settingsForClient['integrations']['chat']['apiKey'])) {
+    $settingsForClient['integrations']['chat']['hasApiKey'] = $settingsForClient['integrations']['chat']['apiKey'] !== '';
+    unset($settingsForClient['integrations']['chat']['apiKey']);
+}
+$settingsJson = json_encode($settingsForClient, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 $csrfToken = $_SESSION['csrf_token'];
 $adminName = $_SESSION[$sessionUserKey] ?? $defaultAdminName;
 
@@ -71,6 +76,26 @@ function loadSettings(string $file, array $defaults): array
         $data['behaviors'] = array_merge($defaults['behaviors'], $data['behaviors']);
     } else {
         $data['behaviors'] = $defaults['behaviors'];
+    }
+    if (isset($data['branding']) && is_array($data['branding'])) {
+        $data['branding'] = array_merge($defaults['branding'] ?? [], $data['branding']);
+    } else {
+        $data['branding'] = $defaults['branding'] ?? [];
+    }
+    if (isset($data['content']) && is_array($data['content'])) {
+        $data['content'] = array_merge($defaults['content'] ?? [], $data['content']);
+    } else {
+        $data['content'] = $defaults['content'] ?? [];
+    }
+    if (isset($data['shortener']) && is_array($data['shortener'])) {
+        $data['shortener'] = array_merge($defaults['shortener'] ?? [], $data['shortener']);
+    } else {
+        $data['shortener'] = $defaults['shortener'] ?? [];
+    }
+    if (isset($data['integrations']['chat']) && is_array($data['integrations']['chat'])) {
+        $data['integrations']['chat'] = array_merge($defaults['integrations']['chat'] ?? [], $data['integrations']['chat']);
+    } else {
+        $data['integrations']['chat'] = $defaults['integrations']['chat'] ?? [];
     }
     if (!array_key_exists('preset', $data)) {
         $data['preset'] = $defaults['preset'];
@@ -298,6 +323,80 @@ function renderLoginPage(string $message = ''): string
         <label><input type="checkbox" id="reactHover"> Reagoi palvelukortteihin (hover → pulssi)</label>
         <label><input type="checkbox" id="reactContact"> Reagoi yhteysosioon (korostus)</label>
       </div>
+      <div class="card">
+        <h3>Brändi & identiteetti</h3>
+        <label>Logo URL
+          <input type="text" id="branding-logoUrl" placeholder="assets/logotp.png">
+        </label>
+        <label>Favicon URL
+          <input type="text" id="branding-faviconUrl" placeholder="assets/logotp.png">
+        </label>
+        <label>Hero-logon URL (maski)
+          <input type="text" id="branding-heroLogoUrl" placeholder="assets/logo.png">
+        </label>
+      </div>
+      <div class="card">
+        <h3>Sisältötekstit</h3>
+        <label>Hero highlight
+          <input type="text" id="content-heroHighlight">
+        </label>
+        <label>Hero eyebrow
+          <input type="text" id="content-heroEyebrow">
+        </label>
+        <label>Hero-otsikko
+          <input type="text" id="content-heroTitle">
+        </label>
+        <label>Hero-ingressi
+          <textarea id="content-heroSubtitle" rows="3"></textarea>
+        </label>
+        <label>Palvelu-tagline
+          <textarea id="content-serviceTagline" rows="2"></textarea>
+        </label>
+        <label>Palvelu-intro
+          <textarea id="content-serviceIntro" rows="3"></textarea>
+        </label>
+      </div>
+      <div class="card">
+        <h3>Linkinlyhentäjä</h3>
+        <label>Perus-URL
+          <input type="text" id="shortener-baseUrl" placeholder="https://anomfin.fi/?s=">
+        </label>
+        <label>Alias – maksimi pituus
+          <input type="number" id="shortener-maxLength" min="1" max="12">
+        </label>
+        <p class="hint">Alias voi sisältää A-Z, a-z ja numerot. Fallback luo koodin automaattisesti.</p>
+      </div>
+      <div class="card">
+        <h3>Tekoälychat</h3>
+        <label><input type="checkbox" id="chat-enabled"> Aktivoi HyperLaunch-chat</label>
+        <label>Palveluntarjoaja
+          <select id="chat-provider">
+            <option value="openai">OpenAI</option>
+            <option value="azure-openai">Azure OpenAI</option>
+            <option value="other">Muu</option>
+          </select>
+        </label>
+        <label>API Endpoint
+          <input type="text" id="chat-endpoint" placeholder="api/chat.php">
+        </label>
+        <label>Malli
+          <input type="text" id="chat-model" placeholder="gpt-4.1-mini">
+        </label>
+        <label>Lämpötila
+          <input type="number" id="chat-temperature" min="0" max="2" step="0.1">
+        </label>
+        <label>System prompt
+          <textarea id="chat-systemPrompt" rows="3"></textarea>
+        </label>
+        <label>Tervetuloviesti
+          <textarea id="chat-greeting" rows="2"></textarea>
+        </label>
+        <label>OpenAI API -avain
+          <input type="password" id="chat-apiKey" placeholder="Lisää uusi API-avain" autocomplete="off">
+        </label>
+        <p class="hint" id="chat-key-hint">Syötä uusi avain tai jätä tyhjäksi, jos nykyinen saa jäädä voimaan.</p>
+        <button type="button" class="secondary" id="chat-clear-key">Tyhjennä tallennettu API-avain</button>
+      </div>
     </div>
 
     <div class="actions">
@@ -371,6 +470,10 @@ function renderLoginPage(string $message = ''): string
     };
 
     const DEFAULT_CSS_VARS = <?php echo json_encode($defaults['cssVars'], JSON_UNESCAPED_SLASHES); ?>;
+    const DEFAULT_BRANDING = <?php echo json_encode($defaults['branding'], JSON_UNESCAPED_SLASHES); ?>;
+    const DEFAULT_CONTENT = <?php echo json_encode($defaults['content'], JSON_UNESCAPED_SLASHES); ?>;
+    const DEFAULT_SHORTENER = <?php echo json_encode($defaults['shortener'], JSON_UNESCAPED_SLASHES); ?>;
+    const DEFAULT_CHAT = <?php echo json_encode($defaults['integrations']['chat'], JSON_UNESCAPED_SLASHES); ?>;
 
     const cssVars = [
       ['--intro-blackout-ms','intro-blackout-ms','ms'],
@@ -395,6 +498,83 @@ function renderLoginPage(string $message = ''): string
     ];
 
     let currentPreset = INITIAL_SETTINGS.preset || null;
+
+    function setInputValue(id, value){
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = value ?? '';
+      }
+    }
+
+    function updateChatKeyState(chat){
+      const keyInput = document.getElementById('chat-apiKey');
+      const hint = document.getElementById('chat-key-hint');
+      const clearBtn = document.getElementById('chat-clear-key');
+      if (!keyInput || !hint || !clearBtn) return;
+
+      const hasKey = chat && (chat.hasApiKey || (chat.apiKey && chat.apiKey.length > 0));
+      keyInput.value = '';
+      keyInput.dataset.hasKey = hasKey ? '1' : '0';
+      hint.textContent = hasKey
+        ? 'API-avain on tallennettu palvelimelle. Syötä uusi arvo korvataksesi tai tyhjennä painikkeesta.'
+        : 'Syötä uusi API-avain. Kentän voi jättää tyhjäksi, jos avain ei ole käytössä.';
+      clearBtn.disabled = !hasKey;
+    }
+
+    function collectBranding(){
+      return {
+        logoUrl: (document.getElementById('branding-logoUrl')?.value || '').trim(),
+        faviconUrl: (document.getElementById('branding-faviconUrl')?.value || '').trim(),
+        heroLogoUrl: (document.getElementById('branding-heroLogoUrl')?.value || '').trim(),
+      };
+    }
+
+    function collectContent(){
+      return {
+        heroHighlight: document.getElementById('content-heroHighlight')?.value || '',
+        heroEyebrow: document.getElementById('content-heroEyebrow')?.value || '',
+        heroTitle: document.getElementById('content-heroTitle')?.value || '',
+        heroSubtitle: document.getElementById('content-heroSubtitle')?.value || '',
+        serviceTagline: document.getElementById('content-serviceTagline')?.value || '',
+        serviceIntro: document.getElementById('content-serviceIntro')?.value || '',
+      };
+    }
+
+    function collectShortener(){
+      const maxLengthRaw = document.getElementById('shortener-maxLength')?.value || '';
+      const maxLength = parseInt(maxLengthRaw, 10);
+      return {
+        baseUrl: (document.getElementById('shortener-baseUrl')?.value || '').trim(),
+        maxLength: Number.isFinite(maxLength) ? maxLength : DEFAULT_SHORTENER.maxLength,
+      };
+    }
+
+    function collectChatIntegration(){
+      const keyInput = document.getElementById('chat-apiKey');
+      const datasetHasKey = keyInput?.dataset?.hasKey === '1';
+      let apiKey = (keyInput?.value || '').trim();
+      if (apiKey === '') {
+        apiKey = datasetHasKey ? '__KEEP__' : '';
+      } else {
+        keyInput.dataset.hasKey = '0';
+      }
+      const temperatureRaw = document.getElementById('chat-temperature')?.value;
+      const temperatureCandidate = Number.parseFloat(temperatureRaw ?? '');
+      const temperature = Number.isFinite(temperatureCandidate)
+        ? temperatureCandidate
+        : (DEFAULT_CHAT.temperature ?? 0.6);
+
+      return {
+        enabled: document.getElementById('chat-enabled')?.checked ?? true,
+        provider: document.getElementById('chat-provider')?.value || 'openai',
+        endpoint: (document.getElementById('chat-endpoint')?.value || '').trim(),
+        model: (document.getElementById('chat-model')?.value || '').trim(),
+        temperature,
+        systemPrompt: document.getElementById('chat-systemPrompt')?.value || '',
+        greeting: document.getElementById('chat-greeting')?.value || '',
+        apiKey,
+      };
+    }
 
     function setField(id, value){
       const r = document.getElementById(id);
@@ -482,6 +662,69 @@ function renderLoginPage(string $message = ''): string
         document.getElementById('meta-updated').textContent = INITIAL_SETTINGS.meta.updated_at || '-';
         document.getElementById('meta-updated-by').textContent = INITIAL_SETTINGS.meta.updated_by || '-';
       }
+      const branding = INITIAL_SETTINGS.branding || DEFAULT_BRANDING;
+      setInputValue('branding-logoUrl', branding.logoUrl || DEFAULT_BRANDING.logoUrl);
+      setInputValue('branding-faviconUrl', branding.faviconUrl || DEFAULT_BRANDING.faviconUrl);
+      setInputValue('branding-heroLogoUrl', branding.heroLogoUrl || DEFAULT_BRANDING.heroLogoUrl);
+
+      const content = INITIAL_SETTINGS.content || DEFAULT_CONTENT;
+      setInputValue('content-heroHighlight', content.heroHighlight || DEFAULT_CONTENT.heroHighlight);
+      setInputValue('content-heroEyebrow', content.heroEyebrow || DEFAULT_CONTENT.heroEyebrow);
+      setInputValue('content-heroTitle', content.heroTitle || DEFAULT_CONTENT.heroTitle);
+      setInputValue('content-heroSubtitle', content.heroSubtitle || DEFAULT_CONTENT.heroSubtitle);
+      setInputValue('content-serviceTagline', content.serviceTagline || DEFAULT_CONTENT.serviceTagline);
+      setInputValue('content-serviceIntro', content.serviceIntro || DEFAULT_CONTENT.serviceIntro);
+
+      const shortener = INITIAL_SETTINGS.shortener || DEFAULT_SHORTENER;
+      setInputValue('shortener-baseUrl', shortener.baseUrl || DEFAULT_SHORTENER.baseUrl);
+      setInputValue('shortener-maxLength', shortener.maxLength || DEFAULT_SHORTENER.maxLength);
+
+      const chat = (INITIAL_SETTINGS.integrations && INITIAL_SETTINGS.integrations.chat) || DEFAULT_CHAT;
+      const chatEnabled = document.getElementById('chat-enabled');
+      if (chatEnabled) {
+        chatEnabled.checked = chat.enabled !== false;
+      }
+      setInputValue('chat-provider', chat.provider || DEFAULT_CHAT.provider || 'openai');
+      setInputValue('chat-endpoint', chat.endpoint || DEFAULT_CHAT.endpoint || 'api/chat.php');
+      setInputValue('chat-model', chat.model || DEFAULT_CHAT.model || 'gpt-4.1-mini');
+      setInputValue('chat-temperature', chat.temperature ?? DEFAULT_CHAT.temperature ?? 0.6);
+      setInputValue('chat-systemPrompt', chat.systemPrompt || DEFAULT_CHAT.systemPrompt);
+      setInputValue('chat-greeting', chat.greeting || DEFAULT_CHAT.greeting);
+      updateChatKeyState(chat);
+    }
+
+    function setupChatControls(){
+      const keyInput = document.getElementById('chat-apiKey');
+      const clearBtn = document.getElementById('chat-clear-key');
+      const hint = document.getElementById('chat-key-hint');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', ()=>{
+          if (!keyInput || !hint) return;
+          keyInput.value = '';
+          keyInput.dataset.hasKey = '0';
+          hint.textContent = 'API-avain poistetaan tallennettaessa.';
+          clearBtn.disabled = true;
+        });
+      }
+      if (keyInput) {
+        keyInput.addEventListener('input', ()=>{
+          if (!hint) return;
+          const trimmed = keyInput.value.trim();
+          if (trimmed.length > 0) {
+            keyInput.dataset.hasKey = '0';
+            hint.textContent = 'Tallennettaessa uusi arvo korvaa tallennetun API-avaimen.';
+            if (clearBtn) clearBtn.disabled = false;
+          } else {
+            if (keyInput.dataset.hasKey === '1') {
+              hint.textContent = 'API-avain on tallennettu palvelimelle. Syötä uusi arvo korvataksesi tai tyhjennä painikkeesta.';
+              if (clearBtn) clearBtn.disabled = false;
+            } else {
+              hint.textContent = 'Syötä uusi API-avain. Kentän voi jättää tyhjäksi, jos avain ei ole käytössä.';
+              if (clearBtn) clearBtn.disabled = true;
+            }
+          }
+        });
+      }
     }
 
     function showStatus(message, type='success'){
@@ -524,6 +767,12 @@ function renderLoginPage(string $message = ''): string
           reactHover: document.getElementById('reactHover').checked,
           reactContact: document.getElementById('reactContact').checked,
         },
+        branding: collectBranding(),
+        content: collectContent(),
+        shortener: collectShortener(),
+        integrations: {
+          chat: collectChatIntegration(),
+        },
         preset: currentPreset,
         ease
       };
@@ -542,6 +791,13 @@ function renderLoginPage(string $message = ''): string
         if(data.meta){
           document.getElementById('meta-updated').textContent = data.meta.updated_at || '-';
           document.getElementById('meta-updated-by').textContent = data.meta.updated_by || '-';
+        }
+        if(data.integrations && data.integrations.chat){
+          const chatState = data.integrations.chat;
+          if (typeof chatState.hasApiKey === 'undefined') {
+            chatState.hasApiKey = typeof chatState.apiKey === 'string' && chatState.apiKey !== '';
+          }
+          updateChatKeyState(chatState);
         }
         if(!skipStatus){
           showStatus('Asetukset tallennettu onnistuneesti.', 'success');
@@ -570,6 +826,13 @@ function renderLoginPage(string $message = ''): string
       showStatus('Palautetaan oletukset…', 'success');
       INITIAL_SETTINGS.cssVars = {};
       INITIAL_SETTINGS.behaviors = {};
+      INITIAL_SETTINGS.branding = { ...DEFAULT_BRANDING };
+      INITIAL_SETTINGS.content = { ...DEFAULT_CONTENT };
+      INITIAL_SETTINGS.shortener = { ...DEFAULT_SHORTENER };
+      INITIAL_SETTINGS.integrations = {
+        ...(INITIAL_SETTINGS.integrations || {}),
+        chat: { ...DEFAULT_CHAT },
+      };
       currentPreset = null;
       document.querySelectorAll('.preset-box').forEach(box=>box.checked=false);
       cssVars.forEach(([varName,id,unit])=>{
@@ -590,11 +853,34 @@ function renderLoginPage(string $message = ''): string
       document.getElementById('logo-ease').value = 'cubic-bezier(.2,.8,.2,1)';
       document.getElementById('reactHover').checked = true;
       document.getElementById('reactContact').checked = true;
+      setInputValue('branding-logoUrl', DEFAULT_BRANDING.logoUrl);
+      setInputValue('branding-faviconUrl', DEFAULT_BRANDING.faviconUrl);
+      setInputValue('branding-heroLogoUrl', DEFAULT_BRANDING.heroLogoUrl);
+      setInputValue('content-heroHighlight', DEFAULT_CONTENT.heroHighlight);
+      setInputValue('content-heroEyebrow', DEFAULT_CONTENT.heroEyebrow);
+      setInputValue('content-heroTitle', DEFAULT_CONTENT.heroTitle);
+      setInputValue('content-heroSubtitle', DEFAULT_CONTENT.heroSubtitle);
+      setInputValue('content-serviceTagline', DEFAULT_CONTENT.serviceTagline);
+      setInputValue('content-serviceIntro', DEFAULT_CONTENT.serviceIntro);
+      setInputValue('shortener-baseUrl', DEFAULT_SHORTENER.baseUrl);
+      setInputValue('shortener-maxLength', DEFAULT_SHORTENER.maxLength);
+      const chatEnabled = document.getElementById('chat-enabled');
+      if (chatEnabled) {
+        chatEnabled.checked = DEFAULT_CHAT.enabled !== false;
+      }
+      setInputValue('chat-provider', DEFAULT_CHAT.provider || 'openai');
+      setInputValue('chat-endpoint', DEFAULT_CHAT.endpoint || 'api/chat.php');
+      setInputValue('chat-model', DEFAULT_CHAT.model || 'gpt-4.1-mini');
+      setInputValue('chat-temperature', DEFAULT_CHAT.temperature ?? 0.6);
+      setInputValue('chat-systemPrompt', DEFAULT_CHAT.systemPrompt || '');
+      setInputValue('chat-greeting', DEFAULT_CHAT.greeting || '');
+      updateChatKeyState(DEFAULT_CHAT);
       await save();
     });
 
     setupPresetCheckboxes();
     linkSliders();
+    setupChatControls();
     load();
   </script>
 </body>
