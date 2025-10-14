@@ -2384,7 +2384,7 @@ textarea {
 
 /* Enhanced logo visibility during terminal transformation */
 .hero-grid.terminal-transform.logo-blended::after {
-    opacity: 0.5;
+    opacity: 0.55;
     background-size: 52%;
     animation: logoBreath 5.6s ease-in-out infinite;
 }
@@ -2402,11 +2402,11 @@ textarea {
 
 @keyframes logoBreath {
     0%, 100% {
-        opacity: 0.25;
+        opacity: 0.4;
         transform: scale(1);
     }
     50% {
-        opacity: 0.35;
+        opacity: 0.55;
         transform: scale(1.02);
     }
 }
