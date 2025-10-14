@@ -682,16 +682,18 @@ function initIntroOverlay() {
                         // Trigger terminal transformation automatically after shake ends
                         setTimeout(() => {
                             activateRectangle();
+                            
+                            // Hide intro overlay AFTER logo has fully blended into hero-grid
+                            // Wait for logo-entering animation (1000ms) + logo-blended transition (300ms)
+                            setTimeout(() => {
+                                overlay.style.opacity = '0';
+                                overlay.style.transition = 'opacity .6s ease';
+                                setTimeout(() => overlay.classList.add('intro-overlay-hidden'), 700);
+                            }, 1400);
                         }, 500);
                     }, shakeDuration);
                 }
                 orb && orb.classList.add('lively');
-                // Piilota intro overlay pehmeästi
-                setTimeout(() => {
-                    overlay.style.opacity = '0';
-                    overlay.style.transition = 'opacity .6s ease';
-                    setTimeout(() => overlay.classList.add('intro-overlay-hidden'), 700);
-                }, 300);
                 anim.removeEventListener?.('finish', onMoveEnd);
             };
             anim.addEventListener?.('finish', onMoveEnd);
