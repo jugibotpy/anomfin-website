@@ -53,7 +53,7 @@ Toimii oikein kaikilla testatuilla syötteillä:
 ### 6. 📦 Riippuvuudet
 - ✅ CSS: `css/style.css`
 - ✅ Fontit: Google Fonts (Inter)
-- ✅ Ikoni: `assets/image2vector.svg`
+- ✅ Ikoni: `assets/logotp.png`
 - ✅ Logo: `assets/logo.png`
 
 ## 🌐 GitHub Pages -valmius

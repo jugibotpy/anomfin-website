@@ -23,7 +23,7 @@ anomfin-website/
 └── assets/
     ├── logo.png           # Logo (PNG)
     ├── logo.svg           # Logo (SVG)
-    └── image2vector.svg   # Vektorigrafiikka
+    └── logotp.png         # Päälogon PNG-versio
 ```
 
 ## �� Asennus (3 vaihetta)
