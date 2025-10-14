@@ -69,9 +69,7 @@ const ANOMFIN_DEFAULT_SETTINGS = {
         '--logo-arc-x': '0.65',
         '--logo-arc-dy': '60px',
         '--grid-hue-duration-ms': '1800ms',
-        '--square-shake-duration-ms': '1000ms',
-        '--square-shake-amp': '14px',
-        '--square-scale-end': '1.25',
+        '--hero-arrival-duration-ms': '1400ms',
         '--orb-float-duration-s': '8s',
         '--grid-float-duration-s': '6s',
         '--eyebrow-size': '1rem',
@@ -673,13 +671,13 @@ function initIntroOverlay() {
                 if (grid) {
                     grid.classList.add('square-excite', 'square-green');
                     
-                    // Use setTimeout instead of animationend for reliability
-                    const shakeDuration = cssMs('--square-shake-duration-ms', 1000);
+                    // Käytetään uutta smooth-arrival -animaatiota
+                    const arrivalDuration = cssMs('--hero-arrival-duration-ms', 1300);
                     setTimeout(() => {
                         grid.classList.remove('square-excite');
                         grid.classList.add('lively');
-                        
-                        // Trigger terminal transformation automatically after shake ends
+
+                        // Trigger terminal transformation automaattisesti smooth-arrivalin jälkeen
                         setTimeout(() => {
                             activateRectangle();
                             
@@ -691,7 +689,7 @@ function initIntroOverlay() {
                                 setTimeout(() => overlay.classList.add('intro-overlay-hidden'), 700);
                             }, 1400);
                         }, 500);
-                    }, shakeDuration);
+                    }, arrivalDuration);
                 }
                 orb && orb.classList.add('lively');
                 anim.removeEventListener?.('finish', onMoveEnd);
@@ -1801,106 +1799,381 @@ function initLeftEdgeBox() {
 
 const PLATFORM_SHOWCASE_DATA = [
     {
+        id: 'ios',
         name: 'iOS',
-        badge: 'SwiftUI',
+        badge: 'SwiftUI · visionOS',
         type: 'phone',
-        code: `struct HyperFluxView: View {\n    var body: some View {\n        VStack(spacing: 12) {\n            Text("AnomFIN HyperFlux")\n                .font(.headline)\n                .foregroundStyle(.mint)\n            Text("audit trail: OK")\n                .font(.caption)\n                .foregroundStyle(.secondary)\n        }\n        .padding(20)\n        .background(.ultraThinMaterial)\n        .cornerRadius(20)\n    }\n}`,
-        footer: ['Secure Enclave', 'FaceID login']
+        brand: 'Apple A17 Pro · Secure Enclave',
+        highlight: 'HyperLaunch native UI + SOC push pipeline.',
+        capabilities: [
+            'Face ID & Passkeys valmiina',
+            'App Store Connect automaatio',
+            'Live Activities · Dynamic Island'
+        ],
+        code: `struct HyperFluxView: View {
+    var body: some View {
+        VStack(spacing: 14) {
+            Text("AnomFIN HyperFlux")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.mint)
+            Label("audit trail: OK", systemImage: "lock.shield")
+                .font(.footnote)
+                .symbolEffect(.pulse.wholeSymbol)
+        }
+        .padding(24)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+    }
+}`,
+        footer: ['Secure Enclave', 'Face ID login']
     },
     {
+        id: 'android',
         name: 'Android',
-        badge: 'Jetpack',
+        badge: 'Jetpack Compose',
         type: 'phone',
-        code: `@Composable\nfun HyperLaunchCard() {\n    Column(Modifier.padding(20)) {\n        Text("Kyberturva")\n        Text("PhishHunterAI™")\n        Text("24/7 SOC hyperwatch")\n    }\n}`,
+        brand: 'Pixel · One UI · Material You',
+        highlight: 'Offline-first + GraphQL Edge synkronointi.',
+        capabilities: [
+            'Play Integrity API',
+            'Wear OS kumppanisovellus',
+            'PhishHunterAI™ push-hälytykset'
+        ],
+        code: `@Composable
+fun HyperLaunchCard() {
+    Column(
+        modifier = Modifier
+            .padding(24.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(Brush.linearGradient(listOf(Color(0xFF002430), Color(0xFF003a55))))
+    ) {
+        Text("AnomFIN Android", style = MaterialTheme.typography.titleMedium)
+        AssistChip(label = { Text("SOC 24/7") })
+        Text("Kyberturva · GraphQL Edge", style = MaterialTheme.typography.bodySmall)
+    }
+}`,
         footer: ['Kotlin · Compose', 'Material You']
     },
     {
+        id: 'macos',
         name: 'macOS',
-        badge: 'Swift',
-        type: 'laptop',
-        code: `import HyperFluxKit\nlet client = HyperFlux()\nclient.stream(.securityFeed) { event in\n    print("🔐", event.summary)\n}`,
+        badge: 'Swift · Catalyst',
+        type: 'desktop',
+        brand: 'MacBook Pro · M3 Max',
+        highlight: 'Unified binary + notarointi + Endpoint Security.',
+        capabilities: [
+            'Menu bar -agentti',
+            'Shortcuts automaatio',
+            'SIEM-loki vienti'
+        ],
+        code: `import HyperFluxKit
+let client = HyperFlux()
+client.stream(.securityFeed) { event in
+    print("🔐", event.summary)
+}
+Task {
+    try await client.pushComplianceReport()
+}`,
         footer: ['Universal binary', 'M3 optimized']
     },
     {
+        id: 'windows',
         name: 'Windows',
-        badge: 'WinUI 3',
+        badge: 'WinUI 3 · WPF Bridge',
         type: 'desktop',
-        code: `public sealed partial class Dashboard : Window {\n    public Dashboard() {\n        InitializeComponent();\n        Telemetry.Connect("anomfin-hyperflux");\n    }\n}`,
+        brand: 'Surface Studio · Azure AD',
+        highlight: 'Zero Trust login + Defender for Endpoint -integraatio.',
+        capabilities: [
+            'Intune hallinta',
+            'PowerShell Desired State',
+            'Teams Alerts -kortit'
+        ],
+        code: `public sealed partial class Dashboard : Window {
+    public Dashboard() {
+        InitializeComponent();
+        Telemetry.Connect("anomfin-hyperflux");
+        AzureAd.LoginWithDeviceCode();
+    }
+}`,
         footer: ['Azure AD login', 'WPF/WinUI bridge']
     },
     {
+        id: 'linux',
         name: 'Linux',
-        badge: 'GTK',
+        badge: 'GTK · Rust',
         type: 'desktop',
-        code: `#!/usr/bin/env python3\nfrom hyperflux import Monitor\nmonitor = Monitor()\nfor alert in monitor.stream():\n    print(alert.to_cli())`,
+        brand: 'Ubuntu LTS · Hardened Kernel',
+        highlight: 'Infra-as-code + SOC agentti + eBPF-telemetria.',
+        capabilities: [
+            'Systemd palveluvalvonta',
+            'Immutable devops pipelines',
+            'SELinux/AppArmor profiilit'
+        ],
+        code: `#!/usr/bin/env python3
+from hyperflux import Monitor
+monitor = Monitor()
+for alert in monitor.stream():
+    print(alert.to_cli())
+monitor.deploy("anomfin-edge", harden=True)`
+,
         footer: ['Ubuntu 22.04 LTS', 'Systemd services']
     },
     {
+        id: 'web',
         name: 'Web',
-        badge: 'Next.js',
+        badge: 'Next.js · Astro',
         type: 'browser',
-        code: `export default function Hero() {\n  return (\n    <section className="hero">\n      <h1>AnomFIN HyperLaunch</h1>\n      <p>SSR + Edge + SOC ready</p>\n    </section>\n  );\n}`,
+        brand: 'Vercel Edge · Cloudflare SOC',
+        highlight: 'Realtime SSR + Astro Islands + SOC instrumentation.',
+        capabilities: [
+            'Edge Functions Audit Trail',
+            'A/B + Feature Flags',
+            'WCAG AA saavutettavuus'
+        ],
+        code: `export default function Hero() {
+  return (
+    <section className="hero">
+      <h1>AnomFIN HyperLaunch</h1>
+      <p>SSR + Edge + SOC ready</p>
+    </section>
+  );
+}`,
         footer: ['TypeScript', 'Vercel Edge']
     }
 ];
+
 
 function initPlatformShowcase() {
     const container = document.getElementById('platform-visuals');
     if (!container) return;
 
+    const chipList = document.getElementById('platform-chiplist');
+    const chips = chipList ? Array.from(chipList.querySelectorAll('.platform-chip')) : [];
+
     container.innerHTML = '';
 
-    PLATFORM_SHOWCASE_DATA.forEach((item, index) => {
-        const card = document.createElement('article');
-        card.className = 'device-card';
-        const header = document.createElement('div');
-        header.className = 'device-header';
+    const stage = document.createElement('div');
+    stage.className = 'platform-carousel';
+    const orbit = document.createElement('div');
+    orbit.className = 'platform-orbit';
 
-        const name = document.createElement('span');
-        name.className = 'device-name';
-        name.textContent = item.name;
+    const cards = PLATFORM_SHOWCASE_DATA.map((item) => {
+        const card = buildPlatformCard(item);
+        orbit.appendChild(card);
+        return card;
+    });
 
-        const badge = document.createElement('span');
-        badge.className = 'device-badge';
-        badge.textContent = item.badge;
+    if (!cards.length) return;
 
-        header.appendChild(name);
-        header.appendChild(badge);
+    stage.appendChild(orbit);
+    container.appendChild(stage);
 
-        const shell = document.createElement('div');
-        shell.className = item.type === 'phone' ? 'device-shell phone' : 'device-shell';
+    setupPlatformCarousel(stage, orbit, cards, chips);
+}
 
-        if (item.type === 'phone') {
-            const notch = document.createElement('div');
-            notch.className = 'device-notch';
-            shell.appendChild(notch);
-        }
+function buildPlatformCard(item = {}) {
+    const id = (item.id || item.name || 'platform').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const card = document.createElement('article');
+    card.className = `device-card device-${id}`;
+    card.dataset.platform = id;
+    card.setAttribute('role', 'group');
+    card.setAttribute('aria-roledescription', 'alustademo');
+    if (item.name) {
+        card.setAttribute('aria-label', item.name);
+    }
 
-        const screen = document.createElement('div');
-        screen.className = 'device-screen';
-        const code = document.createElement('pre');
-        code.textContent = item.code;
-        screen.appendChild(code);
-        shell.appendChild(screen);
+    const header = document.createElement('header');
+    header.className = 'device-header';
 
-        const footer = document.createElement('div');
-        footer.className = 'device-footer';
-        (item.footer || []).forEach(label => {
-            const span = document.createElement('span');
-            span.textContent = label;
-            footer.appendChild(span);
+    const title = document.createElement('div');
+    title.className = 'device-title';
+
+    const name = document.createElement('span');
+    name.className = 'device-name';
+    name.textContent = item.name || 'Alusta';
+    title.appendChild(name);
+
+    if (item.brand) {
+        const meta = document.createElement('span');
+        meta.className = 'device-meta';
+        meta.textContent = item.brand;
+        title.appendChild(meta);
+    }
+
+    const badge = document.createElement('span');
+    badge.className = 'device-badge';
+    badge.textContent = item.badge || 'HyperLaunch';
+
+    header.appendChild(title);
+    header.appendChild(badge);
+
+    const shellClasses = ['device-shell', `device-shell-${id}`];
+    if (item.type === 'phone') shellClasses.push('phone');
+    if (item.type === 'browser') shellClasses.push('browser');
+    const shell = document.createElement('div');
+    shell.className = shellClasses.filter(Boolean).join(' ');
+
+    if (item.type === 'phone') {
+        const notch = document.createElement('div');
+        notch.className = 'device-notch';
+        shell.appendChild(notch);
+    } else if (item.type === 'browser') {
+        const chrome = document.createElement('div');
+        chrome.className = 'device-browser-bar';
+        const dots = document.createElement('div');
+        dots.className = 'device-browser-dots';
+        ['red', 'yellow', 'green'].forEach(color => {
+            const dot = document.createElement('span');
+            dot.className = `device-browser-dot ${color}`;
+            dots.appendChild(dot);
+        });
+        chrome.appendChild(dots);
+        shell.appendChild(chrome);
+    } else {
+        const statusBar = document.createElement('div');
+        statusBar.className = 'device-status-bar';
+        statusBar.innerHTML = '<span></span>';
+        shell.appendChild(statusBar);
+    }
+
+    const screen = document.createElement('div');
+    screen.className = 'device-screen';
+    const screenInner = document.createElement('div');
+    screenInner.className = 'device-screen-inner';
+
+    if (item.highlight) {
+        const highlight = document.createElement('p');
+        highlight.className = 'device-highlight';
+        highlight.textContent = item.highlight;
+        screenInner.appendChild(highlight);
+    }
+
+    const code = document.createElement('pre');
+    code.className = 'device-code';
+    code.textContent = item.code || '';
+    screenInner.appendChild(code);
+
+    if (Array.isArray(item.capabilities) && item.capabilities.length) {
+        const list = document.createElement('ul');
+        list.className = 'device-capabilities';
+        item.capabilities.forEach(cap => {
+            const li = document.createElement('li');
+            li.textContent = cap;
+            list.appendChild(li);
+        });
+        screenInner.appendChild(list);
+    }
+
+    screen.appendChild(screenInner);
+    shell.appendChild(screen);
+
+    const footer = document.createElement('div');
+    footer.className = 'device-footer';
+    (item.footer || []).forEach(label => {
+        const span = document.createElement('span');
+        span.textContent = label;
+        footer.appendChild(span);
+    });
+
+    card.appendChild(header);
+    card.appendChild(shell);
+    card.appendChild(footer);
+
+    return card;
+}
+
+function setupPlatformCarousel(stage, orbit, cards, chips = []) {
+    if (!cards.length) return;
+
+    const total = cards.length;
+    let activeIndex = 0;
+    let timerId = null;
+
+    const angleStep = 360 / total;
+
+    const computeRelative = (index) => {
+        let relative = (index - activeIndex) % total;
+        if (relative > total / 2) relative -= total;
+        if (relative < -total / 2) relative += total;
+        return relative;
+    };
+
+    const applyLayout = (instant = false) => {
+        const radius = Math.min(460, Math.max(320, window.innerWidth * 0.38));
+        cards.forEach((card, index) => {
+            const relative = computeRelative(index);
+            const angle = relative * angleStep;
+            const distance = Math.abs(relative);
+            const scale = relative === 0 ? 1.08 : Math.max(0.82, 1 - distance * 0.08);
+            const opacity = relative === 0 ? 1 : Math.max(0.28, 0.68 - distance * 0.16);
+            const shift = relative * 28;
+
+            card.dataset.offset = String(relative);
+            card.style.setProperty('--angle', `${angle}deg`);
+            card.style.setProperty('--radius', `${radius}px`);
+            card.style.setProperty('--scale', scale.toFixed(2));
+            card.style.setProperty('--opacity', opacity.toFixed(2));
+            card.style.setProperty('--shift', `${shift}px`);
+            if (instant) {
+                card.style.transitionDuration = '0s';
+            } else {
+                card.style.transitionDuration = '';
+            }
         });
 
-        card.appendChild(header);
-        card.appendChild(shell);
-        card.appendChild(footer);
+        chips.forEach((chip, index) => {
+            const isActive = index === activeIndex;
+            chip.classList.toggle('active', isActive);
+            if (isActive) {
+                chip.setAttribute('aria-current', 'true');
+            } else {
+                chip.removeAttribute('aria-current');
+            }
+        });
 
-        if (index === 0) {
-            card.style.boxShadow = '0 32px 85px rgba(0, 255, 166, 0.22)';
+        stage.dataset.activePlatform = cards[activeIndex]?.dataset.platform || '';
+    };
+
+    const restartTimer = () => {
+        if (timerId) clearTimeout(timerId);
+        timerId = setTimeout(() => {
+            rotateTo(activeIndex + 1);
+        }, 5200);
+    };
+
+    const stopTimer = () => {
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
         }
+    };
 
-        container.appendChild(card);
+    const rotateTo = (index, instant = false) => {
+        activeIndex = (index + total) % total;
+        applyLayout(instant);
+        restartTimer();
+    };
+
+    orbit.addEventListener('pointerenter', stopTimer);
+    orbit.addEventListener('pointerleave', restartTimer);
+    stage.addEventListener('focusin', stopTimer);
+    stage.addEventListener('focusout', restartTimer);
+
+    chips.forEach((chip, index) => {
+        chip.dataset.platform = cards[index]?.dataset.platform || '';
+        chip.tabIndex = 0;
+        chip.addEventListener('click', () => rotateTo(index));
+        chip.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                rotateTo(index);
+            }
+        });
     });
+
+    window.addEventListener('resize', () => applyLayout(true));
+
+    applyLayout(true);
+    restartTimer();
 }
 
 // GitHub Applications Section
@@ -2111,37 +2384,96 @@ function createPortfolioCard(item, index) {
         card.classList.add('featured');
     }
 
-    const categoryPill = item.category ? `<span class="meta-pill">${escapeHtml(item.category)}</span>` : '';
-    const statusPill = item.status ? `<span class="meta-pill secondary">${escapeHtml(item.status)}</span>` : '';
+    const head = document.createElement('header');
+    head.className = 'portfolio-head';
 
-    const statsHtml = Array.isArray(item.stats) && item.stats.length
-        ? `<ul class="portfolio-stats">${item.stats.map((stat, idx) => {
-            const classes = [''];
-            if (stat.accent || idx % 2 === 1) classes.push('alt');
-            return `<li class="${classes.join(' ').trim()}"><span class="stat-label">${escapeHtml(stat.label)}</span><span class="stat-value">${escapeHtml(stat.value)}</span></li>`;
-        }).join('')}</ul>`
-        : '';
+    const metaRow = document.createElement('div');
+    metaRow.className = 'portfolio-meta';
 
-    const tagsHtml = Array.isArray(item.tags) && item.tags.length
-        ? `<div class="portfolio-tags">${item.tags.map(tag => `<span class="portfolio-tag">${escapeHtml(tag)}</span>`).join('')}</div>`
-        : '';
+    if (item.category) {
+        const category = document.createElement('span');
+        category.className = 'meta-pill';
+        category.textContent = item.category;
+        metaRow.appendChild(category);
+    }
+
+    if (item.status) {
+        const status = document.createElement('span');
+        status.className = 'meta-pill secondary';
+        status.textContent = item.status;
+        metaRow.appendChild(status);
+    }
+
+    head.appendChild(metaRow);
+
+    const title = document.createElement('h3');
+    title.className = 'portfolio-title';
+    title.textContent = item.title;
+    head.appendChild(title);
+
+    card.appendChild(head);
+
+    if (item.summary) {
+        const summary = document.createElement('p');
+        summary.className = 'portfolio-summary';
+        summary.textContent = item.summary;
+        card.appendChild(summary);
+    }
+
+    if (Array.isArray(item.stats) && item.stats.length) {
+        const statsList = document.createElement('ul');
+        statsList.className = 'portfolio-stats';
+        item.stats.forEach((stat, idx) => {
+            const li = document.createElement('li');
+            li.className = 'portfolio-stat';
+            if (stat.accent || idx % 2 === 1) {
+                li.classList.add('accent');
+            }
+
+            const label = document.createElement('span');
+            label.className = 'stat-label';
+            label.textContent = stat.label;
+
+            const value = document.createElement('span');
+            value.className = 'stat-value';
+            value.textContent = stat.value;
+
+            li.appendChild(label);
+            li.appendChild(value);
+            statsList.appendChild(li);
+        });
+
+        card.appendChild(statsList);
+    }
+
+    if (Array.isArray(item.tags) && item.tags.length) {
+        const tagsWrap = document.createElement('div');
+        tagsWrap.className = 'portfolio-tags';
+        item.tags.forEach(tag => {
+            const tagEl = document.createElement('span');
+            tagEl.className = 'portfolio-tag';
+            tagEl.textContent = tag;
+            tagsWrap.appendChild(tagEl);
+        });
+        card.appendChild(tagsWrap);
+    }
 
     const link = item.link;
-    const actionHtml = link && link.url
-        ? `<a class="portfolio-cta" href="${safeUrl(link.url)}" ${link.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(link.label || 'Tutustu')}<span aria-hidden="true">→</span></a>`
-        : '';
-
-    card.innerHTML = `
-        <div class="portfolio-meta">
-            <span>${categoryPill}</span>
-            <span>${statusPill}</span>
-        </div>
-        <h3>${escapeHtml(item.title)}</h3>
-        <p>${escapeHtml(item.summary)}</p>
-        ${statsHtml}
-        ${tagsHtml}
-        ${actionHtml}
-    `;
+    if (link && link.url) {
+        const action = document.createElement('a');
+        action.className = 'portfolio-cta';
+        action.href = safeUrl(link.url);
+        if (link.external) {
+            action.setAttribute('target', '_blank');
+            action.setAttribute('rel', 'noopener noreferrer');
+        }
+        action.textContent = link.label || 'Tutustu';
+        const arrow = document.createElement('span');
+        arrow.setAttribute('aria-hidden', 'true');
+        arrow.textContent = '→';
+        action.appendChild(arrow);
+        card.appendChild(action);
+    }
 
     return card;
 }
