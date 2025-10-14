@@ -73,7 +73,12 @@
             <div class="hero-container">
                 <div class="hero-content">
                     <p class="eyebrow eyebrow-big" data-content-key="heroEyebrow"><span class="flare-boost" data-content-key="heroHighlight">Yksilöllinen</span> sovelluskehitys &amp; kyberturva</p>
-                    <h1 class="hero-title" data-content-key="heroTitle">Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.</h1>
+                    <h1 class="hero-title" data-content-key="heroTitle">
+                        <span class="hero-title-line">Yksilöllisten</span>
+                        <span class="hero-title-line">Sovellusten</span>
+                        <span class="hero-title-line">Valmistaminen</span>
+                        <span class="hero-title-line hero-title-subline">- Juuri yrityksenne tarpeisiin.</span>
+                    </h1>
                     <p class="hero-subtitle" data-content-key="heroSubtitle">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
                     <div class="hero-buttons">
                         <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn btn-primary">Varaa 30 min kartoitus</a>
@@ -88,14 +93,18 @@
                                 <label class="sr-only" for="shortener-alias">Lyhytkoodi</label>
                                 <input type="text" id="shortener-alias" name="alias" placeholder="Alias (max 4 merkkiä)" autocomplete="off" maxlength="4" pattern="[A-Za-z0-9]{1,4}">
                             </div>
-                            <button type="submit" class="btn btn-primary shortener-submit">Luo lyhyt linkki</button>
+                            <div class="shortener-footer">
+                                <button type="submit" class="btn btn-primary shortener-submit">Luo lyhyt linkki</button>
+                                <div class="shortener-result" id="shortener-result" hidden>
+                                    <span class="result-label">Lyhyt [url]</span>
+                                    <div class="result-link-group">
+                                        <a href="#" id="shortener-link" target="_blank" rel="noopener noreferrer">anomfin.fi/?s=anom</a>
+                                        <button type="button" class="copy-short-link" id="shortener-copy">Kopioi</button>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                         <p class="shortener-status" id="shortener-status" role="status" aria-live="polite"></p>
-                        <div class="shortener-result" id="shortener-result" hidden>
-                            <span class="result-label">Lyhyt linkki</span>
-                            <a href="#" id="shortener-link" target="_blank" rel="noopener noreferrer">anomfin.fi/?s=anom</a>
-                            <button type="button" class="copy-short-link" id="shortener-copy">Kopioi</button>
-                        </div>
                     </div>
                     <ul class="hero-metrics">
                         <li>
