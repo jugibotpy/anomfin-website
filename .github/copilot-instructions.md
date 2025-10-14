@@ -70,7 +70,7 @@ anomfin-website/
 
 **Visual Identity**: Professional, cinematic, futuristic
 **Aesthetic**: Dark neon theme (Tesla × Anonymous × Apple)
-**Color Scheme**: 
+**Color Scheme**:
 - Neon cyan/teal: `rgba(0, 255, 225, ...)`
 - Purple: `rgba(156, 77, 255, ...)`
 - Pink/magenta: `rgba(255, 77, 148, ...)`
