@@ -322,6 +322,11 @@ function renderLoginPage(string $message = ''): string
         <h3>Käytös</h3>
         <label><input type="checkbox" id="reactHover"> Reagoi palvelukortteihin (hover → pulssi)</label>
         <label><input type="checkbox" id="reactContact"> Reagoi yhteysosioon (korostus)</label>
+        <label><input type="checkbox" id="heroMask"> Näytä hero-maskilogo neliössä</label>
+        <label><input type="checkbox" id="floatingGrid"> Näytä leijuva HyperCube</label>
+        <label>Sivun värähtely (0–1)
+          <div class="row"><input id="pageVibration" type="range" min="0" max="1" step="0.05"><input id="pageVibration-n" type="number" min="0" max="1" step="0.05" style="width:100px"></div>
+        </label>
       </div>
       <div class="card">
         <h3>Brändi & identiteetti</h3>
@@ -334,6 +339,9 @@ function renderLoginPage(string $message = ''): string
         <label>Hero-logon URL (maski)
           <input type="text" id="branding-heroLogoUrl" placeholder="assets/logo.png">
         </label>
+        <label>Hero-neliön taustakuva
+          <input type="text" id="branding-heroGridBackground" placeholder="assets/logo.png">
+        </label>
       </div>
       <div class="card">
         <h3>Sisältötekstit</h3>
@@ -345,6 +353,10 @@ function renderLoginPage(string $message = ''): string
         </label>
         <label>Hero-otsikko
           <input type="text" id="content-heroTitle">
+        </label>
+        <label>Hero-otsikko (HTML)
+          <textarea id="content-heroTitleHtml" rows="4" placeholder="<span class=&quot;hero-title-line&quot;>Yksilöllisten</span>"></textarea>
+          <span class="hint">Sallitut tagit: &lt;span&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;small&gt;, &lt;br&gt;. Jokaisesta rivistä tulee oma span.</span>
         </label>
         <label>Hero-ingressi
           <textarea id="content-heroSubtitle" rows="3"></textarea>
@@ -471,6 +483,7 @@ function renderLoginPage(string $message = ''): string
 
     const DEFAULT_CSS_VARS = <?php echo json_encode($defaults['cssVars'], JSON_UNESCAPED_SLASHES); ?>;
     const DEFAULT_BRANDING = <?php echo json_encode($defaults['branding'], JSON_UNESCAPED_SLASHES); ?>;
+    const DEFAULT_BEHAVIORS = <?php echo json_encode($defaults['behaviors'], JSON_UNESCAPED_SLASHES); ?>;
     const DEFAULT_CONTENT = <?php echo json_encode($defaults['content'], JSON_UNESCAPED_SLASHES); ?>;
     const DEFAULT_SHORTENER = <?php echo json_encode($defaults['shortener'], JSON_UNESCAPED_SLASHES); ?>;
     const DEFAULT_CHAT = <?php echo json_encode($defaults['integrations']['chat'], JSON_UNESCAPED_SLASHES); ?>;
@@ -526,6 +539,7 @@ function renderLoginPage(string $message = ''): string
         logoUrl: (document.getElementById('branding-logoUrl')?.value || '').trim(),
         faviconUrl: (document.getElementById('branding-faviconUrl')?.value || '').trim(),
         heroLogoUrl: (document.getElementById('branding-heroLogoUrl')?.value || '').trim(),
+        heroGridBackground: (document.getElementById('branding-heroGridBackground')?.value || '').trim(),
       };
     }
 
@@ -534,6 +548,7 @@ function renderLoginPage(string $message = ''): string
         heroHighlight: document.getElementById('content-heroHighlight')?.value || '',
         heroEyebrow: document.getElementById('content-heroEyebrow')?.value || '',
         heroTitle: document.getElementById('content-heroTitle')?.value || '',
+        heroTitleHtml: document.getElementById('content-heroTitleHtml')?.value || '',
         heroSubtitle: document.getElementById('content-heroSubtitle')?.value || '',
         serviceTagline: document.getElementById('content-serviceTagline')?.value || '',
         serviceIntro: document.getElementById('content-serviceIntro')?.value || '',
@@ -658,6 +673,10 @@ function renderLoginPage(string $message = ''): string
       const behaviors = INITIAL_SETTINGS.behaviors || {};
       document.getElementById('reactHover').checked = behaviors.reactHover !== false;
       document.getElementById('reactContact').checked = behaviors.reactContact !== false;
+      document.getElementById('heroMask').checked = behaviors.heroMask !== false;
+      document.getElementById('floatingGrid').checked = behaviors.floatingGrid === true;
+      const vibrationDefault = (DEFAULT_BEHAVIORS && typeof DEFAULT_BEHAVIORS.pageVibration !== 'undefined') ? DEFAULT_BEHAVIORS.pageVibration : 0;
+      setField('pageVibration', typeof behaviors.pageVibration === 'number' ? behaviors.pageVibration : vibrationDefault);
       if (INITIAL_SETTINGS.meta){
         document.getElementById('meta-updated').textContent = INITIAL_SETTINGS.meta.updated_at || '-';
         document.getElementById('meta-updated-by').textContent = INITIAL_SETTINGS.meta.updated_by || '-';
@@ -666,11 +685,13 @@ function renderLoginPage(string $message = ''): string
       setInputValue('branding-logoUrl', branding.logoUrl || DEFAULT_BRANDING.logoUrl);
       setInputValue('branding-faviconUrl', branding.faviconUrl || DEFAULT_BRANDING.faviconUrl);
       setInputValue('branding-heroLogoUrl', branding.heroLogoUrl || DEFAULT_BRANDING.heroLogoUrl);
+      setInputValue('branding-heroGridBackground', branding.heroGridBackground || DEFAULT_BRANDING.heroGridBackground || 'assets/logo.png');
 
       const content = INITIAL_SETTINGS.content || DEFAULT_CONTENT;
       setInputValue('content-heroHighlight', content.heroHighlight || DEFAULT_CONTENT.heroHighlight);
       setInputValue('content-heroEyebrow', content.heroEyebrow || DEFAULT_CONTENT.heroEyebrow);
       setInputValue('content-heroTitle', content.heroTitle || DEFAULT_CONTENT.heroTitle);
+      setInputValue('content-heroTitleHtml', content.heroTitleHtml || DEFAULT_CONTENT.heroTitleHtml || '');
       setInputValue('content-heroSubtitle', content.heroSubtitle || DEFAULT_CONTENT.heroSubtitle);
       setInputValue('content-serviceTagline', content.serviceTagline || DEFAULT_CONTENT.serviceTagline);
       setInputValue('content-serviceIntro', content.serviceIntro || DEFAULT_CONTENT.serviceIntro);
@@ -766,6 +787,9 @@ function renderLoginPage(string $message = ''): string
         behaviors: {
           reactHover: document.getElementById('reactHover').checked,
           reactContact: document.getElementById('reactContact').checked,
+          heroMask: document.getElementById('heroMask').checked,
+          floatingGrid: document.getElementById('floatingGrid').checked,
+          pageVibration: parseFloat(document.getElementById('pageVibration').value || '0'),
         },
         branding: collectBranding(),
         content: collectContent(),
@@ -819,6 +843,18 @@ function renderLoginPage(string $message = ''): string
           n.addEventListener('input', ()=>{ r.value=n.value; });
         }
       }
+      const pvRange = document.getElementById('pageVibration');
+      const pvNumber = document.getElementById('pageVibration-n');
+      if (pvRange && pvNumber) {
+        const sync = (source, target) => {
+          source.addEventListener('input', () => {
+            const value = Math.max(0, Math.min(1, parseFloat(source.value) || 0)).toFixed(2);
+            target.value = value;
+          });
+        };
+        sync(pvRange, pvNumber);
+        sync(pvNumber, pvRange);
+      }
     }
 
     document.getElementById('save').addEventListener('click', ()=>{ showStatus('Tallennetaan…', 'success'); save(); });
@@ -853,12 +889,17 @@ function renderLoginPage(string $message = ''): string
       document.getElementById('logo-ease').value = 'cubic-bezier(.2,.8,.2,1)';
       document.getElementById('reactHover').checked = true;
       document.getElementById('reactContact').checked = true;
+      document.getElementById('heroMask').checked = DEFAULT_BEHAVIORS.heroMask !== false;
+      document.getElementById('floatingGrid').checked = DEFAULT_BEHAVIORS.floatingGrid === true;
+      setField('pageVibration', DEFAULT_BEHAVIORS.pageVibration ?? 0);
       setInputValue('branding-logoUrl', DEFAULT_BRANDING.logoUrl);
       setInputValue('branding-faviconUrl', DEFAULT_BRANDING.faviconUrl);
       setInputValue('branding-heroLogoUrl', DEFAULT_BRANDING.heroLogoUrl);
+      setInputValue('branding-heroGridBackground', DEFAULT_BRANDING.heroGridBackground || 'assets/logo.png');
       setInputValue('content-heroHighlight', DEFAULT_CONTENT.heroHighlight);
       setInputValue('content-heroEyebrow', DEFAULT_CONTENT.heroEyebrow);
       setInputValue('content-heroTitle', DEFAULT_CONTENT.heroTitle);
+      setInputValue('content-heroTitleHtml', DEFAULT_CONTENT.heroTitleHtml || '');
       setInputValue('content-heroSubtitle', DEFAULT_CONTENT.heroSubtitle);
       setInputValue('content-serviceTagline', DEFAULT_CONTENT.serviceTagline);
       setInputValue('content-serviceIntro', DEFAULT_CONTENT.serviceIntro);

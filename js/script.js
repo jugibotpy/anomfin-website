@@ -81,17 +81,22 @@ const ANOMFIN_DEFAULT_SETTINGS = {
     behaviors: {
         reactHover: true,
         reactContact: true,
+        heroMask: true,
+        floatingGrid: false,
+        pageVibration: 0,
     },
     preset: null,
     meta: {},
     branding: {
         logoUrl: 'assets/logotp.png',
-        faviconUrl: 'assets/logotp.png'
+        faviconUrl: 'assets/logotp.png',
+        heroGridBackground: 'assets/logo.png'
     },
     content: {
         heroHighlight: 'Yksilöllinen',
         heroEyebrow: 'Yksilöllinen sovelluskehitys & kyberturva',
         heroTitle: 'Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.',
+        heroTitleHtml: '<span class="hero-title-line">Yksilöllisten</span><span class="hero-title-line">Sovellusten</span><span class="hero-title-line">Valmistaminen</span><span class="hero-title-line hero-title-subline">- Juuri yrityksenne tarpeisiin.</span>',
         heroSubtitle: 'Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.',
         serviceTagline: '"Koodia, joka kantaa – tänään ja huomenna."',
         serviceIntro: 'Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.'
@@ -154,6 +159,13 @@ async function applyGlobalSettings(){
     if (bodyEl) {
         bodyEl.dataset.reactHover = behaviors.reactHover === false ? '0' : '1';
         bodyEl.dataset.reactContact = behaviors.reactContact === false ? '0' : '1';
+        bodyEl.dataset.heroMask = behaviors.heroMask === false ? '0' : '1';
+        bodyEl.dataset.floatingGrid = behaviors.floatingGrid === true ? '1' : '0';
+        const vibrationValue = typeof behaviors.pageVibration === 'number'
+            ? Math.min(1, Math.max(0, behaviors.pageVibration))
+            : 0;
+        bodyEl.dataset.pageVibration = vibrationValue.toFixed(2);
+        root.style.setProperty('--page-vibration', vibrationValue.toFixed(2));
     }
 
     const branding = { ...ANOMFIN_DEFAULT_SETTINGS.branding, ...(settings.branding || {}) };
@@ -191,6 +203,16 @@ async function applyGlobalSettings(){
     return window.__ANOMFIN_SETTINGS;
 }
 
+function formatCssUrl(url) {
+    if (!url) return '';
+    const trimmed = String(url).trim();
+    if (/^url\(/i.test(trimmed)) {
+        return trimmed;
+    }
+    const sanitized = trimmed.replace(/"/g, '\\"').replace(/'/g, "\\'");
+    return `url('${sanitized}')`;
+}
+
 function applyBranding(branding = {}) {
     const navLogo = document.querySelector('.nav-logo img');
     if (navLogo && branding.logoUrl) {
@@ -212,6 +234,10 @@ function applyBranding(branding = {}) {
     const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
     if (appleIcon && branding.logoUrl) {
         appleIcon.href = branding.logoUrl;
+    }
+
+    if (branding.heroGridBackground) {
+        document.documentElement.style.setProperty('--hero-grid-image', formatCssUrl(branding.heroGridBackground));
     }
 }
 
@@ -271,22 +297,25 @@ function applyDynamicContent(content = {}) {
         serviceIntroEl.innerHTML = content.serviceIntro;
     }
 
-    setupHeroTitleAnimation(content.heroTitle);
+    const heroTitleContent = (content.heroTitleHtml && content.heroTitleHtml.trim().length)
+        ? content.heroTitleHtml
+        : content.heroTitle;
+    setupHeroTitleAnimation(heroTitleContent);
 }
 
-function setupHeroTitleAnimation(newTitle) {
+function setupHeroTitleAnimation(newContent) {
     const heroTitle = document.querySelector('.hero-title');
     if (!heroTitle) return;
 
-    if (!heroTitle.dataset.sourceText) {
-        heroTitle.dataset.sourceText = heroTitle.textContent.trim();
+    if (!heroTitle.dataset.sourceContent) {
+        heroTitle.dataset.sourceContent = heroTitle.innerHTML.trim();
     }
 
-    const text = typeof newTitle === 'string' && newTitle.trim().length
-        ? newTitle.trim()
-        : heroTitle.dataset.sourceText || heroTitle.textContent.trim();
+    const rawContent = typeof newContent === 'string' && newContent.trim().length
+        ? newContent.trim()
+        : heroTitle.dataset.sourceContent || heroTitle.innerHTML.trim();
 
-    heroTitle.dataset.sourceText = text;
+    heroTitle.dataset.sourceContent = rawContent;
 
     heroTitleAnimationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
     heroTitleAnimationTimeouts = [];
@@ -294,17 +323,73 @@ function setupHeroTitleAnimation(newTitle) {
 
     heroTitle.innerHTML = '';
 
-    [...text].forEach(char => {
-        if (char === ' ') {
-            heroTitle.appendChild(document.createTextNode(' '));
+    const processText = (text, target) => {
+        if (!text) return;
+        const normalized = text.replace(/\r/g, '');
+        for (const char of normalized) {
+            if (char === '\n') {
+                target.appendChild(document.createElement('br'));
+                continue;
+            }
+            if (char === ' ') {
+                target.appendChild(document.createTextNode(' '));
+                continue;
+            }
+            const span = document.createElement('span');
+            span.className = 'hero-letter';
+            span.textContent = char;
+            target.appendChild(span);
+            heroTitleSpans.push(span);
+        }
+    };
+
+    const allowedTags = new Set(['STRONG', 'EM', 'SPAN', 'SMALL', 'BR']);
+    const allowedClass = /^[a-z0-9\-\s_]{0,64}$/i;
+
+    const processNode = (node, target) => {
+        if (!node) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+            processText(node.textContent || '', target);
             return;
         }
-        const span = document.createElement('span');
-        span.className = 'hero-letter';
-        span.textContent = char;
-        heroTitle.appendChild(span);
-        heroTitleSpans.push(span);
-    });
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            const tagName = node.tagName.toUpperCase();
+            if (!allowedTags.has(tagName)) {
+                Array.from(node.childNodes).forEach(child => processNode(child, target));
+                return;
+            }
+            if (tagName === 'BR') {
+                target.appendChild(document.createElement('br'));
+                return;
+            }
+            const element = document.createElement(node.tagName.toLowerCase());
+            if ((tagName === 'SPAN' || tagName === 'SMALL') && node.hasAttribute('class')) {
+                const cls = node.getAttribute('class') || '';
+                if (allowedClass.test(cls)) {
+                    element.className = cls;
+                }
+            }
+            Array.from(node.childNodes).forEach(child => processNode(child, element));
+            target.appendChild(element);
+            return;
+        }
+        Array.from(node.childNodes).forEach(child => processNode(child, target));
+    };
+
+    const hasMarkup = /<[a-z][\s\S]*>/i.test(rawContent);
+    heroTitle.classList.toggle('hero-title-rich', hasMarkup);
+
+    if (hasMarkup) {
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`<div>${rawContent}</div>`, 'text/html');
+            Array.from(doc.body.childNodes).forEach(child => processNode(child, heroTitle));
+        } catch (error) {
+            processText(rawContent, heroTitle);
+        }
+    } else {
+        processText(rawContent, heroTitle);
+    }
 
     heroTitleSpans.forEach((span, index) => {
         span.classList.remove('hero-letter-active');
@@ -338,6 +423,20 @@ function triggerHeroFlash() {
     heroFlashTimeout = setTimeout(() => {
         flash.classList.remove('active');
     }, 420);
+}
+
+function getPageVibrationFactor() {
+    const body = document.body || document.getElementsByTagName('body')[0];
+    const raw = body?.dataset?.pageVibration;
+    const parsed = typeof raw === 'string' ? parseFloat(raw) : NaN;
+    if (Number.isFinite(parsed)) {
+        return Math.min(1, Math.max(0, parsed));
+    }
+    const fallback = window.__ANOMFIN_SETTINGS?.behaviors?.pageVibration;
+    if (typeof fallback === 'number') {
+        return Math.min(1, Math.max(0, fallback));
+    }
+    return 0;
 }
 
 // Smooth Scrolling for Navigation Links (skip skip-link)
@@ -1024,7 +1123,7 @@ function initScrollCompanion() {
             const maxY = window.innerHeight - height - margin;
             targetY = clamp(maxY, margin, maxY);
         } else {
-            const sway = Math.sin((window.scrollY || 0) * 0.004) * 22;
+            const sway = Math.sin((window.scrollY || 0) * 0.004) * 22 * getPageVibrationFactor();
             const baseX = window.innerWidth - width - margin;
             targetX = clamp(baseX - ratio * 40 + sway, margin, window.innerWidth - width - margin + 20);
             const baseY = window.innerHeight * 0.28;
@@ -1127,6 +1226,8 @@ function initScrollCompanion() {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const src = document.querySelector('.hero-grid');
     if(!src || prefersReduced) return;
+    const allowFloating = (document.body?.dataset?.floatingGrid === '1');
+    if (!allowFloating) return;
     const fg = src.cloneNode(true);
     fg.classList.add('floating-grid','fg-active');
     fg.setAttribute('aria-hidden','true');
@@ -1285,7 +1386,7 @@ function initScrollCompanion() {
       // follow at ~22% viewport + parallax factor
       targetY = sy * 0.12 + vh * 0.22;
       // left→right across viewport with gentle sway
-      targetX = (vw * (0.15 + 0.7 * p)) + Math.sin(sy * 0.004) * 30 - (vw * 0.5);
+      targetX = (vw * (0.15 + 0.7 * p)) + Math.sin(sy * 0.004) * 30 * getPageVibrationFactor() - (vw * 0.5);
       
       // Sync matrix animation speed with scroll
       const scrollSpeed = Math.abs(sy - (window.lastScrollY || 0));

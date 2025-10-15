@@ -27,6 +27,9 @@ return [
     'behaviors' => [
         'reactHover' => true,
         'reactContact' => true,
+        'heroMask' => true,
+        'floatingGrid' => false,
+        'pageVibration' => 0,
     ],
     'preset' => null,
     'meta' => [
@@ -37,11 +40,13 @@ return [
         'logoUrl' => 'assets/logotp.png',
         'faviconUrl' => 'assets/logotp.png',
         'heroLogoUrl' => 'assets/logo.png',
+        'heroGridBackground' => 'assets/logo.png',
     ],
     'content' => [
         'heroHighlight' => 'Yksilöllinen',
         'heroEyebrow' => 'Yksilöllinen sovelluskehitys & kyberturva',
         'heroTitle' => 'Yksilöllisten sovellusten koodaaminen juuri yrityksenne tarpeisiin.',
+        'heroTitleHtml' => "<span class=\"hero-title-line\">Yksilöllisten</span><span class=\"hero-title-line\">Sovellusten</span><span class=\"hero-title-line\">Valmistaminen</span><span class=\"hero-title-line hero-title-subline\">- Juuri yrityksenne tarpeisiin.</span>",
         'heroSubtitle' => 'Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.',
         'serviceTagline' => '"Koodia, joka kantaa – tänään ja huomenna."',
         'serviceIntro' => 'Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.',

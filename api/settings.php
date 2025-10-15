@@ -70,9 +70,21 @@ if (!in_array($ease, $allowedEases, true)) {
 $sanitized['cssVars']['--logo-ease'] = $ease;
 
 $behaviors = $input['behaviors'] ?? [];
+$previousBehaviors = $current['behaviors'] ?? $defaults['behaviors'] ?? [];
 $sanitized['behaviors'] = [
-    'reactHover' => !empty($behaviors['reactHover']),
-    'reactContact' => !empty($behaviors['reactContact']),
+    'reactHover' => array_key_exists('reactHover', $behaviors)
+        ? !empty($behaviors['reactHover'])
+        : (!empty($previousBehaviors['reactHover'])),
+    'reactContact' => array_key_exists('reactContact', $behaviors)
+        ? !empty($behaviors['reactContact'])
+        : (!empty($previousBehaviors['reactContact'])),
+    'heroMask' => array_key_exists('heroMask', $behaviors)
+        ? !empty($behaviors['heroMask'])
+        : (!array_key_exists('heroMask', $previousBehaviors) || !empty($previousBehaviors['heroMask'])),
+    'floatingGrid' => array_key_exists('floatingGrid', $behaviors)
+        ? !empty($behaviors['floatingGrid'])
+        : (!empty($previousBehaviors['floatingGrid'])),
+    'pageVibration' => sanitizeFraction($behaviors['pageVibration'] ?? $previousBehaviors['pageVibration'] ?? 0),
 ];
 
 $sanitized['branding'] = sanitizeBranding(
@@ -234,6 +246,7 @@ function sanitizeBranding(array $input, array $defaults, array $current): array
         'logoUrl' => sanitizeUrlOrRelative($input['logoUrl'] ?? $base['logoUrl'] ?? 'assets/logotp.png', $base['logoUrl'] ?? 'assets/logotp.png'),
         'faviconUrl' => sanitizeUrlOrRelative($input['faviconUrl'] ?? $base['faviconUrl'] ?? 'assets/logotp.png', $base['faviconUrl'] ?? 'assets/logotp.png'),
         'heroLogoUrl' => sanitizeUrlOrRelative($input['heroLogoUrl'] ?? $base['heroLogoUrl'] ?? 'assets/logo.png', $base['heroLogoUrl'] ?? 'assets/logo.png'),
+        'heroGridBackground' => sanitizeUrlOrRelative($input['heroGridBackground'] ?? $base['heroGridBackground'] ?? 'assets/logo.png', $base['heroGridBackground'] ?? 'assets/logo.png'),
     ];
 }
 
@@ -245,6 +258,7 @@ function sanitizeContent(array $input, array $defaults, array $current): array
         'heroHighlight' => sanitizeText($input['heroHighlight'] ?? $base['heroHighlight']),
         'heroEyebrow' => sanitizeText($input['heroEyebrow'] ?? $base['heroEyebrow']),
         'heroTitle' => sanitizeText($input['heroTitle'] ?? $base['heroTitle']),
+        'heroTitleHtml' => sanitizeHeroTitle($input['heroTitleHtml'] ?? $base['heroTitleHtml'] ?? ''),
         'heroSubtitle' => sanitizeRichText($input['heroSubtitle'] ?? $base['heroSubtitle']),
         'serviceTagline' => sanitizeRichText($input['serviceTagline'] ?? $base['serviceTagline']),
         'serviceIntro' => sanitizeRichText($input['serviceIntro'] ?? $base['serviceIntro']),
@@ -316,9 +330,26 @@ function sanitizeText($value): string
 
 function sanitizeRichText($value): string
 {
-    $allowed = '<strong><em><b><i><span><br>'; 
+    $allowed = '<strong><em><b><i><span><br>';
     $text = strip_tags((string) $value, $allowed);
     return trim($text);
+}
+
+function sanitizeHeroTitle($value): string
+{
+    $allowed = '<strong><em><span><small><br>';
+    $text = strip_tags((string) $value, $allowed);
+    return trim($text);
+}
+
+function sanitizeFraction($value): float
+{
+    $number = filter_var($value, FILTER_VALIDATE_FLOAT);
+    if ($number === false) {
+        $number = 0;
+    }
+    $number = max(0.0, min(1.0, (float) $number));
+    return round($number, 3);
 }
 
 function sanitizeNumber($value, string $default, float $min, float $max): string
