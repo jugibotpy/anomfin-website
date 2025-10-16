@@ -88,6 +88,7 @@ const ANOMFIN_DEFAULT_SETTINGS = {
     preset: null,
     meta: {},
     branding: {
+        navEmblemUrl: 'assets/logotp.png',
         logoUrl: 'assets/logotp.png',
         faviconUrl: 'assets/logotp.png',
         heroGridBackground: 'assets/logo.png'
@@ -114,7 +115,11 @@ const ANOMFIN_DEFAULT_SETTINGS = {
     },
     shortener: {
         baseUrl: 'https://anomfin.fi/?s=',
-        maxLength: 4
+        maxLength: 4,
+        enforceHttps: true,
+        autoPurgeDays: 365,
+        redirectStatus: 302,
+        utmCampaign: 'anomfin-hyperlaunch'
     }
 };
 
@@ -214,10 +219,11 @@ function formatCssUrl(url) {
 }
 
 function applyBranding(branding = {}) {
-    const navLogo = document.querySelector('.nav-logo img');
-    if (navLogo && branding.logoUrl) {
-        navLogo.src = branding.logoUrl;
-        navLogo.srcset = '';
+    const navEmblem = document.querySelector('.nav-logo-emblem');
+    const emblemSource = branding.navEmblemUrl || branding.logoUrl;
+    if (navEmblem && emblemSource) {
+        navEmblem.src = emblemSource;
+        navEmblem.srcset = '';
     }
 
     const footerLogo = document.querySelector('.footer-brand img');
@@ -517,6 +523,7 @@ function initLinkShortener() {
     const shortenerSettings = window.__ANOMFIN_SETTINGS?.shortener || ANOMFIN_DEFAULT_SETTINGS.shortener;
     const baseUrl = shortenerSettings.baseUrl || 'https://anomfin.fi/?s=';
     const maxLength = Number(shortenerSettings.maxLength) || 4;
+    const enforceHttps = shortenerSettings.enforceHttps !== false;
 
     const setStatus = (message, type = 'info') => {
         statusEl.textContent = message || '';
@@ -550,6 +557,12 @@ function initLinkShortener() {
             parsedUrl = new URL(urlValue);
         } catch (error) {
             setStatus('URL näyttää virheelliseltä – tarkista osoite.', 'error');
+            targetInput.focus();
+            return;
+        }
+
+        if (enforceHttps && parsedUrl.protocol !== 'https:') {
+            setStatus('Lyhentäjä hyväksyy vain HTTPS-osoitteet – lisää suojattu linkki.', 'error');
             targetInput.focus();
             return;
         }
@@ -1523,9 +1536,9 @@ let matrixAnimationActive = false;
 let intersectionDetectionEnabled = true;
 
 function initLogoRectangleInteraction() {
-    const logo = document.querySelector('.nav-logo img');
+    const logo = document.querySelector('.nav-logo-symbol');
     const rectangle = document.querySelector('.hero-grid');
-    
+
     if (!logo || !rectangle) return;
 
     let rafId;

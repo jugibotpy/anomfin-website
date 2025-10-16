@@ -3,12 +3,18 @@ declare(strict_types=1);
 
 session_start();
 
+require_once __DIR__ . '/../lib/system.php';
+
 $config = require __DIR__ . '/../config/admin.config.php';
 $sessionKey = $config['session_key'] ?? 'anomfin_admin_authenticated';
 $sessionUserKey = $config['session_user_key'] ?? 'anomfin_admin_name';
 $settingsFile = $config['settings_file'] ?? __DIR__ . '/../data/settings.json';
+$metricsFile = __DIR__ . '/../data/metrics.json';
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 $defaults = require __DIR__ . '/../config/settings-defaults.php';
 
@@ -122,11 +128,22 @@ $sanitized['meta'] = [
     'updated_by' => $_SESSION[$sessionUserKey] ?? ($config['default_admin_name'] ?? 'AnomFIN Admin'),
 ];
 
-if (!is_dir(dirname($settingsFile))) {
-    mkdir(dirname($settingsFile), 0775, true);
+if (!anomfin_write_json_atomic($settingsFile, $sanitized)) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Asetuksia ei voitu tallentaa (kirjoitusoikeudet?)']);
+    return;
 }
 
-file_put_contents($settingsFile, json_encode($sanitized, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+$metrics = anomfin_read_json_file($metricsFile, [
+    'visitors24h' => 0,
+    'visitorsTotal' => 0,
+    'lastSettingsSave' => null,
+    'lastSettingsUser' => null,
+]);
+
+$metrics['lastSettingsSave'] = $sanitized['meta']['updated_at'];
+$metrics['lastSettingsUser'] = $sanitized['meta']['updated_by'];
+anomfin_write_json_atomic($metricsFile, $metrics);
 
 http_response_code(200);
 $payload = loadSettings($settingsFile, $defaults);
@@ -243,6 +260,7 @@ function sanitizeBranding(array $input, array $defaults, array $current): array
     $base = array_merge($defaults, $current);
 
     return [
+        'navEmblemUrl' => sanitizeUrlOrRelative($input['navEmblemUrl'] ?? $base['navEmblemUrl'] ?? 'assets/logotp.png', $base['navEmblemUrl'] ?? 'assets/logotp.png'),
         'logoUrl' => sanitizeUrlOrRelative($input['logoUrl'] ?? $base['logoUrl'] ?? 'assets/logotp.png', $base['logoUrl'] ?? 'assets/logotp.png'),
         'faviconUrl' => sanitizeUrlOrRelative($input['faviconUrl'] ?? $base['faviconUrl'] ?? 'assets/logotp.png', $base['faviconUrl'] ?? 'assets/logotp.png'),
         'heroLogoUrl' => sanitizeUrlOrRelative($input['heroLogoUrl'] ?? $base['heroLogoUrl'] ?? 'assets/logo.png', $base['heroLogoUrl'] ?? 'assets/logo.png'),
@@ -271,10 +289,23 @@ function sanitizeShortener(array $input, array $defaults, array $current): array
     $baseUrl = sanitizeUrlOrRelative($input['baseUrl'] ?? $base['baseUrl'], $base['baseUrl']);
     $maxLength = isset($input['maxLength']) ? (int) $input['maxLength'] : (int) ($base['maxLength'] ?? 4);
     $maxLength = max(1, min($maxLength, 12));
+    $enforceHttps = array_key_exists('enforceHttps', $input)
+        ? !empty($input['enforceHttps'])
+        : !empty($base['enforceHttps']);
+    $autoPurgeDays = isset($input['autoPurgeDays']) ? (int) $input['autoPurgeDays'] : (int) ($base['autoPurgeDays'] ?? 0);
+    $autoPurgeDays = max(0, min($autoPurgeDays, 3650));
+    $redirectCandidate = isset($input['redirectStatus']) ? (int) $input['redirectStatus'] : (int) ($base['redirectStatus'] ?? 302);
+    $allowedStatuses = [301, 302, 307, 308];
+    $redirectStatus = in_array($redirectCandidate, $allowedStatuses, true) ? $redirectCandidate : 302;
+    $utmCampaign = sanitizeText($input['utmCampaign'] ?? ($base['utmCampaign'] ?? ''));
 
     return [
         'baseUrl' => $baseUrl,
         'maxLength' => $maxLength,
+        'enforceHttps' => $enforceHttps,
+        'autoPurgeDays' => $autoPurgeDays,
+        'redirectStatus' => $redirectStatus,
+        'utmCampaign' => $utmCampaign,
     ];
 }
 

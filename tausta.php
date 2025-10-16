@@ -4,6 +4,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lib/shortener.php';
 
 $config = require __DIR__ . '/config/admin.config.php';
 $defaults = require __DIR__ . '/config/settings-defaults.php';
@@ -39,158 +40,126 @@ if ($alias !== '' && strlen($alias) > $maxLength) {
     exit;
 }
 
-$settings = load_settings($settingsFile, $defaults);
-$shortenerBase = $settings['shortener']['baseUrl'] ?? 'https://anomfin.fi/?s=';
+$settings = anomfin_load_settings($settingsFile, $defaults);
+$shortenerConfig = $settings['shortener'] ?? [];
+$shortenerBase = $shortenerConfig['baseUrl'] ?? 'https://anomfin.fi/?s=';
 $shortenerBase = rtrim($shortenerBase, '/') . (str_contains($shortenerBase, '=') ? '' : '/');
+$enforceHttps = !empty($shortenerConfig['enforceHttps']);
+$autoPurgeDays = isset($shortenerConfig['autoPurgeDays']) ? max(0, (int) $shortenerConfig['autoPurgeDays']) : 0;
+$utmCampaign = isset($shortenerConfig['utmCampaign']) ? trim((string) $shortenerConfig['utmCampaign']) : '';
+
+if ($enforceHttps && strcasecmp((string) parse_url($url, PHP_URL_SCHEME), 'https') !== 0) {
+    http_response_code(422);
+    echo json_encode(['success' => false, 'error' => 'Lyhentäjä hyväksyy vain HTTPS-osoitteet.']);
+    exit;
+}
+
+if ($utmCampaign !== '') {
+    $urlWithCampaign = anomfin_ensure_utm_campaign($url, $utmCampaign);
+    if ($urlWithCampaign !== $url) {
+        $url = filter_var($urlWithCampaign, FILTER_VALIDATE_URL) ?: $url;
+    }
+}
+
+if ($autoPurgeDays > 0) {
+    anomfin_purge_json_links($autoPurgeDays);
+}
 
 $pdo = anomfin_get_pdo();
-$code = $alias !== '' ? strtolower($alias) : null;
+$requestedCode = $alias !== '' ? strtolower($alias) : null;
+$finalCode = $requestedCode;
 
 if ($pdo instanceof \PDO) {
     try {
         $pdo->exec('CREATE TABLE IF NOT EXISTS short_links (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            code VARCHAR(16) NOT NULL UNIQUE,
+            code VARCHAR(16) NOT NULL,
             target_url TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_code (code),
+            INDEX idx_created_at (created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
 
-        if ($code === null) {
-            $code = generate_unique_code(function (string $candidate) use ($pdo): bool {
-                $stmt = $pdo->prepare('SELECT 1 FROM short_links WHERE code = :code LIMIT 1');
-                $stmt->execute(['code' => $candidate]);
-                return (bool) $stmt->fetchColumn();
-            }, $maxLength);
-        } else {
-            if (code_exists($pdo, $code)) {
+        if ($autoPurgeDays > 0) {
+            anomfin_purge_expired_db_links($pdo, $autoPurgeDays);
+        }
+
+        if ($requestedCode !== null) {
+            if (anomfin_code_exists($pdo, $requestedCode)) {
                 http_response_code(409);
                 echo json_encode(['success' => false, 'error' => 'Alias on jo käytössä']);
                 exit;
             }
         }
 
-        $stmt = $pdo->prepare('INSERT INTO short_links (code, target_url) VALUES (:code, :url)');
-        $stmt->execute([
-            'code' => $code,
-            'url' => $url,
-        ]);
+        $attempts = $requestedCode === null ? 6 : 1;
+        for ($i = 0; $i < $attempts; $i++) {
+            if ($finalCode === null) {
+                $finalCode = anomfin_generate_unique_code(
+                    function (string $candidate) use ($pdo): bool {
+                        return anomfin_code_exists($pdo, $candidate);
+                    },
+                    $maxLength
+                );
+            }
 
-        echo json_encode([
-            'success' => true,
-            'code' => $code,
-            'shortUrl' => build_short_url($shortenerBase, $code),
-        ]);
-        exit;
+            try {
+                $stmt = $pdo->prepare('INSERT INTO short_links (code, target_url) VALUES (:code, :url)');
+                $stmt->execute([
+                    'code' => $finalCode,
+                    'url' => $url,
+                ]);
+
+                echo json_encode([
+                    'success' => true,
+                    'code' => $finalCode,
+                    'shortUrl' => anomfin_build_short_url($shortenerBase, $finalCode),
+                ]);
+                exit;
+            } catch (\Throwable $insertException) {
+                if (!anomfin_is_duplicate_code_error($insertException)) {
+                    throw $insertException;
+                }
+
+                if ($requestedCode !== null) {
+                    http_response_code(409);
+                    echo json_encode(['success' => false, 'error' => 'Alias on jo käytössä']);
+                    exit;
+                }
+
+                $finalCode = null;
+            }
+        }
+
     } catch (Throwable $exception) {
         error_log('Shortener DB error: ' . $exception->getMessage());
     }
 }
 
 // Fallback to JSON storage
-$code = $code ?? generate_unique_code(function (string $candidate): bool {
-    $links = load_link_store();
-    return array_key_exists($candidate, $links);
-}, $maxLength);
+$fallbackCode = $finalCode ?? $requestedCode;
+$links = anomfin_load_link_store();
 
-$links = load_link_store();
-if (array_key_exists($code, $links)) {
+if ($fallbackCode === null) {
+    $fallbackCode = anomfin_generate_unique_code(function (string $candidate) use ($links): bool {
+        return array_key_exists($candidate, $links);
+    }, $maxLength);
+}
+if (array_key_exists($fallbackCode, $links)) {
     http_response_code(409);
     echo json_encode(['success' => false, 'error' => 'Alias on jo käytössä']);
     exit;
 }
 
-$links[$code] = [
+$links[$fallbackCode] = [
     'url' => $url,
     'created_at' => gmdate('c'),
 ];
 
-save_link_store($links);
+anomfin_save_link_store($links);
 
 echo json_encode([
     'success' => true,
-    'code' => $code,
-    'shortUrl' => build_short_url($shortenerBase, $code),
+    'code' => $fallbackCode,
+    'shortUrl' => anomfin_build_short_url($shortenerBase, $fallbackCode),
 ]);
-
-function generate_unique_code(callable $exists, int $maxLength): string
-{
-    $length = max(1, min($maxLength, 8));
-    $alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    $attempts = 0;
-
-    do {
-        $attempts++;
-        $candidate = '';
-        for ($i = 0; $i < $length; $i++) {
-            $candidate .= $alphabet[random_int(0, strlen($alphabet) - 1)];
-        }
-        if (!$exists($candidate)) {
-            return $candidate;
-        }
-    } while ($attempts < 20);
-
-    throw new RuntimeException('Lyhennettä ei pystytty generoimaan ilman törmäyksiä');
-}
-
-function code_exists(\PDO $pdo, string $code): bool
-{
-    $stmt = $pdo->prepare('SELECT 1 FROM short_links WHERE code = :code LIMIT 1');
-    $stmt->execute(['code' => $code]);
-    return (bool) $stmt->fetchColumn();
-}
-
-function build_short_url(string $base, string $code): string
-{
-    if (str_contains($base, '=') || str_ends_with($base, '/')) {
-        return $base . $code;
-    }
-
-    return rtrim($base, '/') . '/' . $code;
-}
-
-function load_settings(string $file, array $defaults): array
-{
-    if (!is_file($file)) {
-        return $defaults;
-    }
-    $data = json_decode((string) file_get_contents($file), true);
-    if (!is_array($data)) {
-        return $defaults;
-    }
-    return array_replace_recursive($defaults, $data);
-}
-
-function link_store_path(): string
-{
-    $dir = __DIR__ . '/data';
-    if (!is_dir($dir)) {
-        mkdir($dir, 0775, true);
-    }
-    return $dir . '/short-links.json';
-}
-
-function load_link_store(): array
-{
-    $file = link_store_path();
-    if (!is_file($file)) {
-        return [];
-    }
-
-    $data = json_decode((string) file_get_contents($file), true);
-    return is_array($data) ? $data : [];
-}
-
-function save_link_store(array $links): void
-{
-    $file = link_store_path();
-    $fp = fopen($file, 'c+');
-    if ($fp === false) {
-        throw new RuntimeException('Lyhennysten tallennus epäonnistui');
-    }
-    flock($fp, LOCK_EX);
-    ftruncate($fp, 0);
-    fwrite($fp, json_encode($links, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    fflush($fp);
-    flock($fp, LOCK_UN);
-    fclose($fp);
-}

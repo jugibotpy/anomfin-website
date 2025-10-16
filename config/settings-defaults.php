@@ -37,6 +37,7 @@ return [
         'updated_by' => 'Bootstrap',
     ],
     'branding' => [
+        'navEmblemUrl' => 'assets/logotp.png',
         'logoUrl' => 'assets/logotp.png',
         'faviconUrl' => 'assets/logotp.png',
         'heroLogoUrl' => 'assets/logo.png',
@@ -54,6 +55,10 @@ return [
     'shortener' => [
         'baseUrl' => 'https://anomfin.fi/?s=',
         'maxLength' => 4,
+        'enforceHttps' => true,
+        'autoPurgeDays' => 365,
+        'redirectStatus' => 302,
+        'utmCampaign' => 'anomfin-hyperlaunch',
     ],
     'integrations' => [
         'chat' => [
