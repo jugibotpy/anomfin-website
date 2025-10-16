@@ -4,6 +4,7 @@ declare(strict_types=1);
 session_start();
 
 require_once __DIR__ . '/../lib/system.php';
+require_once __DIR__ . '/../config.php';
 
 $config = require __DIR__ . '/../config/admin.config.php';
 $sessionKey = $config['session_key'] ?? 'anomfin_admin_authenticated';
@@ -19,7 +20,7 @@ header('Expires: 0');
 $defaults = require __DIR__ . '/../config/settings-defaults.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $payload = loadSettings($settingsFile, $defaults);
+    $payload = anomfin_settings_load($settingsFile, $defaults);
     if (isset($payload['integrations']['chat']['apiKey'])) {
         $payload['integrations']['chat']['hasApiKey'] = $payload['integrations']['chat']['apiKey'] !== '';
         unset($payload['integrations']['chat']['apiKey']);
@@ -64,7 +65,7 @@ $allowedEases = [
     'linear',
 ];
 
-$current = loadSettings($settingsFile, $defaults);
+$current = anomfin_settings_load($settingsFile, $defaults);
 
 $sanitized = $current;
 $sanitized['cssVars'] = sanitizeCssVars($input['cssVars'] ?? [], $defaults['cssVars']);
@@ -128,7 +129,7 @@ $sanitized['meta'] = [
     'updated_by' => $_SESSION[$sessionUserKey] ?? ($config['default_admin_name'] ?? 'AnomFIN Admin'),
 ];
 
-if (!anomfin_write_json_atomic($settingsFile, $sanitized)) {
+if (!anomfin_settings_save($settingsFile, $sanitized)) {
     http_response_code(500);
     echo json_encode(['error' => 'Asetuksia ei voitu tallentaa (kirjoitusoikeudet?)']);
     return;
@@ -146,57 +147,9 @@ $metrics['lastSettingsUser'] = $sanitized['meta']['updated_by'];
 anomfin_write_json_atomic($metricsFile, $metrics);
 
 http_response_code(200);
-$payload = loadSettings($settingsFile, $defaults);
+$payload = anomfin_settings_load($settingsFile, $defaults);
 $payload['meta']['flash'] = 'Asetukset tallennettu';
 echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-
-function loadSettings(string $file, array $defaults): array
-{
-    if (!file_exists($file)) {
-        return $defaults;
-    }
-
-    $data = json_decode((string) file_get_contents($file), true);
-    if (!is_array($data)) {
-        return $defaults;
-    }
-
-    $merged = $defaults;
-    if (isset($data['cssVars']) && is_array($data['cssVars'])) {
-        $merged['cssVars'] = array_merge($defaults['cssVars'], $data['cssVars']);
-    }
-    if (isset($data['behaviors']) && is_array($data['behaviors'])) {
-        $merged['behaviors'] = array_merge($defaults['behaviors'], $data['behaviors']);
-    }
-    if (isset($data['branding']) && is_array($data['branding'])) {
-        $merged['branding'] = array_merge($defaults['branding'] ?? [], $data['branding']);
-    } else {
-        $merged['branding'] = $defaults['branding'] ?? [];
-    }
-    if (isset($data['content']) && is_array($data['content'])) {
-        $merged['content'] = array_merge($defaults['content'] ?? [], $data['content']);
-    } else {
-        $merged['content'] = $defaults['content'] ?? [];
-    }
-    if (isset($data['shortener']) && is_array($data['shortener'])) {
-        $merged['shortener'] = array_merge($defaults['shortener'] ?? [], $data['shortener']);
-    } else {
-        $merged['shortener'] = $defaults['shortener'] ?? [];
-    }
-    if (isset($data['integrations']['chat']) && is_array($data['integrations']['chat'])) {
-        $merged['integrations']['chat'] = array_merge($defaults['integrations']['chat'] ?? [], $data['integrations']['chat']);
-    } else {
-        $merged['integrations']['chat'] = $defaults['integrations']['chat'] ?? [];
-    }
-    if (array_key_exists('preset', $data)) {
-        $merged['preset'] = $data['preset'];
-    }
-    if (isset($data['meta']) && is_array($data['meta'])) {
-        $merged['meta'] = array_merge($defaults['meta'], $data['meta']);
-    }
-
-    return $merged;
-}
 
 function sanitizeCssVars(array $input, array $defaults): array
 {

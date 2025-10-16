@@ -9,10 +9,10 @@ function anomfin_get_db_config(): array
     }
 
     $defaults = [
-        'host' => getenv('ANOMFIN_DB_HOST') ?: '127.0.0.1',
+        'host' => getenv('ANOMFIN_DB_HOST') ?: 'localhost',
         'port' => (int) (getenv('ANOMFIN_DB_PORT') ?: 3306),
-        'database' => getenv('ANOMFIN_DB_NAME') ?: 'anomfin',
-        'username' => getenv('ANOMFIN_DB_USER') ?: 'anomfin',
+        'database' => getenv('ANOMFIN_DB_NAME') ?: 'anomfinf_anomfinf',
+        'username' => getenv('ANOMFIN_DB_USER') ?: 'anomfinf_anomfinf',
         'password' => getenv('ANOMFIN_DB_PASS') ?: '',
         'charset' => 'utf8mb4',
         'options' => [],
@@ -78,4 +78,38 @@ function anomfin_get_pdo(): ?\PDO
 function anomfin_database_available(): bool
 {
     return anomfin_get_pdo() instanceof \PDO;
+}
+
+function anomfin_get_mysqli(): ?\mysqli
+{
+    static $mysqli = null;
+    if ($mysqli instanceof \mysqli) {
+        return $mysqli;
+    }
+
+    $config = anomfin_get_db_config();
+    if (empty($config['host']) || empty($config['database'])) {
+        return null;
+    }
+
+    $mysqli = @new \mysqli(
+        (string) ($config['host'] ?? 'localhost'),
+        (string) ($config['username'] ?? ''),
+        (string) ($config['password'] ?? ''),
+        (string) ($config['database'] ?? ''),
+        (int) ($config['port'] ?? 3306)
+    );
+
+    if ($mysqli->connect_errno) {
+        error_log('AnomFIN MySQLi connection failed: ' . $mysqli->connect_error);
+        $mysqli = null;
+        return null;
+    }
+
+    $charset = $config['charset'] ?? 'utf8mb4';
+    if ($charset) {
+        $mysqli->set_charset($charset);
+    }
+
+    return $mysqli;
 }

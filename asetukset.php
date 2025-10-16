@@ -52,7 +52,7 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-$settings = loadSettings($settingsFile, $defaults);
+$settings = anomfin_settings_load($settingsFile, $defaults);
 $metricsFile = __DIR__ . '/data/metrics.json';
 $metrics = ensureMetrics($metricsFile);
 $statusReport = buildStatusReport($settingsFile, $settings, $defaults, $metrics);
@@ -64,57 +64,6 @@ if (isset($settingsForClient['integrations']['chat']['apiKey'])) {
 $settingsJson = json_encode($settingsForClient, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 $csrfToken = $_SESSION['csrf_token'];
 $adminName = $_SESSION[$sessionUserKey] ?? $defaultAdminName;
-
-function loadSettings(string $file, array $defaults): array
-{
-    if (!file_exists($file)) {
-        anomfin_write_json_atomic($file, $defaults);
-        return $defaults;
-    }
-    $data = json_decode((string)file_get_contents($file), true);
-    if (!is_array($data)) {
-        return $defaults;
-    }
-    if (isset($data['cssVars']) && is_array($data['cssVars'])) {
-        $data['cssVars'] = array_merge($defaults['cssVars'], $data['cssVars']);
-    } else {
-        $data['cssVars'] = $defaults['cssVars'];
-    }
-    if (isset($data['behaviors']) && is_array($data['behaviors'])) {
-        $data['behaviors'] = array_merge($defaults['behaviors'], $data['behaviors']);
-    } else {
-        $data['behaviors'] = $defaults['behaviors'];
-    }
-    if (isset($data['branding']) && is_array($data['branding'])) {
-        $data['branding'] = array_merge($defaults['branding'] ?? [], $data['branding']);
-    } else {
-        $data['branding'] = $defaults['branding'] ?? [];
-    }
-    if (isset($data['content']) && is_array($data['content'])) {
-        $data['content'] = array_merge($defaults['content'] ?? [], $data['content']);
-    } else {
-        $data['content'] = $defaults['content'] ?? [];
-    }
-    if (isset($data['shortener']) && is_array($data['shortener'])) {
-        $data['shortener'] = array_merge($defaults['shortener'] ?? [], $data['shortener']);
-    } else {
-        $data['shortener'] = $defaults['shortener'] ?? [];
-    }
-    if (isset($data['integrations']['chat']) && is_array($data['integrations']['chat'])) {
-        $data['integrations']['chat'] = array_merge($defaults['integrations']['chat'] ?? [], $data['integrations']['chat']);
-    } else {
-        $data['integrations']['chat'] = $defaults['integrations']['chat'] ?? [];
-    }
-    if (!array_key_exists('preset', $data)) {
-        $data['preset'] = $defaults['preset'];
-    }
-    if (isset($data['meta']) && is_array($data['meta'])) {
-        $data['meta'] = array_merge($defaults['meta'], $data['meta']);
-    } else {
-        $data['meta'] = $defaults['meta'];
-    }
-    return $data;
-}
 
 function ensureMetrics(string $file): array
 {
