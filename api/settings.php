@@ -322,6 +322,7 @@ function sanitizeChatIntegration(array $input, array $defaults, array $current):
         'systemPrompt' => sanitizeRichText($input['systemPrompt'] ?? $base['systemPrompt']),
         'greeting' => sanitizeRichText($input['greeting'] ?? $base['greeting']),
         'apiKey' => $base['apiKey'] ?? '',
+        'avatarUrl' => sanitizeUrlOrRelative($input['avatarUrl'] ?? ($base['avatarUrl'] ?? 'assets/logotp.png'), $base['avatarUrl'] ?? 'assets/logotp.png'),
     ];
 
     if (array_key_exists('apiKey', $input)) {
