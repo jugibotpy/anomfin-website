@@ -40,7 +40,7 @@ if ($alias !== '' && strlen($alias) > $maxLength) {
     exit;
 }
 
-$settings = anomfin_load_settings($settingsFile, $defaults);
+$settings = load_settings($settingsFile, $defaults);
 $shortenerConfig = $settings['shortener'] ?? [];
 $shortenerBase = $shortenerConfig['baseUrl'] ?? 'https://anomfin.fi/?s=';
 $shortenerBase = rtrim($shortenerBase, '/') . (str_contains($shortenerBase, '=') ? '' : '/');
@@ -55,14 +55,14 @@ if ($enforceHttps && strcasecmp((string) parse_url($url, PHP_URL_SCHEME), 'https
 }
 
 if ($utmCampaign !== '') {
-    $urlWithCampaign = anomfin_ensure_utm_campaign($url, $utmCampaign);
+    $urlWithCampaign = ensure_utm_campaign($url, $utmCampaign);
     if ($urlWithCampaign !== $url) {
         $url = filter_var($urlWithCampaign, FILTER_VALIDATE_URL) ?: $url;
     }
 }
 
 if ($autoPurgeDays > 0) {
-    anomfin_purge_json_links($autoPurgeDays);
+    purge_json_links($autoPurgeDays);
 }
 
 $pdo = anomfin_get_pdo();
@@ -81,11 +81,17 @@ if ($pdo instanceof \PDO) {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
 
         if ($autoPurgeDays > 0) {
-            anomfin_purge_expired_db_links($pdo, $autoPurgeDays);
+            purge_expired_db_links($pdo, $autoPurgeDays);
         }
 
-        if ($requestedCode !== null) {
-            if (anomfin_code_exists($pdo, $requestedCode)) {
+        if ($code === null) {
+            $code = generate_unique_code(function (string $candidate) use ($pdo): bool {
+                $stmt = $pdo->prepare('SELECT 1 FROM short_links WHERE code = :code LIMIT 1');
+                $stmt->execute(['code' => $candidate]);
+                return (bool) $stmt->fetchColumn();
+            }, $maxLength);
+        } else {
+            if (code_exists($pdo, $code)) {
                 http_response_code(409);
                 echo json_encode(['success' => false, 'error' => 'Alias on jo käytössä']);
                 exit;
@@ -163,3 +169,161 @@ echo json_encode([
     'code' => $fallbackCode,
     'shortUrl' => anomfin_build_short_url($shortenerBase, $fallbackCode),
 ]);
+
+function generate_unique_code(callable $exists, int $maxLength): string
+{
+    $length = max(1, min($maxLength, 8));
+    $alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    $attempts = 0;
+
+    do {
+        $attempts++;
+        $candidate = '';
+        for ($i = 0; $i < $length; $i++) {
+            $candidate .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+        if (!$exists($candidate)) {
+            return $candidate;
+        }
+    } while ($attempts < 20);
+
+    throw new RuntimeException('Lyhennettä ei pystytty generoimaan ilman törmäyksiä');
+}
+
+function code_exists(\PDO $pdo, string $code): bool
+{
+    $stmt = $pdo->prepare('SELECT 1 FROM short_links WHERE code = :code LIMIT 1');
+    $stmt->execute(['code' => $code]);
+    return (bool) $stmt->fetchColumn();
+}
+
+function purge_expired_db_links(\PDO $pdo, int $days): void
+{
+    if ($days <= 0) {
+        return;
+    }
+
+    $threshold = gmdate('Y-m-d H:i:s', time() - ($days * 86400));
+    $stmt = $pdo->prepare('DELETE FROM short_links WHERE created_at < :threshold');
+    $stmt->execute(['threshold' => $threshold]);
+}
+
+function build_short_url(string $base, string $code): string
+{
+    if (str_contains($base, '=') || str_ends_with($base, '/')) {
+        return $base . $code;
+    }
+
+    return rtrim($base, '/') . '/' . $code;
+}
+
+function load_settings(string $file, array $defaults): array
+{
+    if (!is_file($file)) {
+        return $defaults;
+    }
+    $data = json_decode((string) file_get_contents($file), true);
+    if (!is_array($data)) {
+        return $defaults;
+    }
+    return array_replace_recursive($defaults, $data);
+}
+
+function link_store_path(): string
+{
+    $dir = __DIR__ . '/data';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+    return $dir . '/short-links.json';
+}
+
+function load_link_store(): array
+{
+    $file = link_store_path();
+    if (!is_file($file)) {
+        return [];
+    }
+
+    $data = json_decode((string) file_get_contents($file), true);
+    return is_array($data) ? $data : [];
+}
+
+function save_link_store(array $links): void
+{
+    $file = link_store_path();
+    $fp = fopen($file, 'c+');
+    if ($fp === false) {
+        throw new RuntimeException('Lyhennysten tallennus epäonnistui');
+    }
+    flock($fp, LOCK_EX);
+    ftruncate($fp, 0);
+    fwrite($fp, json_encode($links, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+}
+
+function purge_json_links(int $days): void
+{
+    if ($days <= 0) {
+        return;
+    }
+
+    $links = load_link_store();
+    if ($links === []) {
+        return;
+    }
+
+    $threshold = time() - ($days * 86400);
+    $changed = false;
+    foreach ($links as $code => $data) {
+        $createdAt = isset($data['created_at']) ? strtotime((string) $data['created_at']) : 0;
+        if ($createdAt > 0 && $createdAt < $threshold) {
+            unset($links[$code]);
+            $changed = true;
+        }
+    }
+
+    if ($changed) {
+        save_link_store($links);
+    }
+}
+
+function ensure_utm_campaign(string $url, string $campaign): string
+{
+    $parts = parse_url($url);
+    if ($parts === false) {
+        return $url;
+    }
+
+    $query = [];
+    if (!empty($parts['query'])) {
+        parse_str($parts['query'], $query);
+    }
+
+    $lower = array_change_key_case($query, CASE_LOWER);
+    if (array_key_exists('utm_campaign', $lower)) {
+        return $url;
+    }
+
+    $query['utm_campaign'] = $campaign;
+    $parts['query'] = http_build_query($query);
+
+    return build_url_from_parts($parts);
+}
+
+function build_url_from_parts(array $parts): string
+{
+    $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : '';
+    $user = $parts['user'] ?? '';
+    $pass = isset($parts['pass']) ? ':' . $parts['pass'] : '';
+    $auth = $user !== '' ? $user . $pass . '@' : '';
+    $host = $parts['host'] ?? '';
+    $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+    $path = $parts['path'] ?? '';
+    $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+    $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+
+    return $scheme . $auth . $host . $port . $path . $query . $fragment;
+}

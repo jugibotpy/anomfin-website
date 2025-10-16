@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/lib/shortener.php';
 
 $config = require __DIR__ . '/config/admin.config.php';
 $defaults = require __DIR__ . '/config/settings-defaults.php';
@@ -22,13 +21,11 @@ if (isset($_GET['s'])) {
     if ($code !== '') {
         $target = anomfin_resolve_short_link($code);
         if ($target !== null) {
-            $cleanTarget = str_replace(["\r", "\n"], '', $target);
             header('Cache-Control: no-cache, no-store, must-revalidate');
             header('Pragma: no-cache');
             header('Expires: 0');
-            header('Location: ' . $cleanTarget, true, $redirectStatus);
-            $escapedTarget = htmlspecialchars($cleanTarget, ENT_QUOTES, 'UTF-8');
-            echo '<!DOCTYPE html><html lang="fi"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=' . $escapedTarget . '"><title>Uudelleenohjataan…</title></head><body><p>Uudelleenohjataan kohteeseen <a href="' . $escapedTarget . '">' . $escapedTarget . '</a>.</p></body></html>';
+            header('Location: ' . $target, true, $redirectStatus);
+            echo '<!DOCTYPE html><html lang="fi"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '"><title>Uudelleenohjataan…</title></head><body><p>Uudelleenohjataan kohteeseen <a href="' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</a>.</p></body></html>';
             exit;
         }
     }
@@ -49,6 +46,20 @@ if (!is_file($indexHtml)) {
 
 header('Content-Type: text/html; charset=utf-8');
 readfile($indexHtml);
+
+function anomfin_load_settings(string $file, array $defaults): array
+{
+    if (!is_file($file)) {
+        return $defaults;
+    }
+
+    $data = json_decode((string) file_get_contents($file), true);
+    if (!is_array($data)) {
+        return $defaults;
+    }
+
+    return array_replace_recursive($defaults, $data);
+}
 
 function anomfin_resolve_short_link(string $code): ?string
 {
@@ -74,3 +85,23 @@ function anomfin_resolve_short_link(string $code): ?string
     return null;
 }
 
+function anomfin_link_store_path(): string
+{
+    $dir = __DIR__ . '/data';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+
+    return $dir . '/short-links.json';
+}
+
+function anomfin_load_link_store(): array
+{
+    $file = anomfin_link_store_path();
+    if (!is_file($file)) {
+        return [];
+    }
+
+    $data = json_decode((string) file_get_contents($file), true);
+    return is_array($data) ? $data : [];
+}
