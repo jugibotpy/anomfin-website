@@ -114,7 +114,11 @@ const ANOMFIN_DEFAULT_SETTINGS = {
     },
     shortener: {
         baseUrl: 'https://anomfin.fi/?s=',
-        maxLength: 4
+        maxLength: 4,
+        enforceHttps: true,
+        autoPurgeDays: 365,
+        redirectStatus: 302,
+        utmCampaign: 'anomfin-hyperlaunch'
     }
 };
 
@@ -517,6 +521,7 @@ function initLinkShortener() {
     const shortenerSettings = window.__ANOMFIN_SETTINGS?.shortener || ANOMFIN_DEFAULT_SETTINGS.shortener;
     const baseUrl = shortenerSettings.baseUrl || 'https://anomfin.fi/?s=';
     const maxLength = Number(shortenerSettings.maxLength) || 4;
+    const enforceHttps = shortenerSettings.enforceHttps !== false;
 
     const setStatus = (message, type = 'info') => {
         statusEl.textContent = message || '';
@@ -550,6 +555,12 @@ function initLinkShortener() {
             parsedUrl = new URL(urlValue);
         } catch (error) {
             setStatus('URL näyttää virheelliseltä – tarkista osoite.', 'error');
+            targetInput.focus();
+            return;
+        }
+
+        if (enforceHttps && parsedUrl.protocol !== 'https:') {
+            setStatus('Lyhentäjä hyväksyy vain HTTPS-osoitteet – lisää suojattu linkki.', 'error');
             targetInput.focus();
             return;
         }

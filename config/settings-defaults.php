@@ -54,6 +54,10 @@ return [
     'shortener' => [
         'baseUrl' => 'https://anomfin.fi/?s=',
         'maxLength' => 4,
+        'enforceHttps' => true,
+        'autoPurgeDays' => 365,
+        'redirectStatus' => 302,
+        'utmCampaign' => 'anomfin-hyperlaunch',
     ],
     'integrations' => [
         'chat' => [

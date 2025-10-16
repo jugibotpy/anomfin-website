@@ -271,10 +271,23 @@ function sanitizeShortener(array $input, array $defaults, array $current): array
     $baseUrl = sanitizeUrlOrRelative($input['baseUrl'] ?? $base['baseUrl'], $base['baseUrl']);
     $maxLength = isset($input['maxLength']) ? (int) $input['maxLength'] : (int) ($base['maxLength'] ?? 4);
     $maxLength = max(1, min($maxLength, 12));
+    $enforceHttps = array_key_exists('enforceHttps', $input)
+        ? !empty($input['enforceHttps'])
+        : !empty($base['enforceHttps']);
+    $autoPurgeDays = isset($input['autoPurgeDays']) ? (int) $input['autoPurgeDays'] : (int) ($base['autoPurgeDays'] ?? 0);
+    $autoPurgeDays = max(0, min($autoPurgeDays, 3650));
+    $redirectCandidate = isset($input['redirectStatus']) ? (int) $input['redirectStatus'] : (int) ($base['redirectStatus'] ?? 302);
+    $allowedStatuses = [301, 302, 307, 308];
+    $redirectStatus = in_array($redirectCandidate, $allowedStatuses, true) ? $redirectCandidate : 302;
+    $utmCampaign = sanitizeText($input['utmCampaign'] ?? ($base['utmCampaign'] ?? ''));
 
     return [
         'baseUrl' => $baseUrl,
         'maxLength' => $maxLength,
+        'enforceHttps' => $enforceHttps,
+        'autoPurgeDays' => $autoPurgeDays,
+        'redirectStatus' => $redirectStatus,
+        'utmCampaign' => $utmCampaign,
     ];
 }
 

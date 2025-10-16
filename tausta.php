@@ -40,8 +40,29 @@ if ($alias !== '' && strlen($alias) > $maxLength) {
 }
 
 $settings = load_settings($settingsFile, $defaults);
-$shortenerBase = $settings['shortener']['baseUrl'] ?? 'https://anomfin.fi/?s=';
+$shortenerConfig = $settings['shortener'] ?? [];
+$shortenerBase = $shortenerConfig['baseUrl'] ?? 'https://anomfin.fi/?s=';
 $shortenerBase = rtrim($shortenerBase, '/') . (str_contains($shortenerBase, '=') ? '' : '/');
+$enforceHttps = !empty($shortenerConfig['enforceHttps']);
+$autoPurgeDays = isset($shortenerConfig['autoPurgeDays']) ? max(0, (int) $shortenerConfig['autoPurgeDays']) : 0;
+$utmCampaign = isset($shortenerConfig['utmCampaign']) ? trim((string) $shortenerConfig['utmCampaign']) : '';
+
+if ($enforceHttps && strcasecmp((string) parse_url($url, PHP_URL_SCHEME), 'https') !== 0) {
+    http_response_code(422);
+    echo json_encode(['success' => false, 'error' => 'Lyhentäjä hyväksyy vain HTTPS-osoitteet.']);
+    exit;
+}
+
+if ($utmCampaign !== '') {
+    $urlWithCampaign = ensure_utm_campaign($url, $utmCampaign);
+    if ($urlWithCampaign !== $url) {
+        $url = filter_var($urlWithCampaign, FILTER_VALIDATE_URL) ?: $url;
+    }
+}
+
+if ($autoPurgeDays > 0) {
+    purge_json_links($autoPurgeDays);
+}
 
 $pdo = anomfin_get_pdo();
 $code = $alias !== '' ? strtolower($alias) : null;
@@ -54,6 +75,10 @@ if ($pdo instanceof \PDO) {
             target_url TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+
+        if ($autoPurgeDays > 0) {
+            purge_expired_db_links($pdo, $autoPurgeDays);
+        }
 
         if ($code === null) {
             $code = generate_unique_code(function (string $candidate) use ($pdo): bool {
@@ -139,6 +164,17 @@ function code_exists(\PDO $pdo, string $code): bool
     return (bool) $stmt->fetchColumn();
 }
 
+function purge_expired_db_links(\PDO $pdo, int $days): void
+{
+    if ($days <= 0) {
+        return;
+    }
+
+    $threshold = gmdate('Y-m-d H:i:s', time() - ($days * 86400));
+    $stmt = $pdo->prepare('DELETE FROM short_links WHERE created_at < :threshold');
+    $stmt->execute(['threshold' => $threshold]);
+}
+
 function build_short_url(string $base, string $code): string
 {
     if (str_contains($base, '=') || str_ends_with($base, '/')) {
@@ -193,4 +229,68 @@ function save_link_store(array $links): void
     fflush($fp);
     flock($fp, LOCK_UN);
     fclose($fp);
+}
+
+function purge_json_links(int $days): void
+{
+    if ($days <= 0) {
+        return;
+    }
+
+    $links = load_link_store();
+    if ($links === []) {
+        return;
+    }
+
+    $threshold = time() - ($days * 86400);
+    $changed = false;
+    foreach ($links as $code => $data) {
+        $createdAt = isset($data['created_at']) ? strtotime((string) $data['created_at']) : 0;
+        if ($createdAt > 0 && $createdAt < $threshold) {
+            unset($links[$code]);
+            $changed = true;
+        }
+    }
+
+    if ($changed) {
+        save_link_store($links);
+    }
+}
+
+function ensure_utm_campaign(string $url, string $campaign): string
+{
+    $parts = parse_url($url);
+    if ($parts === false) {
+        return $url;
+    }
+
+    $query = [];
+    if (!empty($parts['query'])) {
+        parse_str($parts['query'], $query);
+    }
+
+    $lower = array_change_key_case($query, CASE_LOWER);
+    if (array_key_exists('utm_campaign', $lower)) {
+        return $url;
+    }
+
+    $query['utm_campaign'] = $campaign;
+    $parts['query'] = http_build_query($query);
+
+    return build_url_from_parts($parts);
+}
+
+function build_url_from_parts(array $parts): string
+{
+    $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : '';
+    $user = $parts['user'] ?? '';
+    $pass = isset($parts['pass']) ? ':' . $parts['pass'] : '';
+    $auth = $user !== '' ? $user . $pass . '@' : '';
+    $host = $parts['host'] ?? '';
+    $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+    $path = $parts['path'] ?? '';
+    $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+    $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+
+    return $scheme . $auth . $host . $port . $path . $query . $fragment;
 }
