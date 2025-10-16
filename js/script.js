@@ -57,23 +57,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 const ANOMFIN_DEFAULT_SETTINGS = {
     cssVars: {
-        '--intro-blackout-ms': '500ms',
-        '--intro-bg-fade-ms': '3000ms',
-        '--logo-reveal-ms': '2500ms',
+        '--intro-blackout-ms': '1500ms',
+        '--intro-bg-fade-ms': '3100ms',
+        '--logo-reveal-ms': '3100ms',
         '--logo-initial-opacity': '0.2',
         '--logo-initial-blur': '80px',
         '--logo-initial-brightness': '0.85',
         '--logo-initial-scale': '2',
-        '--logo-move-duration-ms': '1000ms',
-        '--logo-move-delay-ms': '600ms',
+        '--logo-move-duration-ms': '2050ms',
+        '--logo-move-delay-ms': '1500ms',
         '--logo-arc-x': '0.65',
         '--logo-arc-dy': '60px',
-        '--grid-hue-duration-ms': '1800ms',
+        '--grid-hue-duration-ms': '2500ms',
+        '--square-shake-duration-ms': '1500ms',
+        '--square-shake-amp': '14px',
+        '--square-scale-end': '1.25',
         '--hero-arrival-duration-ms': '1400ms',
         '--orb-float-duration-s': '8s',
         '--grid-float-duration-s': '6s',
         '--eyebrow-size': '1rem',
-        '--services-fade-delay-ms': '200ms',
+        '--services-fade-delay-ms': '1000ms',
         '--neon': '#00FFA6',
         '--square-green-rgba': '0,255,150',
         '--logo-ease': 'cubic-bezier(.2,.8,.2,1)',
@@ -110,7 +113,8 @@ const ANOMFIN_DEFAULT_SETTINGS = {
             model: 'gpt-4.1-mini',
             temperature: 0.6,
             systemPrompt: 'Toimi AnomFIN HyperLaunch -neuvojana. Vastaa suomeksi, ole asiantunteva, ystävällinen ja ytimekäs. Suosittele palveluitamme yritysasiakkaille.',
-            greeting: 'Tervetuloa AnomFIN-chattiin! Olen täällä auttamassa sinua palveluidemme kanssa.'
+            greeting: 'Tervetuloa AnomFIN-chattiin! Olen täällä auttamassa sinua palveluidemme kanssa.',
+            avatarUrl: 'assets/logotp.png'
         }
     },
     shortener: {
@@ -923,17 +927,32 @@ function initScrollCompanion() {
         </div>
         <span class="companion-spark">Open Source</span>
     ` : `
-        <div class="companion-logo">
-            <span class="companion-logo-main">AnomFIN</span>
-            <span class="companion-logo-sub">24/7 CHAT</span>
+        <div class="companion-header-main">
+            <div class="companion-logo">
+                <span class="companion-logo-main">AnomFIN</span>
+                <span class="companion-logo-sub">24/7 CHAT</span>
+            </div>
+            <span class="companion-spark">Scroll Sync</span>
         </div>
-        <span class="companion-spark">Scroll Sync</span>
     `;
     
     const quoteContent = isMobile ? 
         'Avoin lähdekoodi, vahva yhteisö. AnomFIN, AnomTools, Jugi-ekosysteemi – Kali Linux ja Ubuntu v22.04 tukevat kehitystyötä.' : 
         'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.';
     
+    const chatToggleMarkup = isMobile ? '' : `
+            <div class="companion-chat-toggle" role="group" aria-label="Sulava AI-Chat">
+                <span class="companion-chat-toggle-label">Sulava AI-Chat</span>
+                <label class="companion-chat-toggle-control">
+                    <input type="checkbox" class="companion-chat-toggle-input" checked>
+                    <span class="companion-chat-toggle-track" aria-hidden="true">
+                        <span class="companion-chat-toggle-thumb"></span>
+                    </span>
+                    <span class="companion-chat-toggle-state">On</span>
+                </label>
+            </div>
+    `;
+
     const chatDockMarkup = isMobile ? '' : `
             <div class="chat-dock" id="chat-dock" aria-live="polite">
                 <p class="sr-only">HyperLaunch chat -paneeli</p>
@@ -945,6 +964,7 @@ function initScrollCompanion() {
             <div class="companion-header">
                 ${headerContent}
             </div>
+            ${chatToggleMarkup}
             <p class="companion-quote">${quoteContent}</p>
             <div class="companion-progress" role="status" aria-live="polite">
                 <svg viewBox="0 0 120 120" class="companion-progress-ring" aria-hidden="true">
@@ -978,6 +998,57 @@ function initScrollCompanion() {
     `;
 
     document.body.appendChild(companion);
+
+    const chatToggleInput = companion.querySelector('.companion-chat-toggle-input');
+    const chatStateLabel = companion.querySelector('.companion-chat-toggle-state');
+
+    const updateCompanionChatState = (expanded) => {
+        const isExpanded = Boolean(expanded);
+        if (chatToggleInput) {
+            chatToggleInput.checked = isExpanded;
+        }
+        if (chatStateLabel) {
+            chatStateLabel.textContent = isExpanded ? 'On' : 'Off';
+        }
+        companion.classList.toggle('chat-panel-active', isExpanded);
+        companion.classList.toggle('chat-panel-idle', !isExpanded);
+    };
+
+    if (chatToggleInput) {
+        chatToggleInput.checked = false;
+        chatToggleInput.disabled = true;
+        updateCompanionChatState(false);
+
+        chatToggleInput.addEventListener('change', () => {
+            const targetState = chatToggleInput.checked;
+            if (typeof window.__anomfinChatSetExpanded === 'function') {
+                window.__anomfinChatSetExpanded(targetState);
+            } else {
+                updateCompanionChatState(targetState);
+            }
+        });
+
+        document.addEventListener('anomfin:chat-ready', (event) => {
+            chatToggleInput.disabled = false;
+            updateCompanionChatState(Boolean(event?.detail?.expanded ?? true));
+        });
+
+        document.addEventListener('anomfin:chat-expanded', (event) => {
+            if (!event || typeof event.detail?.expanded === 'undefined') return;
+            updateCompanionChatState(Boolean(event.detail.expanded));
+        });
+
+        document.addEventListener('anomfin:chat-availability', (event) => {
+            const available = Boolean(event?.detail?.available ?? true);
+            chatToggleInput.disabled = !available;
+            companion.classList.toggle('chat-panel-disabled', !available);
+        });
+
+        document.addEventListener('anomfin:chat-fullscreen', (event) => {
+            const active = Boolean(event?.detail?.expanded);
+            companion.classList.toggle('chat-panel-fullscreen', active);
+        });
+    }
 
     const progressValue = companion.querySelector('.progress-value');
     const ring = companion.querySelector('.ring-fg');
@@ -3081,6 +3152,7 @@ function initChatWidget() {
         disabledNote.className = 'chat-disabled-note';
         disabledNote.textContent = 'HyperLaunch-chat on pois päältä. Aktivoi se asetuksista, kun API-avain on valmiina.';
         dock.appendChild(disabledNote);
+        document.dispatchEvent(new CustomEvent('anomfin:chat-availability', { detail: { available: false } }));
         return;
     }
 
@@ -3089,6 +3161,8 @@ function initChatWidget() {
     const statusLabel = hasApiKey ? 'Online' : 'Odottaa API-avainta';
     const modelLabel = chatSettings.model || 'gpt-4.1-mini';
     const widgetId = `hyperlaunch-chat-${Date.now().toString(36)}`;
+    const aiAvatarUrl = safeUrl(chatSettings.avatarUrl || chatDefaults.avatarUrl || 'assets/logotp.png', 'assets/logotp.png');
+    const assistantAvatarHtml = `<div class="chat-message-avatar chat-message-avatar-ai"><img src="${escapeHtml(aiAvatarUrl)}" alt="AnomFIN AI"></div>`;
 
     const widget = document.createElement('section');
     widget.className = 'chat-widget active';
@@ -3099,15 +3173,25 @@ function initChatWidget() {
                 <span class="status-indicator">${statusLabel} · ${providerLabel}</span>
                 <span>${escapeHtml(modelLabel)}</span>
             </div>
-            <button class="chat-widget-close" type="button" aria-expanded="true" aria-controls="${widgetId}-messages">
-                Piilota
-            </button>
+            <div class="chat-widget-actions">
+                <button class="chat-widget-expand" type="button" aria-expanded="false" aria-label="Laajenna HyperLaunch-chat" title="Laajenna">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3h6v2H7v4H5V3zm14 18h-6v-2h4v-4h2v6zm0-18v6h-2V7h-4V5h6zM5 21v-6h2v4h4v2H5z" fill="currentColor"/></svg>
+                </button>
+                <button class="chat-widget-close" type="button" aria-expanded="true" aria-controls="${widgetId}-messages">
+                    Piilota
+                </button>
+            </div>
         </div>
         <div class="chat-messages" id="${widgetId}-messages" role="log" aria-live="polite"></div>
         <div class="chat-input-container">
             <form class="chat-input-form" id="${widgetId}-form" novalidate>
                 <input type="text" class="chat-input" id="${widgetId}-input" placeholder="Kirjoita viestisi..." autocomplete="off" required>
-                <button type="submit" class="chat-send-btn">Lähetä</button>
+                <button type="submit" class="chat-send-btn" aria-label="Lähetä viesti HyperLaunchille">
+                    <span class="chat-send-label">Lähetä</span>
+                    <span class="chat-send-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false"><path d="M3.4 20.6 21 12 3.4 3.4l-.9 3.6 10.7 5-10.7 5z" fill="currentColor"/></svg>
+                    </span>
+                </button>
             </form>
         </div>
     `;
@@ -3120,6 +3204,40 @@ function initChatWidget() {
     const input = widget.querySelector('.chat-input');
     const sendBtn = widget.querySelector('.chat-send-btn');
     const toggleBtn = widget.querySelector('.chat-widget-close');
+    const expandBtn = widget.querySelector('.chat-widget-expand');
+
+    let isFullscreen = false;
+    let fullscreenOverlay = null;
+
+    const ensureOverlay = () => {
+        if (!fullscreenOverlay) {
+            fullscreenOverlay = document.createElement('div');
+            fullscreenOverlay.className = 'chat-fullscreen-overlay';
+            fullscreenOverlay.addEventListener('click', () => setFullscreen(false));
+        }
+        return fullscreenOverlay;
+    };
+
+    function setFullscreen(fullscreen) {
+        const nextState = Boolean(fullscreen);
+        if (isFullscreen === nextState) return;
+        isFullscreen = nextState;
+        widget.classList.toggle('chat-fullscreen', isFullscreen);
+        if (expandBtn) {
+            expandBtn.setAttribute('aria-expanded', isFullscreen ? 'true' : 'false');
+            expandBtn.title = isFullscreen ? 'Pienennä' : 'Laajenna';
+        }
+        const overlay = ensureOverlay();
+        if (isFullscreen) {
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('active'));
+        } else if (overlay.parentNode) {
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.remove(), 200);
+        }
+        document.body.classList.toggle('chat-fullscreen-open', isFullscreen);
+        document.dispatchEvent(new CustomEvent('anomfin:chat-fullscreen', { detail: { expanded: isFullscreen } }));
+    }
 
     const conversationHistory = [];
     if (chatSettings.systemPrompt) {
@@ -3127,18 +3245,31 @@ function initChatWidget() {
     }
 
     function setExpanded(expanded) {
-        widget.classList.toggle('chat-collapsed', !expanded);
-        toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-        toggleBtn.textContent = expanded ? 'Piilota' : 'Avaa';
-        if (expanded && !input.disabled) {
-            input.focus();
+        const isExpanded = Boolean(expanded);
+        widget.classList.toggle('chat-collapsed', !isExpanded);
+        toggleBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+        toggleBtn.textContent = isExpanded ? 'Piilota' : 'Avaa';
+        if (!isExpanded && isFullscreen) {
+            setFullscreen(false);
         }
+        if (isExpanded && !input.disabled) {
+            requestAnimationFrame(() => input.focus());
+        }
+        document.dispatchEvent(new CustomEvent('anomfin:chat-expanded', { detail: { expanded: isExpanded } }));
     }
+
+    window.__anomfinChatSetExpanded = setExpanded;
 
     toggleBtn.addEventListener('click', () => {
         const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
         setExpanded(!expanded);
     });
+
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => {
+            setFullscreen(!isFullscreen);
+        });
+    }
 
     function addMessage(content, isUser = false, pushToHistory = true) {
         const safeContent = String(content || '').trim();
@@ -3152,8 +3283,12 @@ function initChatWidget() {
             .map(line => `<p>${escapeHtml(line)}</p>`)
             .join('');
 
+        const avatarHtml = isUser
+            ? '<div class="chat-message-avatar chat-message-avatar-user">👤</div>'
+            : assistantAvatarHtml;
+
         messageDiv.innerHTML = `
-            <div class="chat-message-avatar">${isUser ? '👤' : '🤖'}</div>
+            ${avatarHtml}
             <div class="chat-message-content">${paragraphs}</div>
         `;
 
@@ -3169,8 +3304,8 @@ function initChatWidget() {
         const typingDiv = document.createElement('div');
         typingDiv.className = 'chat-message typing-indicator';
         typingDiv.innerHTML = `
-            <div class="chat-message-avatar">🤖</div>
-            <div class="chat-message-content">
+            ${assistantAvatarHtml}
+            <div class="chat-message-content chat-message-content-typing">
                 <div class="chat-typing-indicator">
                     <span></span>
                     <span></span>
@@ -3232,6 +3367,8 @@ function initChatWidget() {
     }
 
     setExpanded(true);
+    document.dispatchEvent(new CustomEvent('anomfin:chat-ready', { detail: { expanded: true } }));
+    document.dispatchEvent(new CustomEvent('anomfin:chat-availability', { detail: { available: hasApiKey } }));
 
     if (!hasApiKey) {
         input.disabled = true;
