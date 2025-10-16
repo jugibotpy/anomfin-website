@@ -4,6 +4,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lib/shortener.php';
 
 $config = require __DIR__ . '/config/admin.config.php';
 $defaults = require __DIR__ . '/config/settings-defaults.php';
@@ -65,15 +66,18 @@ if ($autoPurgeDays > 0) {
 }
 
 $pdo = anomfin_get_pdo();
-$code = $alias !== '' ? strtolower($alias) : null;
+$requestedCode = $alias !== '' ? strtolower($alias) : null;
+$finalCode = $requestedCode;
 
 if ($pdo instanceof \PDO) {
     try {
         $pdo->exec('CREATE TABLE IF NOT EXISTS short_links (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            code VARCHAR(16) NOT NULL UNIQUE,
+            code VARCHAR(16) NOT NULL,
             target_url TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_code (code),
+            INDEX idx_created_at (created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
 
         if ($autoPurgeDays > 0) {
@@ -94,47 +98,76 @@ if ($pdo instanceof \PDO) {
             }
         }
 
-        $stmt = $pdo->prepare('INSERT INTO short_links (code, target_url) VALUES (:code, :url)');
-        $stmt->execute([
-            'code' => $code,
-            'url' => $url,
-        ]);
+        $attempts = $requestedCode === null ? 6 : 1;
+        for ($i = 0; $i < $attempts; $i++) {
+            if ($finalCode === null) {
+                $finalCode = anomfin_generate_unique_code(
+                    function (string $candidate) use ($pdo): bool {
+                        return anomfin_code_exists($pdo, $candidate);
+                    },
+                    $maxLength
+                );
+            }
 
-        echo json_encode([
-            'success' => true,
-            'code' => $code,
-            'shortUrl' => build_short_url($shortenerBase, $code),
-        ]);
-        exit;
+            try {
+                $stmt = $pdo->prepare('INSERT INTO short_links (code, target_url) VALUES (:code, :url)');
+                $stmt->execute([
+                    'code' => $finalCode,
+                    'url' => $url,
+                ]);
+
+                echo json_encode([
+                    'success' => true,
+                    'code' => $finalCode,
+                    'shortUrl' => anomfin_build_short_url($shortenerBase, $finalCode),
+                ]);
+                exit;
+            } catch (\Throwable $insertException) {
+                if (!anomfin_is_duplicate_code_error($insertException)) {
+                    throw $insertException;
+                }
+
+                if ($requestedCode !== null) {
+                    http_response_code(409);
+                    echo json_encode(['success' => false, 'error' => 'Alias on jo käytössä']);
+                    exit;
+                }
+
+                $finalCode = null;
+            }
+        }
+
     } catch (Throwable $exception) {
         error_log('Shortener DB error: ' . $exception->getMessage());
     }
 }
 
 // Fallback to JSON storage
-$code = $code ?? generate_unique_code(function (string $candidate): bool {
-    $links = load_link_store();
-    return array_key_exists($candidate, $links);
-}, $maxLength);
+$fallbackCode = $finalCode ?? $requestedCode;
+$links = anomfin_load_link_store();
 
-$links = load_link_store();
-if (array_key_exists($code, $links)) {
+if ($fallbackCode === null) {
+    $fallbackCode = anomfin_generate_unique_code(function (string $candidate) use ($links): bool {
+        return array_key_exists($candidate, $links);
+    }, $maxLength);
+}
+if (array_key_exists($fallbackCode, $links)) {
     http_response_code(409);
     echo json_encode(['success' => false, 'error' => 'Alias on jo käytössä']);
     exit;
 }
 
-$links[$code] = [
+$links[$fallbackCode] = [
     'url' => $url,
     'created_at' => gmdate('c'),
 ];
 
-save_link_store($links);
+anomfin_save_link_store($links);
 
 echo json_encode([
     'success' => true,
-    'code' => $code,
-    'shortUrl' => build_short_url($shortenerBase, $code),
+    'code' => $fallbackCode,
+    'shortUrl' => anomfin_build_short_url($shortenerBase, $fallbackCode),
 ]);
 
 function generate_unique_code(callable $exists, int $maxLength): string

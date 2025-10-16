@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 session_start();
 
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lib/shortener.php';
+require_once __DIR__ . '/lib/system.php';
+
 $config = require __DIR__ . '/config/admin.config.php';
 $defaults = require __DIR__ . '/config/settings-defaults.php';
 
@@ -49,6 +53,9 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 $settings = loadSettings($settingsFile, $defaults);
+$metricsFile = __DIR__ . '/data/metrics.json';
+$metrics = ensureMetrics($metricsFile);
+$statusReport = buildStatusReport($settingsFile, $settings, $defaults, $metrics);
 $settingsForClient = $settings;
 if (isset($settingsForClient['integrations']['chat']['apiKey'])) {
     $settingsForClient['integrations']['chat']['hasApiKey'] = $settingsForClient['integrations']['chat']['apiKey'] !== '';
@@ -61,7 +68,7 @@ $adminName = $_SESSION[$sessionUserKey] ?? $defaultAdminName;
 function loadSettings(string $file, array $defaults): array
 {
     if (!file_exists($file)) {
-        file_put_contents($file, json_encode($defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        anomfin_write_json_atomic($file, $defaults);
         return $defaults;
     }
     $data = json_decode((string)file_get_contents($file), true);
@@ -107,6 +114,101 @@ function loadSettings(string $file, array $defaults): array
         $data['meta'] = $defaults['meta'];
     }
     return $data;
+}
+
+function ensureMetrics(string $file): array
+{
+    $defaults = [
+        'visitors24h' => 0,
+        'visitorsTotal' => 0,
+        'lastSettingsSave' => null,
+        'lastSettingsUser' => null,
+    ];
+
+    $metrics = anomfin_read_json_file($file, $defaults);
+
+    if ($metrics === $defaults && !file_exists($file)) {
+        anomfin_write_json_atomic($file, $defaults);
+    }
+
+    return array_merge($defaults, $metrics);
+}
+
+function buildStatusReport(string $settingsFile, array $settings, array $defaults, array $metrics): array
+{
+    $dataDir = dirname($settingsFile);
+    $settingsExists = is_file($settingsFile);
+    $settingsWritable = $settingsExists ? is_writable($settingsFile) : is_writable($dataDir);
+    $jsonStorePath = anomfin_link_store_path();
+    $jsonStoreExists = is_file($jsonStorePath);
+    $jsonStoreWritable = $jsonStoreExists ? is_writable($jsonStorePath) : is_writable(dirname($jsonStorePath));
+
+    $pdo = anomfin_get_pdo();
+    $dbAvailable = $pdo instanceof \PDO;
+    $dbCount = null;
+    $dbUnique = false;
+
+    if ($dbAvailable) {
+        try {
+            $stmt = $pdo->query('SELECT COUNT(*) FROM short_links');
+            $dbCount = (int) $stmt->fetchColumn();
+
+            $schemaStmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'short_links' AND index_name = 'uniq_code' AND non_unique = 0");
+            $schemaStmt->execute();
+            $dbUnique = (int) $schemaStmt->fetchColumn() > 0;
+        } catch (\Throwable $exception) {
+            $dbCount = null;
+            $dbUnique = false;
+            $dbAvailable = false;
+        }
+    }
+
+    $jsonLinks = anomfin_load_link_store();
+    $jsonCount = is_array($jsonLinks) ? count($jsonLinks) : 0;
+
+    $shortener = array_merge($defaults['shortener'] ?? [], $settings['shortener'] ?? []);
+
+    return [
+        'filesystem' => [
+            'settings' => [
+                'path' => $settingsFile,
+                'exists' => $settingsExists,
+                'writable' => $settingsWritable,
+                'perms' => anomfin_format_permissions($settingsFile),
+            ],
+            'dataDir' => [
+                'path' => $dataDir,
+                'exists' => is_dir($dataDir),
+                'writable' => is_dir($dataDir) ? is_writable($dataDir) : false,
+                'perms' => anomfin_format_permissions($dataDir),
+            ],
+            'jsonStore' => [
+                'path' => $jsonStorePath,
+                'exists' => $jsonStoreExists,
+                'writable' => $jsonStoreWritable,
+                'perms' => anomfin_format_permissions($jsonStorePath),
+                'count' => $jsonCount,
+            ],
+        ],
+        'shortener' => [
+            'dbAvailable' => $dbAvailable,
+            'dbCount' => $dbCount,
+            'dbUnique' => $dbUnique,
+            'jsonCount' => $jsonCount,
+            'autoPurgeDays' => (int) ($shortener['autoPurgeDays'] ?? 0),
+            'maxLength' => (int) ($shortener['maxLength'] ?? 4),
+            'enforceHttps' => !empty($shortener['enforceHttps']),
+        ],
+        'metrics' => [
+            'visitors24h' => (int) ($metrics['visitors24h'] ?? 0),
+            'visitorsTotal' => (int) ($metrics['visitorsTotal'] ?? 0),
+        ],
+        'security' => [
+            'masterPassword' => true,
+            'lastSettingsSave' => $metrics['lastSettingsSave'] ?? null,
+            'lastSettingsUser' => $metrics['lastSettingsUser'] ?? null,
+        ],
+    ];
 }
 
 function renderLoginPage(string $message = ''): string
@@ -191,6 +293,18 @@ function renderLoginPage(string $message = ''): string
     .status.error{ background:rgba(255,84,105,0.12); border:1px solid rgba(255,84,105,0.4); color:#ff6f82; display:block; }
     .toolbar{ display:flex; gap:12px; align-items:center; }
     .toolbar span{ font-size:0.9rem; color:var(--muted); }
+    .status-card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; margin-top:24px; }
+    .status-card h3{ margin:0 0 12px; color:var(--accent); font-size:1.05rem; }
+    .status-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+    .status-row{ background:#0b131f; border:1px solid rgba(60,86,126,0.55); border-radius:12px; padding:14px 16px; box-shadow:0 16px 40px rgba(0,0,0,0.32); }
+    .status-row strong{ font-size:1.1rem; display:block; margin-bottom:4px; }
+    .status-row p{ margin:4px 0 0; color:var(--muted); font-size:0.85rem; }
+    .status-metric{ font-size:1.6rem; font-weight:700; color:#f4fbff; letter-spacing:-0.01em; }
+    .status-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:0.8rem; font-weight:600; margin-top:6px; }
+    .status-pill.ok{ background:rgba(0,255,166,0.12); color:#4de2aa; border:1px solid rgba(0,255,166,0.35); }
+    .status-pill.warn{ background:rgba(255,191,0,0.12); color:#f9d76d; border:1px solid rgba(255,191,0,0.4); }
+    .status-pill.error{ background:rgba(255,84,105,0.12); color:#ff6f82; border:1px solid rgba(255,84,105,0.4); }
+    .status-meta{ margin-top:6px; font-size:0.78rem; color:#6f84a4; }
     .preset-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
     .preset-grid label{ background:#0b131f; border:1px solid var(--border); padding:12px 14px; border-radius:10px; cursor:pointer; font-weight:500; box-shadow:0 12px 30px rgba(0,0,0,0.25); transition:border 0.2s ease, transform 0.2s ease; }
     .preset-grid label:hover{ border-color:var(--accent); transform:translateY(-2px); }
@@ -334,6 +448,9 @@ function renderLoginPage(string $message = ''): string
         <label>Logo URL
           <input type="text" id="branding-logoUrl" placeholder="assets/logotp.png">
         </label>
+        <label>Navin emblemikuva
+          <input type="text" id="branding-navEmblemUrl" placeholder="assets/logotp.png">
+        </label>
         <label>Favicon URL
           <input type="text" id="branding-faviconUrl" placeholder="assets/logotp.png">
         </label>
@@ -436,6 +553,72 @@ function renderLoginPage(string $message = ''): string
     </div>
 
     <div id="status" class="status"></div>
+
+    <?php
+    $fsSettings = $statusReport['filesystem']['settings'];
+    $fsSettingsClass = ($fsSettings['exists'] && $fsSettings['writable']) ? 'ok' : ($fsSettings['exists'] ? 'warn' : 'error');
+    $fsSettingsLabel = $fsSettingsClass === 'ok' ? 'Kirjoitus OK' : ($fsSettings['exists'] ? 'Vain luku' : 'Ei löydy');
+
+    $fsDir = $statusReport['filesystem']['dataDir'];
+    $fsDirClass = ($fsDir['exists'] && $fsDir['writable']) ? 'ok' : ($fsDir['exists'] ? 'warn' : 'error');
+    $fsDirLabel = $fsDirClass === 'ok' ? 'Hakemisto OK' : ($fsDir['exists'] ? 'Ei kirjoitusoikeutta' : 'Ei löydy');
+
+    $jsonStore = $statusReport['filesystem']['jsonStore'];
+    $jsonClass = ($jsonStore['exists'] && $jsonStore['writable']) ? 'ok' : ($jsonStore['exists'] ? 'warn' : 'error');
+    $jsonLabel = $jsonClass === 'ok' ? 'Valmis' : ($jsonStore['exists'] ? 'Vain luku' : 'Luodaan automaattisesti');
+
+    $shortenerStatus = $statusReport['shortener'];
+    $dbClass = $shortenerStatus['dbAvailable'] ? ($shortenerStatus['dbUnique'] ? 'ok' : 'warn') : 'warn';
+    $dbLabel = $shortenerStatus['dbAvailable'] ? ($shortenerStatus['dbUnique'] ? 'MySQL + uniq' : 'MySQL ilman uniq') : 'Ei yhteyttä';
+    $dbDetail = $shortenerStatus['dbAvailable']
+        ? 'Linkkejä ' . ($shortenerStatus['dbCount'] !== null ? (string) $shortenerStatus['dbCount'] : '—')
+        : 'Fallback JSON-kantaan (' . (string) $shortenerStatus['jsonCount'] . ')';
+
+    $metricsStatus = $statusReport['metrics'];
+    $securityStatus = $statusReport['security'];
+    ?>
+
+    <div class="card status-card">
+      <h3>Järjestelmän status</h3>
+      <div class="status-grid">
+        <div class="status-row">
+          <strong>Asetustiedosto</strong>
+          <span class="status-pill <?php echo $fsSettingsClass; ?>"><?php echo htmlspecialchars($fsSettingsLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+          <p><?php echo htmlspecialchars($fsSettings['path'], ENT_QUOTES, 'UTF-8'); ?></p>
+          <p class="status-meta">Oikeudet: <?php echo htmlspecialchars($fsSettings['perms'], ENT_QUOTES, 'UTF-8'); ?> · Kirjoitusoikeus: <?php echo $fsSettings['writable'] ? 'kyllä' : 'ei'; ?></p>
+        </div>
+        <div class="status-row">
+          <strong>Data-hakemisto</strong>
+          <span class="status-pill <?php echo $fsDirClass; ?>"><?php echo htmlspecialchars($fsDirLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+          <p><?php echo htmlspecialchars($fsDir['path'], ENT_QUOTES, 'UTF-8'); ?></p>
+          <p class="status-meta">Oikeudet: <?php echo htmlspecialchars($fsDir['perms'], ENT_QUOTES, 'UTF-8'); ?> · Kirjoitusoikeus: <?php echo $fsDir['writable'] ? 'kyllä' : 'ei'; ?></p>
+        </div>
+        <div class="status-row">
+          <strong>Lyhytlinkkien tietokanta</strong>
+          <span class="status-pill <?php echo $dbClass; ?>"><?php echo htmlspecialchars($dbLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+          <p><?php echo htmlspecialchars($dbDetail, ENT_QUOTES, 'UTF-8'); ?></p>
+          <p class="status-meta">Uniikki alias: <?php echo $shortenerStatus['dbUnique'] ? 'varmistettu' : 'ei varmennettu'; ?> · JSON fallback: <?php echo (int) $shortenerStatus['jsonCount']; ?> linkkiä</p>
+        </div>
+        <div class="status-row">
+          <strong>JSON-varasto</strong>
+          <span class="status-pill <?php echo $jsonClass; ?>"><?php echo htmlspecialchars($jsonLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+          <p><?php echo htmlspecialchars($jsonStore['path'], ENT_QUOTES, 'UTF-8'); ?></p>
+          <p class="status-meta">Merkintöjä: <span id="status-shortener-json-count"><?php echo (int) $shortenerStatus['jsonCount']; ?></span> · Oikeudet: <?php echo htmlspecialchars($jsonStore['perms'], ENT_QUOTES, 'UTF-8'); ?></p>
+        </div>
+        <div class="status-row">
+          <strong>Lyhytlinkkien asetukset</strong>
+          <span class="status-pill ok">Hallinta</span>
+          <p><span class="status-metric" id="status-shortener-maxlength"><?php echo (int) $shortenerStatus['maxLength']; ?></span> merkkiä · aliasin maksimi</p>
+          <p class="status-meta">HTTPS-pakotus: <span id="status-shortener-https"><?php echo $shortenerStatus['enforceHttps'] ? 'päällä' : 'pois päältä'; ?></span> · Automaattinen poisto: <span id="status-shortener-autopurge"><?php echo (int) $shortenerStatus['autoPurgeDays']; ?></span> pv · Master override: superadmin</p>
+        </div>
+        <div class="status-row">
+          <strong>Vierailijat & ylläpito</strong>
+          <span class="status-pill ok">Seuranta</span>
+          <p><span class="status-metric" id="status-visitors-24h"><?php echo (int) $metricsStatus['visitors24h']; ?></span> vierailijaa / 24 h</p>
+          <p class="status-meta">Kaikki vierailijat: <span id="status-visitors-total"><?php echo (int) $metricsStatus['visitorsTotal']; ?></span> · Viimeisin tallennus: <?php echo htmlspecialchars($securityStatus['lastSettingsSave'] ?? '-', ENT_QUOTES, 'UTF-8'); ?> (<?php echo htmlspecialchars($securityStatus['lastSettingsUser'] ?? 'tuntematon', ENT_QUOTES, 'UTF-8'); ?>)</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -554,6 +737,7 @@ function renderLoginPage(string $message = ''): string
     function collectBranding(){
       return {
         logoUrl: (document.getElementById('branding-logoUrl')?.value || '').trim(),
+        navEmblemUrl: (document.getElementById('branding-navEmblemUrl')?.value || '').trim(),
         faviconUrl: (document.getElementById('branding-faviconUrl')?.value || '').trim(),
         heroLogoUrl: (document.getElementById('branding-heroLogoUrl')?.value || '').trim(),
         heroGridBackground: (document.getElementById('branding-heroGridBackground')?.value || '').trim(),
@@ -708,6 +892,7 @@ function renderLoginPage(string $message = ''): string
       }
       const branding = INITIAL_SETTINGS.branding || DEFAULT_BRANDING;
       setInputValue('branding-logoUrl', branding.logoUrl || DEFAULT_BRANDING.logoUrl);
+      setInputValue('branding-navEmblemUrl', branding.navEmblemUrl || DEFAULT_BRANDING.navEmblemUrl || DEFAULT_BRANDING.logoUrl);
       setInputValue('branding-faviconUrl', branding.faviconUrl || DEFAULT_BRANDING.faviconUrl);
       setInputValue('branding-heroLogoUrl', branding.heroLogoUrl || DEFAULT_BRANDING.heroLogoUrl);
       setInputValue('branding-heroGridBackground', branding.heroGridBackground || DEFAULT_BRANDING.heroGridBackground || 'assets/logo.png');
@@ -782,6 +967,7 @@ function renderLoginPage(string $message = ''): string
 
     function showStatus(message, type='success'){
       const status = document.getElementById('status');
+      if(!status) return;
       status.textContent = message;
       status.className = 'status ' + type;
       if(message){
@@ -791,7 +977,23 @@ function renderLoginPage(string $message = ''): string
       }
     }
 
-    async function save(skipStatus){
+    function updateStatusSnapshot(shortener){
+      if (!shortener) return;
+      const maxLengthEl = document.getElementById('status-shortener-maxlength');
+      if (maxLengthEl && typeof shortener.maxLength !== 'undefined') {
+        maxLengthEl.textContent = shortener.maxLength;
+      }
+      const autoPurgeEl = document.getElementById('status-shortener-autopurge');
+      if (autoPurgeEl && typeof shortener.autoPurgeDays !== 'undefined') {
+        autoPurgeEl.textContent = shortener.autoPurgeDays;
+      }
+      const httpsEl = document.getElementById('status-shortener-https');
+      if (httpsEl && typeof shortener.enforceHttps !== 'undefined') {
+        httpsEl.textContent = shortener.enforceHttps ? 'päällä' : 'pois päältä';
+      }
+    }
+
+    async function save(skipStatus=false){
       const out={};
       cssVars.forEach(([varName,id,unit])=>{
         const el = document.getElementById(id+'-n') || document.getElementById(id);
@@ -837,6 +1039,7 @@ function renderLoginPage(string $message = ''): string
         const res = await fetch('api/settings.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify(body)
         });
         if(!res.ok){
@@ -854,6 +1057,16 @@ function renderLoginPage(string $message = ''): string
             chatState.hasApiKey = typeof chatState.apiKey === 'string' && chatState.apiKey !== '';
           }
           updateChatKeyState(chatState);
+        }
+        if (data.shortener) {
+          updateStatusSnapshot(data.shortener);
+        }
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('anomfin:lastSettings', JSON.stringify(data));
+          }
+        } catch (storageError) {
+          console.warn('LocalStorage päivitys epäonnistui', storageError);
         }
         if(!skipStatus){
           showStatus('Asetukset tallennettu onnistuneesti.', 'success');
@@ -925,6 +1138,7 @@ function renderLoginPage(string $message = ''): string
       document.getElementById('floatingGrid').checked = DEFAULT_BEHAVIORS.floatingGrid === true;
       setField('pageVibration', DEFAULT_BEHAVIORS.pageVibration ?? 0);
       setInputValue('branding-logoUrl', DEFAULT_BRANDING.logoUrl);
+      setInputValue('branding-navEmblemUrl', DEFAULT_BRANDING.navEmblemUrl || DEFAULT_BRANDING.logoUrl);
       setInputValue('branding-faviconUrl', DEFAULT_BRANDING.faviconUrl);
       setInputValue('branding-heroLogoUrl', DEFAULT_BRANDING.heroLogoUrl);
       setInputValue('branding-heroGridBackground', DEFAULT_BRANDING.heroGridBackground || 'assets/logo.png');

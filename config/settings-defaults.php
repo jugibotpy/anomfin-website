@@ -37,6 +37,7 @@ return [
         'updated_by' => 'Bootstrap',
     ],
     'branding' => [
+        'navEmblemUrl' => 'assets/logotp.png',
         'logoUrl' => 'assets/logotp.png',
         'faviconUrl' => 'assets/logotp.png',
         'heroLogoUrl' => 'assets/logo.png',
