@@ -37,6 +37,10 @@ function anomfin_get_pdo(): ?\PDO
         return $pdo;
     }
 
+    if (!class_exists('PDO')) {
+        return null;
+    }
+
     $config = anomfin_get_db_config();
     if (empty($config['host']) || empty($config['database'])) {
         return null;
@@ -70,6 +74,9 @@ function anomfin_get_pdo(): ?\PDO
     } catch (\PDOException $exception) {
         error_log('AnomFIN database connection failed: ' . $exception->getMessage());
         $pdo = null;
+    } catch (\Throwable $exception) {
+        error_log('AnomFIN database connection failed: ' . $exception->getMessage());
+        $pdo = null;
     }
 
     return $pdo;
@@ -87,18 +94,28 @@ function anomfin_get_mysqli(): ?\mysqli
         return $mysqli;
     }
 
+    if (!class_exists('mysqli')) {
+        return null;
+    }
+
     $config = anomfin_get_db_config();
     if (empty($config['host']) || empty($config['database'])) {
         return null;
     }
 
-    $mysqli = @new \mysqli(
-        (string) ($config['host'] ?? 'localhost'),
-        (string) ($config['username'] ?? ''),
-        (string) ($config['password'] ?? ''),
-        (string) ($config['database'] ?? ''),
-        (int) ($config['port'] ?? 3306)
-    );
+    try {
+        $mysqli = @new \mysqli(
+            (string) ($config['host'] ?? 'localhost'),
+            (string) ($config['username'] ?? ''),
+            (string) ($config['password'] ?? ''),
+            (string) ($config['database'] ?? ''),
+            (int) ($config['port'] ?? 3306)
+        );
+    } catch (\Throwable $exception) {
+        error_log('AnomFIN MySQLi connection failed: ' . $exception->getMessage());
+        $mysqli = null;
+        return null;
+    }
 
     if ($mysqli->connect_errno) {
         error_log('AnomFIN MySQLi connection failed: ' . $mysqli->connect_error);
