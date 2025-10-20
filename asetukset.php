@@ -388,6 +388,8 @@ function renderLoginPage(string $message = ''): string
         <label><input type="checkbox" id="reactContact"> Reagoi yhteysosioon (korostus)</label>
         <label><input type="checkbox" id="heroMask"> Näytä hero-maskilogo neliössä</label>
         <label><input type="checkbox" id="floatingGrid"> Näytä leijuva HyperCube</label>
+        <label><input type="checkbox" id="hybercube"> HYBERCUBE – ON / OFF (scroll-companion)</label>
+        <label><input type="checkbox" id="chatDock"> CHAT – ON / OFF (dock)</label>
         <label>Sivun värähtely (0–1)
           <div class="row"><input id="pageVibration" type="range" min="0" max="1" step="0.05"><input id="pageVibration-n" type="number" min="0" max="1" step="0.05" style="width:100px"></div>
         </label>
@@ -485,6 +487,9 @@ function renderLoginPage(string $message = ''): string
         </label>
         <label>Tervetuloviesti
           <textarea id="chat-greeting" rows="2"></textarea>
+        </label>
+        <label>Jatkovuoropuhelu
+          <textarea id="chat-followup" rows="2"></textarea>
         </label>
         <label>OpenAI API -avain
           <input type="password" id="chat-apiKey" placeholder="Lisää uusi API-avain" autocomplete="off">
@@ -745,6 +750,7 @@ function renderLoginPage(string $message = ''): string
         temperature,
         systemPrompt: document.getElementById('chat-systemPrompt')?.value || '',
         greeting: document.getElementById('chat-greeting')?.value || '',
+        followup: document.getElementById('chat-followup')?.value || '',
         apiKey,
       };
     }
@@ -833,6 +839,14 @@ function renderLoginPage(string $message = ''): string
       document.getElementById('reactContact').checked = behaviors.reactContact !== false;
       document.getElementById('heroMask').checked = behaviors.heroMask !== false;
       document.getElementById('floatingGrid').checked = behaviors.floatingGrid === true;
+      const hybercubeToggle = document.getElementById('hybercube');
+      if (hybercubeToggle) {
+        hybercubeToggle.checked = behaviors.hybercube !== false;
+      }
+      const chatDockToggle = document.getElementById('chatDock');
+      if (chatDockToggle) {
+        chatDockToggle.checked = behaviors.chatDock !== false;
+      }
       const vibrationDefault = (DEFAULT_BEHAVIORS && typeof DEFAULT_BEHAVIORS.pageVibration !== 'undefined') ? DEFAULT_BEHAVIORS.pageVibration : 0;
       setField('pageVibration', typeof behaviors.pageVibration === 'number' ? behaviors.pageVibration : vibrationDefault);
       if (INITIAL_SETTINGS.meta){
@@ -877,6 +891,7 @@ function renderLoginPage(string $message = ''): string
       setInputValue('chat-temperature', chat.temperature ?? DEFAULT_CHAT.temperature ?? 0.6);
       setInputValue('chat-systemPrompt', chat.systemPrompt || DEFAULT_CHAT.systemPrompt);
       setInputValue('chat-greeting', chat.greeting || DEFAULT_CHAT.greeting);
+      setInputValue('chat-followup', chat.followup || DEFAULT_CHAT.followup);
       updateChatKeyState(chat);
     }
 
@@ -972,6 +987,8 @@ function renderLoginPage(string $message = ''): string
           reactContact: document.getElementById('reactContact').checked,
           heroMask: document.getElementById('heroMask').checked,
           floatingGrid: document.getElementById('floatingGrid').checked,
+          hybercube: document.getElementById('hybercube').checked,
+          chatDock: document.getElementById('chatDock').checked,
           pageVibration: parseFloat(document.getElementById('pageVibration').value || '0'),
         },
         branding: collectBranding(),
@@ -1085,6 +1102,14 @@ function renderLoginPage(string $message = ''): string
       document.getElementById('reactContact').checked = true;
       document.getElementById('heroMask').checked = DEFAULT_BEHAVIORS.heroMask !== false;
       document.getElementById('floatingGrid').checked = DEFAULT_BEHAVIORS.floatingGrid === true;
+      const resetHybercube = document.getElementById('hybercube');
+      if (resetHybercube) {
+        resetHybercube.checked = DEFAULT_BEHAVIORS.hybercube !== false;
+      }
+      const resetChatDock = document.getElementById('chatDock');
+      if (resetChatDock) {
+        resetChatDock.checked = DEFAULT_BEHAVIORS.chatDock !== false;
+      }
       setField('pageVibration', DEFAULT_BEHAVIORS.pageVibration ?? 0);
       setInputValue('branding-logoUrl', DEFAULT_BRANDING.logoUrl);
       setInputValue('branding-navEmblemUrl', DEFAULT_BRANDING.navEmblemUrl || DEFAULT_BRANDING.logoUrl);
@@ -1117,6 +1142,7 @@ function renderLoginPage(string $message = ''): string
       setInputValue('chat-temperature', DEFAULT_CHAT.temperature ?? 0.6);
       setInputValue('chat-systemPrompt', DEFAULT_CHAT.systemPrompt || '');
       setInputValue('chat-greeting', DEFAULT_CHAT.greeting || '');
+      setInputValue('chat-followup', DEFAULT_CHAT.followup || '');
       updateChatKeyState(DEFAULT_CHAT);
       await save();
     });

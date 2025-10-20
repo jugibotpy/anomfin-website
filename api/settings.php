@@ -91,6 +91,12 @@ $sanitized['behaviors'] = [
     'floatingGrid' => array_key_exists('floatingGrid', $behaviors)
         ? !empty($behaviors['floatingGrid'])
         : (!empty($previousBehaviors['floatingGrid'])),
+    'hybercube' => array_key_exists('hybercube', $behaviors)
+        ? !empty($behaviors['hybercube'])
+        : (!array_key_exists('hybercube', $previousBehaviors) || !empty($previousBehaviors['hybercube'])),
+    'chatDock' => array_key_exists('chatDock', $behaviors)
+        ? !empty($behaviors['chatDock'])
+        : (!array_key_exists('chatDock', $previousBehaviors) || !empty($previousBehaviors['chatDock'])),
     'pageVibration' => sanitizeFraction($behaviors['pageVibration'] ?? $previousBehaviors['pageVibration'] ?? 0),
 ];
 
@@ -274,6 +280,7 @@ function sanitizeChatIntegration(array $input, array $defaults, array $current):
         'temperature' => max(0.0, min((float) ($input['temperature'] ?? $base['temperature'] ?? 0.6), 2.0)),
         'systemPrompt' => sanitizeRichText($input['systemPrompt'] ?? $base['systemPrompt']),
         'greeting' => sanitizeRichText($input['greeting'] ?? $base['greeting']),
+        'followup' => sanitizeRichText($input['followup'] ?? ($base['followup'] ?? '')),
         'apiKey' => $base['apiKey'] ?? '',
         'avatarUrl' => sanitizeUrlOrRelative($input['avatarUrl'] ?? ($base['avatarUrl'] ?? 'assets/logotp.png'), $base['avatarUrl'] ?? 'assets/logotp.png'),
     ];
@@ -347,41 +354,91 @@ function sanitizeNumber($value, string $default, float $min, float $max): string
     return (string) $number;
 }
 
+function sanitizeNumericValue($value, string $unit): ?float
+{
+    if (is_numeric($value)) {
+        return (float) $value;
+    }
+
+    if (is_string($value)) {
+        $normalized = trim(str_replace(',', '.', $value));
+        if ($unit !== '') {
+            $unitLength = strlen($unit);
+            if ($unitLength > 0 && strlen($normalized) >= $unitLength) {
+                if (substr_compare($normalized, $unit, -$unitLength) === 0) {
+                    $normalized = trim(substr($normalized, 0, -$unitLength));
+                }
+            }
+        }
+        $number = filter_var($normalized, FILTER_VALIDATE_FLOAT);
+        if ($number !== false) {
+            return (float) $number;
+        }
+    }
+
+    return null;
+}
+
+function formatUnitNumber(float $number): string
+{
+    $rounded = round($number, 3);
+    if (abs($rounded - round($rounded)) < 0.001) {
+        return (string) (int) round($rounded);
+    }
+
+    return rtrim(rtrim(sprintf('%.3f', $rounded), '0'), '.');
+}
+
 function sanitizeDuration($value, string $default): string
 {
-    $number = filter_var($value, FILTER_VALIDATE_FLOAT);
-    if ($number === false) {
-        $number = filter_var($default, FILTER_VALIDATE_FLOAT) ?: 0;
+    $number = sanitizeNumericValue($value, 'ms');
+    if ($number === null) {
+        $number = sanitizeNumericValue($default, 'ms');
     }
-    return sprintf('%sms', max(0, $number));
+    if ($number === null) {
+        $number = 0.0;
+    }
+    $number = max(0, $number);
+    return formatUnitNumber($number) . 'ms';
 }
 
 function sanitizeNumberWithUnit($value, string $default, string $unit, float $min, float $max): string
 {
-    $number = filter_var($value, FILTER_VALIDATE_FLOAT);
-    if ($number === false) {
-        $number = filter_var($default, FILTER_VALIDATE_FLOAT);
+    $number = sanitizeNumericValue($value, $unit);
+    if ($number === null) {
+        $number = sanitizeNumericValue($default, $unit);
+    }
+    if ($number === null) {
+        $number = $min;
     }
     $number = max($min, min($max, (float) $number));
-    return rtrim(rtrim(sprintf('%.3f', $number), '0'), '.') . $unit;
+    return formatUnitNumber($number) . $unit;
 }
 
 function sanitizeSeconds($value, string $default): string
 {
-    $number = filter_var($value, FILTER_VALIDATE_FLOAT);
-    if ($number === false) {
-        $number = filter_var($default, FILTER_VALIDATE_FLOAT) ?: 0;
+    $number = sanitizeNumericValue($value, 's');
+    if ($number === null) {
+        $number = sanitizeNumericValue($default, 's');
     }
-    return sprintf('%ss', max(0, $number));
+    if ($number === null) {
+        $number = 0.0;
+    }
+    $number = max(0, $number);
+    return formatUnitNumber($number) . 's';
 }
 
 function sanitizePixel($value, string $default): string
 {
-    $number = filter_var($value, FILTER_VALIDATE_FLOAT);
-    if ($number === false) {
-        $number = filter_var($default, FILTER_VALIDATE_FLOAT) ?: 0;
+    $number = sanitizeNumericValue($value, 'px');
+    if ($number === null) {
+        $number = sanitizeNumericValue($default, 'px');
     }
-    return sprintf('%spx', max(0, $number));
+    if ($number === null) {
+        $number = 0.0;
+    }
+    $number = max(0, $number);
+    return formatUnitNumber($number) . 'px';
 }
 
 function sanitizeHexColor($value, string $default): string
