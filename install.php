@@ -221,21 +221,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installationComplete) {
                 if (file_put_contents(__DIR__ . '/.env', $envContent) !== false) {
                     @chmod(__DIR__ . '/.env', 0600);
 
-                    // Create database tables
-                    try {
-                        createDatabaseTables($testConn);
-                    } catch (Exception $e) {
-                        $errors[] = 'Taulujen luominen epäonnistui: ' . htmlspecialchars($e->getMessage());
-                    }
-
                     // Create admin.php if it doesn't exist
                     if (!file_exists(__DIR__ . '/admin.php')) {
                         createAdminPage();
-                    }
-
-                    // Create .htaccess if it doesn't exist
-                    if (!file_exists(__DIR__ . '/.htaccess')) {
-                        createHtaccessFile();
                     }
 
                     $success = true;
@@ -250,130 +238,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installationComplete) {
             }
         }
     }
-}
-
-/**
- * Create database tables
- */
-function createDatabaseTables(PDO $pdo): void
-{
-    // Create contact_messages table
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS contact_messages (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            company VARCHAR(255),
-            name VARCHAR(255) NOT NULL,
-            email VARCHAR(255) NOT NULL,
-            phone VARCHAR(50),
-            message TEXT NOT NULL,
-            status ENUM('new', 'read', 'replied') DEFAULT 'new',
-            admin_reply TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX idx_status (status),
-            INDEX idx_created (created_at)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    ");
-    
-    // Create site_settings table
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS site_settings (
-            setting_key VARCHAR(100) PRIMARY KEY,
-            setting_value TEXT,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    ");
-    
-    // Create link_shortener table
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS link_shortener (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            code VARCHAR(10) NOT NULL UNIQUE,
-            url VARCHAR(2000) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            hits INT DEFAULT 0,
-            INDEX idx_code (code),
-            INDEX idx_created (created_at)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    ");
-}
-
-/**
- * Create .htaccess file with rewrite rules
- */
-function createHtaccessFile(): void
-{
-    $htaccessContent = <<<'HTACCESS'
-# AnomFIN Website - Apache Configuration
-# Requires mod_rewrite to be enabled
-
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
-    
-    # Link Shortener - Redirect /s/{code} to redirect.php
-    # Must come before other rules to avoid conflicts
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^s/([a-zA-Z0-9]{1,10})$ redirect.php?c=$1 [L,QSA]
-    
-    # Additional rewrite rules can be added below
-    
-</IfModule>
-
-# Security Headers
-<IfModule mod_headers.c>
-    # Prevent MIME type sniffing
-    Header set X-Content-Type-Options "nosniff"
-    
-    # Enable XSS protection
-    Header set X-XSS-Protection "1; mode=block"
-    
-    # Prevent clickjacking
-    Header set X-Frame-Options "SAMEORIGIN"
-    
-    # Referrer policy
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-</IfModule>
-
-# Compression
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
-</IfModule>
-
-# Browser Caching
-<IfModule mod_expires.c>
-    ExpiresActive On
-    
-    # Images
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/webp "access plus 1 year"
-    ExpiresByType image/svg+xml "access plus 1 year"
-    
-    # CSS and JavaScript
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType text/javascript "access plus 1 month"
-    
-    # Fonts
-    ExpiresByType font/woff2 "access plus 1 year"
-    ExpiresByType font/woff "access plus 1 year"
-    ExpiresByType font/ttf "access plus 1 year"
-    
-    # Default
-    ExpiresDefault "access plus 1 week"
-</IfModule>
-
-# Error Documents (optional)
-# ErrorDocument 404 /404.html
-# ErrorDocument 500 /500.html
-
-HTACCESS;
-
-    file_put_contents(__DIR__ . '/.htaccess', $htaccessContent);
-    @chmod(__DIR__ . '/.htaccess', 0644);
 }
 
 /**

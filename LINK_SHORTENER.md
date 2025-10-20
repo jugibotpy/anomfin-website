@@ -2,130 +2,111 @@
 
 ## Overview
 
-The link shortener feature allows users to create short, memorable URLs that redirect to longer target URLs. This feature includes:
+The link shortener feature allows users to create short, memorable URLs that redirect to longer target URLs. This feature is built into the AnomFIN website and includes:
 
 - **Frontend Form**: User-friendly form in the hero section of the homepage
-- **API Endpoint**: RESTful API for creating short links
-- **Redirect Handler**: Efficient URL resolution with hit tracking
-- **Database Storage**: Persistent storage of shortened links
-- **Analytics**: Hit counter for tracking link usage
+- **API Endpoint**: RESTful API for creating short links via `tausta.php`
+- **Redirect Handler**: Integrated into `index.php` with query parameter `?s={code}`
+- **Database Storage**: Persistent storage in `short_links` table
+- **JSON Fallback**: File-based storage in `data/short-links.json` if database is unavailable
+- **Settings**: Configurable via admin panel in `asetukset.php`
 
-## Files
+## Architecture
 
-### New Files Created
+The link shortener is integrated into the existing AnomFIN infrastructure:
 
-1. **`api/shorten.php`** - API endpoint for creating short URLs
-   - POST endpoint accepting JSON `{url, code?}`
-   - Validates URL format and custom codes
-   - Generates random codes if not provided
-   - Returns `{success, short_url, code}`
+### Core Files
 
-2. **`redirect.php`** - Redirect handler
-   - Resolves `/s/{code}` URLs to target URLs
-   - Increments hit counter for analytics
-   - Shows user-friendly 404 page for invalid codes
-   - 302 temporary redirects
+1. **`index.php`** - Main entry point and redirect handler
+   - Handles short link resolution via `?s={code}` query parameter
+   - Calls `anomfin_resolve_short_link()` to lookup URLs
+   - Shows 404 page for invalid codes
+   - Serves `index.html` for normal requests
 
-3. **`js/shortener.js`** - Frontend JavaScript
-   - Form validation and submission
-   - Async API calls with fetch()
-   - Clipboard copy functionality
-   - Status message handling
+2. **`tausta.php`** - API endpoint for creating short links
+   - POST endpoint accepting JSON `{url, alias?, maxLength?}`
+   - Validates URL format and custom aliases
+   - Generates random codes if no alias provided
+   - Returns `{success, code, shortUrl}`
+   - Creates `short_links` table automatically
 
-4. **`.htaccess`** - Apache configuration
-   - Rewrite rule: `/s/{code}` → `redirect.php?c={code}`
-   - Security headers (X-Content-Type-Options, X-Frame-Options, etc.)
-   - Compression and caching rules
+3. **`lib/shortener.php`** - Helper functions
+   - `anomfin_generate_unique_code()` - Generate random codes
+   - `anomfin_code_exists()` - Check if code exists in database
+   - `anomfin_load_link_store()` / `anomfin_save_link_store()` - JSON file storage
+   - `anomfin_build_short_url()` - Build full short URL
+   - Utility functions for purging expired links
 
-### Modified Files
+4. **`index.html`** - Frontend with shortener form
+   - Form already exists in hero section
+   - Styled with existing CSS in `css/style.css`
+   - JavaScript in `js/script.js` handles form submission
 
-1. **`install.php`** - Installation script
-   - Added `createDatabaseTables()` function
-   - Creates `link_shortener` table during installation
-   - Added `createHtaccessFile()` function
-   - Automatically creates .htaccess if missing
-
-2. **`index.html`** - Homepage
-   - Added `<script src="js/shortener.js" defer></script>`
-   - Form already exists in hero section (lines 90-110)
+5. **`asetukset.php`** - Admin panel
+   - Configure shortener settings
+   - Set base URL, auto-purge days, enforce HTTPS, UTM campaigns
+   - View statistics
 
 ## Database Schema
 
-### `link_shortener` Table
+### `short_links` Table
+
+The table is automatically created by `tausta.php` on first use:
 
 ```sql
-CREATE TABLE IF NOT EXISTS link_shortener (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(10) NOT NULL UNIQUE,
-    url VARCHAR(2000) NOT NULL,
+CREATE TABLE IF NOT EXISTS short_links (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(16) NOT NULL,
+    target_url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    hits INT DEFAULT 0,
-    INDEX idx_code (code),
-    INDEX idx_created (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    UNIQUE KEY uniq_code (code),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
 **Fields:**
 - `id`: Primary key, auto-increment
-- `code`: Short code (1-10 alphanumeric characters), unique
-- `url`: Target URL (max 2000 characters)
+- `code`: Short code (1-16 characters), unique
+- `target_url`: Target URL (TEXT field, no size limit)
 - `created_at`: Timestamp when link was created
-- `hits`: Number of times link has been accessed
+
+**Note:** Hit tracking is not implemented in the database. Future versions may add this feature.
 
 ## Installation
+
+The link shortener is already integrated into the AnomFIN website. No additional installation is needed!
 
 ### Prerequisites
 
 - PHP 7.4 or higher
-- MySQL 5.7+ or MariaDB 10.2+
-- Apache with mod_rewrite enabled
-- Database connection configured in `config.php`
+- MySQL 5.7+ or MariaDB 10.2+ (optional - falls back to JSON storage)
+- Database connection configured in `config.php` (if using database)
 
-### Steps
+### Setup Steps
 
-1. **Run install.php**
-   ```
-   Navigate to: https://yourdomain.com/install.php
-   ```
-   
-2. **Enter database credentials**
-   - Database host (usually `localhost`)
-   - Database name (e.g., `anomfinf_anomfinf`)
-   - Database user (e.g., `anomfinf_anomfinf`)
-   - Database password
+1. **Deploy the website files** to your web server
 
-3. **Installation will automatically:**
-   - Create `.env` file with configuration
-   - Create `link_shortener` table
-   - Create `.htaccess` file with rewrite rules
-   - Set up security configurations
+2. **Configure database connection** in `config.php`
+   - The system uses the existing `anomfin_get_pdo()` function
+   - If database is unavailable, falls back to JSON file storage
 
-4. **Remove install.php** (IMPORTANT!)
-   ```bash
-   rm install.php
-   # or via FTP/File Manager
-   ```
+3. **Configure shortener settings** (optional)
+   - Login to admin panel at `/asetukset.php`
+   - Navigate to "Lyhytlinkit" (Short Links) section
+   - Configure:
+     - Base URL (default: `https://anomfin.fi/?s=`)
+     - Auto-purge days (delete old links automatically)
+     - Enforce HTTPS (require HTTPS URLs)
+     - UTM campaign (add tracking parameters)
 
-### Manual Installation (Alternative)
+4. **Test the feature**
+   - Visit your homepage
+   - Use the link shortener form in the hero section
+   - Create a short link and test it
 
-If automatic installation fails, you can manually:
+### Table Creation
 
-1. **Create the table:**
-   ```sql
-   CREATE TABLE link_shortener (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       code VARCHAR(10) NOT NULL UNIQUE,
-       url VARCHAR(2000) NOT NULL,
-       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       hits INT DEFAULT 0,
-       INDEX idx_code (code),
-       INDEX idx_created (created_at)
-   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-   ```
-
-2. **Upload .htaccess** (already included in repository)
-
-3. **Verify config.php** has database credentials
+The `short_links` table is automatically created by `tausta.php` on first API call. No manual database setup is required!
 
 ## Usage
 
@@ -134,18 +115,19 @@ If automatic installation fails, you can manually:
 **Via Web Interface:**
 1. Navigate to homepage: `https://anomfin.fi`
 2. Find the "Link Shortener" form in the hero section
-3. Enter the long URL (must start with `http://` or `https://`)
-4. Optionally enter a custom alias (1-4 alphanumeric characters)
+3. Enter the long URL (must be a valid URL)
+4. Optionally enter a custom alias (alphanumeric characters)
 5. Click "Luo lyhyt linkki" (Create short link)
 6. Copy the generated short URL
 
 **Via API:**
 ```bash
-curl -X POST https://anomfin.fi/api/shorten.php \
+curl -X POST https://anomfin.fi/tausta.php \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://example.com/very/long/url",
-    "code": "demo"
+    "alias": "demo",
+    "maxLength": 4
   }'
 ```
 
@@ -153,25 +135,30 @@ curl -X POST https://anomfin.fi/api/shorten.php \
 ```json
 {
   "success": true,
-  "short_url": "https://anomfin.fi/s/demo",
-  "code": "demo"
+  "code": "demo",
+  "shortUrl": "https://anomfin.fi/?s=demo"
 }
 ```
 
+**Request Parameters:**
+- `url` (required): Target URL to shorten
+- `alias` (optional): Custom code/alias (alphanumeric only)
+- `maxLength` (optional): Maximum code length (1-12, default: 4)
+
 ### Using a Short Link
 
-Simply visit: `https://anomfin.fi/s/{code}`
+Simply visit: `https://anomfin.fi/?s={code}`
 
-Example: `https://anomfin.fi/s/demo`
+Example: `https://anomfin.fi/?s=demo`
 
 The system will:
-1. Look up the code in the database
-2. Increment the hit counter
-3. Redirect to the target URL (302 redirect)
+1. Look up the code in the database (or JSON file if DB unavailable)
+2. Redirect to the target URL (302 temporary redirect by default)
+3. Show a 404 page if the code doesn't exist
 
 ## API Reference
 
-### POST /api/shorten.php
+### POST /tausta.php
 
 Create a new short link.
 
@@ -179,62 +166,71 @@ Create a new short link.
 ```json
 {
   "url": "https://example.com/long-url",
-  "code": "optional-custom-code"
+  "alias": "demo",
+  "maxLength": 4
 }
 ```
 
 **Request Fields:**
-- `url` (required): Target URL, must start with `http://` or `https://`, max 2000 characters
-- `code` (optional): Custom short code, 1-10 alphanumeric characters
+- `url` (required): Target URL, must be valid URL
+- `alias` (optional): Custom short code, alphanumeric characters only
+- `maxLength` (optional): Maximum code length (1-12, default: 4)
 
-**Success Response (201):**
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "short_url": "https://anomfin.fi/s/abc1",
-  "code": "abc1"
+  "code": "demo",
+  "shortUrl": "https://anomfin.fi/?s=demo"
 }
 ```
 
-**Error Response (4xx/5xx):**
+**Error Response:**
 ```json
 {
   "success": false,
-  "error": "Error message"
+  "error": "Error message in Finnish"
 }
 ```
 
 **Common Errors:**
-- `400`: Invalid input (missing URL, invalid format, invalid code)
-- `400`: Code already exists
 - `405`: Method not allowed (use POST)
-- `500`: Database error
-- `503`: Database connection failed
+- `400`: Invalid JSON
+- `422`: Invalid URL or alias validation error
+- `409`: Alias already in use
 
 ## Security
 
-### Input Validation
+### Built-in Security Features
 
-- **URL Validation**: Must start with `http://` or `https://` and pass `filter_var()` validation
-- **Code Validation**: Only alphanumeric characters (a-z, A-Z, 0-9), 1-10 characters
-- **SQL Injection Prevention**: All queries use prepared statements with PDO
-- **XSS Prevention**: All user input is sanitized with `htmlspecialchars()` before output
+The shortener includes several security measures:
 
-### Security Headers
+1. **Input Validation**
+   - URL validation with `filter_var(FILTER_VALIDATE_URL)`
+   - Alias sanitization with `preg_replace('/[^A-Za-z0-9]/', '', $alias)`
+   - Length limits on codes (max 16 characters in database)
 
-The `.htaccess` file includes:
-- `X-Content-Type-Options: nosniff` - Prevents MIME sniffing
-- `X-XSS-Protection: 1; mode=block` - Enables XSS filter
-- `X-Frame-Options: SAMEORIGIN` - Prevents clickjacking
-- `Referrer-Policy: strict-origin-when-cross-origin` - Controls referrer information
+2. **SQL Injection Prevention**
+   - All queries use PDO prepared statements
+   - Named parameters (`:code`, `:url`)
+   - No direct SQL string concatenation
+
+3. **XSS Prevention**
+   - Output sanitized with `htmlspecialchars()` in redirect pages
+   - JSON encoding for API responses
+
+4. **Database**
+   - Unique constraint on `code` column prevents duplicates
+   - Uses InnoDB engine with proper collation
+   - Automatic table creation with safe schema
 
 ### Best Practices
 
-1. **Remove install.php** after installation
-2. **Use HTTPS** for production (protects data in transit)
-3. **Regular backups** of the database
-4. **Monitor** for abuse (spam links, malicious URLs)
-5. **Rate limiting** (consider implementing in production)
+1. **Enable HTTPS enforcement** in admin settings
+2. **Set auto-purge days** to automatically delete old links
+3. **Monitor the database** for suspicious or spam URLs
+4. **Regular backups** of `short_links` table and `data/short-links.json`
+5. **Rate limiting** - Consider adding at web server level (e.g., nginx limit_req)
 
 ## Configuration
 
@@ -272,80 +268,114 @@ In your Apache config or vhost:
 
 ## Troubleshooting
 
-### 404 Error on /s/{code}
+### Short Link Returns 404
 
-**Problem:** Short links return 404 Not Found
-
-**Solutions:**
-1. Check if `.htaccess` exists in the web root
-2. Verify mod_rewrite is enabled: `apache2ctl -M | grep rewrite`
-3. Check Apache config allows `.htaccess`: `AllowOverride All`
-4. Verify RewriteBase in `.htaccess` matches your setup
-
-### Database Connection Failed
-
-**Problem:** API returns "Database connection failed"
+**Problem:** Short links show "Lyhytlinkkiä ei löytynyt" (Link not found)
 
 **Solutions:**
-1. Check `config.php` has correct credentials
-2. Verify database exists and is accessible
-3. Check database user has permissions (SELECT, INSERT, UPDATE)
-4. Test connection: `mysql -h localhost -u username -p database`
+1. Verify the code exists in the database:
+   ```sql
+   SELECT * FROM short_links WHERE code='xyz';
+   ```
+2. Check JSON fallback file: `data/short-links.json`
+3. Verify the URL format is correct: `https://anomfin.fi/?s=code`
+4. Codes are case-insensitive (automatically converted to lowercase)
 
-### Code Already Exists
+### Database Connection Issues
 
-**Problem:** Custom code is already taken
-
-**Solutions:**
-1. Choose a different custom code
-2. Let the system auto-generate a random code (leave code field empty)
-
-### Link Not Found
-
-**Problem:** Short link shows "Linkkiä ei löytynyt" (Link not found)
+**Problem:** Links don't persist after creation
 
 **Solutions:**
-1. Verify the code exists in database: `SELECT * FROM link_shortener WHERE code='xyz'`
-2. Check case sensitivity (codes are case-sensitive)
-3. Verify table was created during installation
+1. Check `config.php` has correct database credentials
+2. Verify the `anomfin_get_pdo()` function works
+3. The system will automatically fall back to JSON storage if database is unavailable
+4. Check `data/short-links.json` for fallback storage
+
+### Alias Already in Use
+
+**Problem:** Custom alias returns 409 error
+
+**Solutions:**
+1. Choose a different alias
+2. Omit the `alias` parameter to get an auto-generated code
+
+### API Returns Error
+
+**Problem:** Form submission fails or returns error
+
+**Solutions:**
+1. Check browser console for JavaScript errors
+2. Verify `tausta.php` is accessible
+3. Check PHP error logs for detailed error messages
+4. Ensure JSON payload is valid
+
+## Configuration
+
+The shortener can be configured via the admin panel at `/asetukset.php`:
+
+### Available Settings
+
+1. **Base URL** (`shortener.baseUrl`)
+   - Default: `https://anomfin.fi/?s=`
+   - Format: Must end with `=` or `/`
+   - Example: `https://anomfin.fi/?s=` or `https://short.domain.fi/`
+
+2. **Auto-Purge Days** (`shortener.autoPurgeDays`)
+   - Default: `0` (disabled)
+   - Automatically delete links older than N days
+   - Applies to both database and JSON storage
+
+3. **Enforce HTTPS** (`shortener.enforceHttps`)
+   - Default: `false`
+   - When enabled, only HTTPS URLs are allowed
+
+4. **UTM Campaign** (`shortener.utmCampaign`)
+   - Default: empty
+   - Automatically adds `utm_campaign` parameter to shortened URLs
+   - Example: Set to `anomfin` to track all short link traffic
+
+5. **Redirect Status** (`shortener.redirectStatus`)
+   - Default: `302` (Temporary)
+   - Options: `301`, `302`, `307`, `308`
+   - Controls HTTP redirect status code
 
 ## Analytics
 
 ### View Link Statistics
 
-To view link usage statistics, query the database:
+Query the database for basic statistics:
 
 ```sql
--- Most popular links
-SELECT code, url, hits, created_at 
-FROM link_shortener 
-ORDER BY hits DESC 
-LIMIT 10;
+-- All links
+SELECT code, target_url, created_at 
+FROM short_links 
+ORDER BY created_at DESC;
 
 -- Recent links
-SELECT code, url, hits, created_at 
-FROM link_shortener 
+SELECT code, target_url, created_at 
+FROM short_links 
 ORDER BY created_at DESC 
-LIMIT 10;
+LIMIT 20;
 
--- Total links and hits
-SELECT 
-    COUNT(*) as total_links,
-    SUM(hits) as total_hits
-FROM link_shortener;
+-- Total link count
+SELECT COUNT(*) as total_links
+FROM short_links;
+
+-- Links by date
+SELECT DATE(created_at) as date, COUNT(*) as count
+FROM short_links 
+GROUP BY DATE(created_at)
+ORDER BY date DESC;
 ```
 
-### Future Enhancements
+**Note:** Hit tracking is not currently implemented. View counts would need to be added in a future version.
 
-Consider adding:
-- Admin panel for managing links
-- Link expiration dates
-- Custom domains
-- QR code generation
-- Click-through tracking (geographic data, referrers)
-- Link editing/deletion
-- Rate limiting per IP
-- Analytics dashboard
+### Admin Panel Statistics
+
+The admin panel (`asetukset.php`) shows:
+- Total number of short links
+- Database schema information
+- Settings configuration
 
 ## Browser Support
 
