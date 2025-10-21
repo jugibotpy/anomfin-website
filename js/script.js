@@ -45,8 +45,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     initContactForm();
     initLinkShortener();
 
-    // Scroll companion
-    initScrollCompanion();
+    const hybercubeEnabled = (document.body?.dataset?.hybercube ?? '1') !== '0';
+    const chatDockEnabled = (document.body?.dataset?.chatDock ?? '1') !== '0';
+
+    if (hybercubeEnabled) {
+        initScrollCompanion();
+    }
+
+    if (chatDockEnabled) {
+        initChatWidget();
+    }
 
     // Applications section
     initApplicationsSection();
@@ -87,6 +95,8 @@ const ANOMFIN_DEFAULT_SETTINGS = {
         heroMask: true,
         floatingGrid: false,
         pageVibration: 0,
+        hybercube: true,
+        chatDock: true,
     },
     preset: null,
     meta: {},
@@ -113,7 +123,8 @@ const ANOMFIN_DEFAULT_SETTINGS = {
             model: 'gpt-4.1-mini',
             temperature: 0.6,
             systemPrompt: 'Toimi AnomFIN HyperLaunch -neuvojana. Vastaa suomeksi, ole asiantunteva, ystävällinen ja ytimekäs. Suosittele palveluitamme yritysasiakkaille.',
-            greeting: 'Tervetuloa AnomFIN-chattiin! Olen täällä auttamassa sinua palveluidemme kanssa.',
+            greeting: 'Tervetuloa HyperLaunch-chattiin – luksissa, kyberturvassa ilmoittelussa – kysy rohkeasti.',
+            followup: 'Olen AnomFIN chatBot, mitäs kaipailette?',
             avatarUrl: 'assets/logotp.png'
         }
     },
@@ -170,6 +181,8 @@ async function applyGlobalSettings(){
         bodyEl.dataset.reactContact = behaviors.reactContact === false ? '0' : '1';
         bodyEl.dataset.heroMask = behaviors.heroMask === false ? '0' : '1';
         bodyEl.dataset.floatingGrid = behaviors.floatingGrid === true ? '1' : '0';
+        bodyEl.dataset.hybercube = behaviors.hybercube === false ? '0' : '1';
+        bodyEl.dataset.chatDock = behaviors.chatDock === false ? '0' : '1';
         const vibrationValue = typeof behaviors.pageVibration === 'number'
             ? Math.min(1, Math.max(0, behaviors.pageVibration))
             : 0;
@@ -911,6 +924,7 @@ function initScrollCompanion() {
 
     // Detect if mobile device
     const isMobile = window.innerWidth <= 800;
+    const allowChatDock = (document.body?.dataset?.chatDock ?? '1') !== '0';
 
     const companion = document.createElement('aside');
     companion.className = 'scroll-companion';
@@ -940,7 +954,7 @@ function initScrollCompanion() {
         'Avoin lähdekoodi, vahva yhteisö. AnomFIN, AnomTools, Jugi-ekosysteemi – Kali Linux ja Ubuntu v22.04 tukevat kehitystyötä.' : 
         'Vieritysmatriisi näyttää missä kohtaa kyberturva- ja sovelluspolkua kuljet.';
     
-    const chatToggleMarkup = isMobile ? '' : `
+    const chatToggleMarkup = (isMobile || !allowChatDock) ? '' : `
             <div class="companion-chat-toggle" role="group" aria-label="Sulava AI-Chat">
                 <span class="companion-chat-toggle-label">Sulava AI-Chat</span>
                 <label class="companion-chat-toggle-control">
@@ -953,7 +967,7 @@ function initScrollCompanion() {
             </div>
     `;
 
-    const chatDockMarkup = isMobile ? '' : `
+    const chatDockMarkup = (isMobile || !allowChatDock) ? '' : `
             <div class="chat-dock" id="chat-dock" aria-live="polite">
                 <p class="sr-only">HyperLaunch chat -paneeli</p>
             </div>
@@ -1267,7 +1281,7 @@ function initScrollCompanion() {
         }
     });
 
-    if (!isMobile) {
+    if (!isMobile && allowChatDock) {
         initChatWidget();
     }
 
@@ -2783,6 +2797,9 @@ function initMobileVisualEnhancements() {
 
 // Mobile HyperCube popup trigger
 function initMobileHyperCubeTrigger() {
+    if ((document.body?.dataset?.hybercube ?? '1') === '0') {
+        return;
+    }
     if (window.innerWidth > 800) return;
     
     const trigger = document.getElementById('mobile-hypercube-trigger');
@@ -2837,6 +2854,9 @@ function initMobileHyperCubeTrigger() {
 
 // Mobile GitHub Hypercube Effect - Creative 3D rotating cube
 function initMobileHypercube() {
+    if ((document.body?.dataset?.hybercube ?? '1') === '0') {
+        return;
+    }
     // Only run on mobile devices
     if (window.innerWidth > 800) return;
     
@@ -3136,8 +3156,18 @@ let chatWidgetInstance = null;
 function initChatWidget() {
     if (chatWidgetInstance) return;
 
-    const dock = document.querySelector('.chat-dock');
-    if (!dock) return;
+    if ((document.body?.dataset?.chatDock ?? '1') === '0') {
+        return;
+    }
+
+    let dock = document.querySelector('.chat-dock');
+    if (!dock) {
+        dock = document.createElement('div');
+        dock.className = 'chat-dock chat-dock-floating';
+        dock.id = 'chat-dock';
+        dock.setAttribute('aria-live', 'polite');
+        document.body.appendChild(dock);
+    }
 
     const chatDefaults = ANOMFIN_DEFAULT_SETTINGS.integrations.chat;
     const chatSettings = {
@@ -3157,42 +3187,40 @@ function initChatWidget() {
     }
 
     const hasApiKey = Boolean(chatSettings.apiKey || chatSettings.hasApiKey);
-    const providerLabel = (chatSettings.provider || 'AI').toString().toUpperCase();
-    const statusLabel = hasApiKey ? 'Online' : 'Odottaa API-avainta';
-    const modelLabel = chatSettings.model || 'gpt-4.1-mini';
     const widgetId = `hyperlaunch-chat-${Date.now().toString(36)}`;
     const aiAvatarUrl = safeUrl(chatSettings.avatarUrl || chatDefaults.avatarUrl || 'assets/logotp.png', 'assets/logotp.png');
-    const assistantAvatarHtml = `<div class="chat-message-avatar chat-message-avatar-ai"><img src="${escapeHtml(aiAvatarUrl)}" alt="AnomFIN AI"></div>`;
 
     const widget = document.createElement('section');
-    widget.className = 'chat-widget active';
+    widget.className = 'chat-widget chat-widget-minimal active';
+    if (!hasApiKey) {
+        widget.classList.add('chat-widget-offline');
+    }
+
     widget.innerHTML = `
-        <div class="chat-widget-header">
-            <div class="chat-widget-title">
-                <strong>HyperLaunch Chat</strong>
-                <span class="status-indicator">${statusLabel} · ${providerLabel}</span>
-                <span>${escapeHtml(modelLabel)}</span>
+        <div class="chat-widget-shell">
+            <header class="chat-widget-header">
+                <div class="chat-header-logo">
+                    <img src="${escapeHtml(aiAvatarUrl)}" alt="AnomFIN chat-logo" class="chat-header-logo-img">
+                </div>
+                <div class="chat-header-actions">
+                    <button class="chat-widget-expand" type="button" aria-expanded="false" aria-label="Laajenna HyperLaunch-chat" title="Laajenna">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3h6v2H7v4H5V3zm14 18h-6v-2h4v-4h2v6zm0-18v6h-2V7h-4V5h6zM5 21v-6h2v4h4v2H5z" fill="currentColor"/></svg>
+                    </button>
+                    <button class="chat-widget-close" type="button" aria-expanded="true" aria-controls="${widgetId}-messages" aria-label="Piilota HyperLaunch-chat" title="Piilota">
+                        <span class="sr-only">Piilota chat</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.4 5l5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4L12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z" fill="currentColor"/></svg>
+                    </button>
+                </div>
+            </header>
+            <div class="chat-messages" id="${widgetId}-messages" role="log" aria-live="polite"></div>
+            <div class="chat-input-container">
+                <form class="chat-input-form" id="${widgetId}-form" novalidate>
+                    <label class="sr-only" for="${widgetId}-input">Kirjoita viestisi</label>
+                    <div class="chat-input-shell">
+                        <input type="text" class="chat-input" id="${widgetId}-input" placeholder="Kirjoita viestisi..." autocomplete="off" required>
+                    </div>
+                </form>
             </div>
-            <div class="chat-widget-actions">
-                <button class="chat-widget-expand" type="button" aria-expanded="false" aria-label="Laajenna HyperLaunch-chat" title="Laajenna">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3h6v2H7v4H5V3zm14 18h-6v-2h4v-4h2v6zm0-18v6h-2V7h-4V5h6zM5 21v-6h2v4h4v2H5z" fill="currentColor"/></svg>
-                </button>
-                <button class="chat-widget-close" type="button" aria-expanded="true" aria-controls="${widgetId}-messages">
-                    Piilota
-                </button>
-            </div>
-        </div>
-        <div class="chat-messages" id="${widgetId}-messages" role="log" aria-live="polite"></div>
-        <div class="chat-input-container">
-            <form class="chat-input-form" id="${widgetId}-form" novalidate>
-                <input type="text" class="chat-input" id="${widgetId}-input" placeholder="Kirjoita viestisi..." autocomplete="off" required>
-                <button type="submit" class="chat-send-btn" aria-label="Lähetä viesti HyperLaunchille">
-                    <span class="chat-send-label">Lähetä</span>
-                    <span class="chat-send-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" focusable="false"><path d="M3.4 20.6 21 12 3.4 3.4l-.9 3.6 10.7 5-10.7 5z" fill="currentColor"/></svg>
-                    </span>
-                </button>
-            </form>
         </div>
     `;
 
@@ -3202,12 +3230,13 @@ function initChatWidget() {
     const messagesEl = widget.querySelector('.chat-messages');
     const form = widget.querySelector('.chat-input-form');
     const input = widget.querySelector('.chat-input');
-    const sendBtn = widget.querySelector('.chat-send-btn');
     const toggleBtn = widget.querySelector('.chat-widget-close');
     const expandBtn = widget.querySelector('.chat-widget-expand');
+    const headerEl = widget.querySelector('.chat-widget-header');
 
     let isFullscreen = false;
     let fullscreenOverlay = null;
+    let lastSpeaker = null;
 
     const ensureOverlay = () => {
         if (!fullscreenOverlay) {
@@ -3218,23 +3247,23 @@ function initChatWidget() {
         return fullscreenOverlay;
     };
 
-    function setFullscreen(fullscreen) {
-        const nextState = Boolean(fullscreen);
-        if (isFullscreen === nextState) return;
+    function setFullscreen(active) {
+        const nextState = Boolean(active);
+        if (nextState === isFullscreen) return;
         isFullscreen = nextState;
         widget.classList.toggle('chat-fullscreen', isFullscreen);
-        if (expandBtn) {
-            expandBtn.setAttribute('aria-expanded', isFullscreen ? 'true' : 'false');
-            expandBtn.title = isFullscreen ? 'Pienennä' : 'Laajenna';
-        }
+
         const overlay = ensureOverlay();
         if (isFullscreen) {
             document.body.appendChild(overlay);
             requestAnimationFrame(() => overlay.classList.add('active'));
-        } else if (overlay.parentNode) {
+        } else if (overlay.parentElement) {
             overlay.classList.remove('active');
-            setTimeout(() => overlay.remove(), 200);
+            overlay.addEventListener('transitionend', () => {
+                overlay.remove();
+            }, { once: true });
         }
+
         document.body.classList.toggle('chat-fullscreen-open', isFullscreen);
         document.dispatchEvent(new CustomEvent('anomfin:chat-fullscreen', { detail: { expanded: isFullscreen } }));
     }
@@ -3247,12 +3276,15 @@ function initChatWidget() {
     function setExpanded(expanded) {
         const isExpanded = Boolean(expanded);
         widget.classList.toggle('chat-collapsed', !isExpanded);
-        toggleBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
-        toggleBtn.textContent = isExpanded ? 'Piilota' : 'Avaa';
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+            toggleBtn.setAttribute('aria-label', isExpanded ? 'Piilota HyperLaunch-chat' : 'Avaa HyperLaunch-chat');
+            toggleBtn.setAttribute('title', isExpanded ? 'Piilota' : 'Avaa');
+        }
         if (!isExpanded && isFullscreen) {
             setFullscreen(false);
         }
-        if (isExpanded && !input.disabled) {
+        if (isExpanded && input && !input.disabled) {
             requestAnimationFrame(() => input.focus());
         }
         document.dispatchEvent(new CustomEvent('anomfin:chat-expanded', { detail: { expanded: isExpanded } }));
@@ -3260,10 +3292,12 @@ function initChatWidget() {
 
     window.__anomfinChatSetExpanded = setExpanded;
 
-    toggleBtn.addEventListener('click', () => {
-        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        setExpanded(!expanded);
-    });
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+            setExpanded(!expanded);
+        });
+    }
 
     if (expandBtn) {
         expandBtn.addEventListener('click', () => {
@@ -3271,48 +3305,87 @@ function initChatWidget() {
         });
     }
 
+    function createAvatar(isUser, ghost = false) {
+        const avatar = document.createElement('div');
+        avatar.className = `chat-message-avatar ${isUser ? 'chat-message-avatar-user' : 'chat-message-avatar-ai'}`;
+        avatar.setAttribute('aria-hidden', 'true');
+        if (ghost) {
+            avatar.classList.add('chat-message-avatar-ghost');
+            return avatar;
+        }
+        if (isUser) {
+            const dot = document.createElement('span');
+            dot.className = 'chat-avatar-user-dot';
+            avatar.appendChild(dot);
+        } else {
+            const img = document.createElement('img');
+            img.src = aiAvatarUrl;
+            img.alt = '';
+            img.setAttribute('aria-hidden', 'true');
+            avatar.appendChild(img);
+        }
+        return avatar;
+    }
+
+    function updateHeaderDepth() {
+        if (!headerEl) return;
+        const count = messagesEl.querySelectorAll('.chat-message:not(.typing-indicator)').length;
+        headerEl.classList.toggle('chat-header-muted', count >= 6);
+    }
+
     function addMessage(content, isUser = false, pushToHistory = true) {
         const safeContent = String(content || '').trim();
         if (!safeContent) return;
 
+        const speaker = isUser ? 'user' : 'ai';
+        const sameSpeaker = lastSpeaker === speaker;
         const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message${isUser ? ' user' : ''}`;
+        messageDiv.className = `chat-message ${speaker}`;
 
-        const paragraphs = safeContent
+        const avatar = createAvatar(isUser, sameSpeaker);
+        messageDiv.appendChild(avatar);
+
+        const body = document.createElement('div');
+        body.className = 'chat-message-content';
+        body.innerHTML = safeContent
             .split(/\n+/)
             .map(line => `<p>${escapeHtml(line)}</p>`)
             .join('');
-
-        const avatarHtml = isUser
-            ? '<div class="chat-message-avatar chat-message-avatar-user">👤</div>'
-            : assistantAvatarHtml;
-
-        messageDiv.innerHTML = `
-            ${avatarHtml}
-            <div class="chat-message-content">${paragraphs}</div>
-        `;
+        messageDiv.appendChild(body);
 
         messagesEl.appendChild(messageDiv);
         messagesEl.scrollTop = messagesEl.scrollHeight;
 
+        lastSpeaker = speaker;
+        updateHeaderDepth();
+
         if (pushToHistory) {
             conversationHistory.push({ role: isUser ? 'user' : 'assistant', content: safeContent });
         }
+
+        return messageDiv;
     }
 
     function showTypingIndicator() {
+        const sameSpeaker = lastSpeaker === 'ai';
         const typingDiv = document.createElement('div');
-        typingDiv.className = 'chat-message typing-indicator';
-        typingDiv.innerHTML = `
-            ${assistantAvatarHtml}
-            <div class="chat-message-content chat-message-content-typing">
-                <div class="chat-typing-indicator">
+        typingDiv.className = 'chat-message typing-indicator ai';
+        typingDiv.appendChild(createAvatar(false, sameSpeaker));
+
+        const content = document.createElement('div');
+        content.className = 'chat-message-content chat-message-content-typing';
+        content.innerHTML = `
+            <div class="chat-typing-indicator">
+                <span class="chat-typing-text">...</span>
+                <div class="chat-typing-dots">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
             </div>
         `;
+        typingDiv.appendChild(content);
+
         messagesEl.appendChild(typingDiv);
         messagesEl.scrollTop = messagesEl.scrollHeight;
         return typingDiv;
@@ -3360,10 +3433,27 @@ function initChatWidget() {
         return String(data.reply);
     }
 
-    if (chatSettings.greeting) {
-        addMessage(chatSettings.greeting, false, true);
-    } else {
-        addMessage('Tervetuloa HyperLaunchiin! Vastaan sovelluskehitystä ja kyberturvaa koskeviin kysymyksiin.', false, true);
+    function runGreetingSequence() {
+        const sequence = [];
+        if (chatSettings.greeting) {
+            sequence.push({ delay: 5000, text: chatSettings.greeting });
+        }
+        if (chatSettings.followup) {
+            sequence.push({ delay: 2000, text: chatSettings.followup });
+        }
+        if (!sequence.length) return;
+
+        let chain = Promise.resolve();
+        sequence.forEach((step) => {
+            chain = chain.then(() => new Promise((resolve) => {
+                const indicator = showTypingIndicator();
+                setTimeout(() => {
+                    indicator.remove();
+                    addMessage(step.text, false, true);
+                    resolve();
+                }, step.delay);
+            }));
+        });
     }
 
     setExpanded(true);
@@ -3371,36 +3461,42 @@ function initChatWidget() {
     document.dispatchEvent(new CustomEvent('anomfin:chat-availability', { detail: { available: hasApiKey } }));
 
     if (!hasApiKey) {
-        input.disabled = true;
-        sendBtn.disabled = true;
+        if (input) {
+            input.disabled = true;
+            input.placeholder = 'Aktivoi chat asetuksista';
+        }
         addMessage('Syötä OpenAI API -avain asetuksista niin aktivoimme chatin välittömästi.', false, false);
         return;
     }
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const message = input.value.trim();
-        if (!message) {
-            return;
-        }
+    setTimeout(runGreetingSequence, 600);
 
-        addMessage(message, true, true);
-        input.value = '';
-        input.focus();
+    if (form && input) {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const message = input.value.trim();
+            if (!message || input.disabled) {
+                return;
+            }
 
-        const typingIndicator = showTypingIndicator();
-        sendBtn.disabled = true;
+            addMessage(message, true, true);
+            input.value = '';
 
-        try {
-            const reply = await requestChatCompletion(message);
-            typingIndicator.remove();
-            addMessage(reply, false, true);
-        } catch (error) {
-            console.error('Chat error:', error);
-            typingIndicator.remove();
-            addMessage('Jokin meni vikaan – voit aina lähettää viestiä osoitteeseen info@anomfin.fi.', false, false);
-        } finally {
-            sendBtn.disabled = false;
-        }
-    });
+            const typingIndicator = showTypingIndicator();
+            input.disabled = true;
+
+            try {
+                const reply = await requestChatCompletion(message);
+                typingIndicator.remove();
+                addMessage(reply, false, true);
+            } catch (error) {
+                console.error('Chat error:', error);
+                typingIndicator.remove();
+                addMessage('Jokin meni vikaan – voit aina lähettää viestiä osoitteeseen info@anomfin.fi.', false, false);
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
+        });
+    }
 }
