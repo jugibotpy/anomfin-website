@@ -70,7 +70,7 @@ const attachShortenerValidation = () => {
     return;
   }
 
-  const shortenerSettings = window.__ANOMFIN_SETTINGS?.shortener || {};
+  const shortenerSettings = (typeof window !== 'undefined' && window.__ANOMFIN_SETTINGS?.shortener) || {};
   const maxLength = Number(shortenerSettings.maxLength) || 4;
 
   const updateHint = () => {

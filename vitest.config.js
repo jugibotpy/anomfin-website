@@ -1,4 +1,4 @@
-// Your attack surface, explained.
+// Vitest configuration for AnomFIN tests
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({

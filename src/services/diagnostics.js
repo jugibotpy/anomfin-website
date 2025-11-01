@@ -24,11 +24,23 @@ export const runBrowserDiagnostics = (logger = createStructuredLogger('security-
 
   const performanceEntry = typeof performance !== 'undefined' ? performance.getEntriesByType?.('navigation')?.[0] : undefined;
   const tlsVersion = performanceEntry?.nextHopProtocol;
+  const secureProtocols = ['h2', 'h3'];
+  let protocolStatus = 'fail';
+  let protocolDetail = 'Protokollaa ei voitu varmistaa.';
+  if (tlsVersion) {
+    if (secureProtocols.includes(tlsVersion)) {
+      protocolStatus = 'pass';
+      protocolDetail = `Yhteys käyttää turvallista ${tlsVersion}-protokollaa.`;
+    } else {
+      protocolStatus = 'warn';
+      protocolDetail = `Yhteys käyttää tunnistamatonta protokollaa (${tlsVersion}) – varmista yhteyden turvallisuus.`;
+    }
+  }
   results.push({
     id: 'protocol',
     label: 'Protokolla',
-    status: asStatus(Boolean(tlsVersion && tlsVersion.includes('h2'))),
-    detail: tlsVersion ? `Yhteys käyttää ${tlsVersion}-protokollaa.` : 'Protokollaa ei voitu varmistaa.',
+    status: protocolStatus,
+    detail: protocolDetail,
   });
 
   let storageStatus = 'pass';

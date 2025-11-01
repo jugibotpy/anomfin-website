@@ -94,7 +94,7 @@ export const renderSecurityDashboard = (root, { dataset, diagnostics } = {}) => 
   const diagnosticsBlock = document.createElement('section');
   diagnosticsBlock.className = 'security-diagnostics-summary';
   diagnosticsBlock.innerHTML = `
-    <h4>Selaincheck</h4>
+    <h4>Selaintarkistus</h4>
     <p>${diagnosticsSummary.passed} / ${diagnosticsSummary.passed + diagnosticsSummary.failed} tarkistusta kunnossa.</p>
   `;
 

@@ -39,7 +39,7 @@ export const fetchSecurityInsights = async (
   url = DEFAULT_SOURCE,
   { timeoutMs = 4000, signal, logger = createStructuredLogger('security-data') } = {},
 ) => {
-  const { signal: combinedSignal, cleanup, cancel } = withTimeoutSignal(timeoutMs, signal);
+  const { signal: combinedSignal, cleanup } = withTimeoutSignal(timeoutMs, signal);
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -69,8 +69,5 @@ export const fetchSecurityInsights = async (
     throw error;
   } finally {
     cleanup?.();
-    if (typeof cancel === 'function' && !combinedSignal.aborted) {
-      cancel();
-    }
   }
 };
