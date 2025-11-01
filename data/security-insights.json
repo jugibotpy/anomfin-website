@@ -1,0 +1,51 @@
+{
+  "updatedAt": "2025-01-12T08:30:00Z",
+  "signals": [
+    {
+      "id": "patching",
+      "label": "Päivitysten kattavuus",
+      "status": "warning",
+      "score": 68,
+      "trend": "up",
+      "detail": "Pilviympäristön 12% palvelimista odottaa uudelleenkäynnistystä."
+    },
+    {
+      "id": "alerts",
+      "label": "Tunnistettujen uhkien määrä",
+      "status": "monitor",
+      "score": 34,
+      "trend": "steady",
+      "detail": "Viikkotasolla 4 automaattista hälytystä suljettu ilman eskalaatiota."
+    },
+    {
+      "id": "backups",
+      "label": "Varmuuskopioiden eheys",
+      "status": "ok",
+      "score": 12,
+      "trend": "down",
+      "detail": "Viimeinen testipalautus onnistui 21 tunnissa (tavoite 24h)."
+    },
+    {
+      "id": "identity",
+      "label": "Identiteettipoikkeamat",
+      "status": "critical",
+      "score": 92,
+      "trend": "up",
+      "detail": "Kaksi epäonnistunutta kirjautumisyritystä admin-tililtä – MFA pakotettu uudelleen."
+    }
+  ],
+  "incidents": [
+    {
+      "title": "Azure AD epäonnistuneet kirjautumiset",
+      "severity": "warning",
+      "detectedAt": "2025-01-11T19:00:00+02:00",
+      "reference": "INC-2025-019"
+    },
+    {
+      "title": "Okta agent -päivitys odottaa uudelleenkäynnistystä",
+      "severity": "monitor",
+      "detectedAt": "2025-01-10T14:12:00+02:00",
+      "reference": "INC-2025-018"
+    }
+  ]
+}

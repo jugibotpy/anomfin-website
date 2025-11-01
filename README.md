@@ -2,6 +2,34 @@
 
 Tämä on puhdas julkaisupaketti AnomFIN-verkkosivustolle. Paketti sisältää vain tuotantoon tarvittavat tiedostot.
 
+## ⚡ Päivitys – HyperLaunch Secure Ops
+- **Tilannehuone 360°**: Reaaliaikainen kyberturvan dashboard, jonka data tulee `data/security-insights.json` -lähteestä.
+- **Selain-HyperCheck**: Paikallinen diagnostiikka HTTPS-tilasta, yhteydestä ja tallennusoikeuksista, tulokset myös lokitetaan strukturoituina.
+- **Lyhytlinkin live-valvonta**: Reaaliaikainen HTTPS- ja alias-validointi ennen lomakkeen lähetystä.
+
+## 🧰 Kehitysympäristö & komennot
+```bash
+npm install          # Asenna kehitystyökalut
+npm run lint:fix     # Korjaa ESLint + Prettier säännöt
+npm test             # Suorita Vitest-yksikkötestit
+```
+
+## ✅ Verifiointiajot
+1. Avaa `index.html` selaimessa → varmista, että **Tilannehuone 360°** näyttää päivittyvän datan ja selaincheckin tulokset.
+2. Syötä `https://anomfin.fi` ja alias `FIN1` → lomake näyttää vihreän vihjeen ennen lähetystä.
+3. Muuta `data/security-insights.json` arvoja ja lataa sivu → dashboard päivittyy uusiin arvoihin.
+
+## 🧠 Why this design
+- **Functional core, imperative shell**: puhtaat laskentafunktiot `src/core/`-hakemistossa, IO rajattu `src/services/`-tasoille.
+- **Security-first oletukset**: kaikki linkkisyötteet validoidaan HTTPS-vaatimuksella, ja dashboard-fetchaus käyttää aikakatkaisua.
+- **DX etusijalla**: Node 18+ ESM, Vitest + ESLint tekevät tarkistukset yhdellä komennolla.
+- **Lokaali data ensin**: dashboard käyttää paikallista JSON-lähdettä, joten demo toimii ilman taustapalvelimia.
+
+## 📌 TODO – seuraavat iteraatiot
+- Lisätään `api/security-insights.php` joka välittää tuotantodatan palvelimelta ja autentikoi API-avaimella.
+- Tuodaan PWA-service worker offline-tilan parantamiseksi ja hallittujen päivitysten julkaisuun.
+- Rakennetaan käyttöliittymästä saavutettava raportin vienti (PDF/CSV) suoraan dashboardista.
+
 ## 📦 Paketin sisältö
 
 ```
