@@ -1,0 +1,23 @@
+{
+  "name": "anomfin-website",
+  "version": "1.1.0",
+  "description": "AnomFIN website security analytics toolkit",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint js --ext .js tests",
+    "lint:fix": "eslint js --ext .js tests --fix",
+    "format": "prettier --write \"js/**/*.js\" \"tests/**/*.js\" README.md"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.3.0",
+    "vitest": "^1.6.0"
+  }
+}

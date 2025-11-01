@@ -4255,3 +4255,279 @@ body.chat-fullscreen-open {
     border: 1px solid rgba(220, 53, 69, 0.3);
     border-radius: 12px;
 }
+
+/* Less noise. More signal. AnomFIN. */
+.diagnostics {
+    background: radial-gradient(circle at top right, rgba(0, 255, 166, 0.12), transparent 55%),
+        linear-gradient(180deg, rgba(9, 18, 28, 0.95) 0%, rgba(9, 18, 28, 0.65) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.diagnostics::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(0, 255, 166, 0.05), transparent 40%);
+    pointer-events: none;
+}
+
+.diagnostics .section-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 3rem;
+}
+
+.diagnostics-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    position: relative;
+    z-index: 1;
+}
+
+.diagnostics-card {
+    background: rgba(12, 22, 33, 0.78);
+    border: 1px solid rgba(0, 255, 166, 0.2);
+    border-radius: 18px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(18px);
+    position: relative;
+    overflow: hidden;
+}
+
+.diagnostics-card::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(0, 255, 166, 0.08), transparent 60%);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.diagnostics-card .card-header {
+    position: relative;
+    z-index: 1;
+}
+
+.diagnostics-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+}
+
+.diagnostics-card .card-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.diagnostics-form fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.form-range,
+.form-field {
+    display: grid;
+    gap: 0.35rem;
+    position: relative;
+}
+
+.form-range label,
+.form-field label {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.form-range input[type='range'] {
+    accent-color: var(--neon, #00ffa6);
+}
+
+.form-range output {
+    justify-self: flex-end;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-field input[type='number'] {
+    background: rgba(6, 14, 22, 0.85);
+    border: 1px solid rgba(0, 255, 166, 0.25);
+    border-radius: 12px;
+    padding: 0.65rem 0.75rem;
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color 160ms ease;
+}
+
+.form-field input[type='number']:focus {
+    border-color: rgba(0, 255, 166, 0.8);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 255, 166, 0.15);
+}
+
+.diagnostics-result {
+    background: rgba(3, 9, 15, 0.75);
+    border-radius: 14px;
+    border: 1px solid rgba(0, 255, 166, 0.2);
+    padding: 1rem 1.25rem;
+    display: grid;
+    gap: 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+.diagnostics-result::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(160deg, rgba(0, 255, 166, 0.18), transparent 65%);
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.result-label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.result-value {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.result-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.result-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(0, 255, 166, 0.12);
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.result-level[data-level='alert'] {
+    background: rgba(255, 94, 94, 0.12);
+    color: #ff8c8c;
+}
+
+.result-level[data-level='critical'],
+.result-level[data-level='severe'] {
+    background: rgba(255, 140, 0, 0.2);
+    color: #ffc58b;
+}
+
+.result-telemetry {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.result-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.result-list li {
+    position: relative;
+    padding-left: 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.result-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--neon, #00ffa6);
+    box-shadow: 0 0 10px rgba(0, 255, 166, 0.6);
+}
+
+.result-metric {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.result-summary {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.blueprint {
+    border-color: rgba(0, 170, 255, 0.2);
+}
+
+.blueprint-body {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.blueprint-status {
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    font-size: 0.8rem;
+    color: rgba(0, 255, 166, 0.8);
+}
+
+.blueprint-status[data-status='alert'] {
+    color: #ff8c8c;
+}
+
+.blueprint-status[data-status='focus'] {
+    color: #ffc58b;
+}
+
+.blueprint-status[data-status='review'] {
+    color: #ffa6ff;
+}
+
+.blueprint-narrative {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.diagnostics-card[data-state='alert']::before {
+    background: linear-gradient(135deg, rgba(255, 94, 94, 0.18), transparent 60%);
+}
+
+@media (max-width: 768px) {
+    .diagnostics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-metric {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+

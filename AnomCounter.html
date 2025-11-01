@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="icon" href="assets/logotp.png" type="image/png">
+    <!-- Trust by design, proof by delivery. -->
     <style>
         :root {
             color-scheme: dark;
@@ -115,6 +116,7 @@
         }
 
         .counter-shell {
+            --finale-intensity: 0;
             position: relative;
             width: min(540px, calc(100% - 32px));
             padding: 3.5rem 3rem;
@@ -216,7 +218,8 @@
             gap: 2.2rem;
         }
 
-        .primary-btn {
+        .primary-btn,
+        .ghost-btn {
             background: linear-gradient(135deg, rgba(0, 255, 225, 0.9), rgba(156, 77, 255, 0.95));
             color: #02010f;
             font-weight: 700;
@@ -230,15 +233,23 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .primary-btn:hover {
+        .primary-btn:hover,
+        .ghost-btn:hover {
             transform: translateY(-4px) scale(1.01);
             box-shadow: 0 26px 60px rgba(156, 77, 255, 0.4);
         }
 
-        .primary-btn:disabled {
+        .primary-btn:disabled,
+        .ghost-btn:disabled {
             opacity: 0.55;
             cursor: not-allowed;
             box-shadow: none;
+        }
+
+        .ghost-btn {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            box-shadow: inset 0 0 0 1px rgba(0, 255, 225, 0.2);
         }
 
         .timer-display {
@@ -253,6 +264,7 @@
             align-items: center;
             justify-content: center;
             min-width: 320px;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
         }
 
         .timer-ring {
@@ -341,6 +353,65 @@
             opacity: 1;
         }
 
+        .time-adjust {
+            display: flex;
+            gap: 1.4rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .adjust-group {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(48px, auto));
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 255, 225, 0.2);
+            border-radius: 16px;
+            padding: 0.85rem 1rem;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .adjust-group span {
+            font-size: 0.8rem;
+            letter-spacing: 0.18em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .adjust-btn {
+            background: rgba(0, 255, 225, 0.12);
+            color: var(--neon-primary);
+            border: 1px solid rgba(0, 255, 225, 0.35);
+            border-radius: 12px;
+            font-size: 1.4rem;
+            width: 52px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .adjust-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 255, 225, 0.25);
+        }
+
+        .adjust-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         .finale {
             margin-top: 1.5rem;
             font-size: 0.95rem;
@@ -352,8 +423,13 @@
             color: var(--neon-secondary);
         }
 
-        .countdown-active .primary-btn {
+        .counter-shell[data-status="running"] .primary-btn {
             background: linear-gradient(135deg, rgba(0, 255, 225, 0.5), rgba(156, 77, 255, 0.65));
+        }
+
+        .counter-shell[data-status="finished"] .primary-btn {
+            background: linear-gradient(135deg, rgba(255, 77, 148, 0.65), rgba(255, 131, 58, 0.8));
+            color: #1f0100;
         }
 
         .detonated .counter-shell {
@@ -364,23 +440,41 @@
         }
 
         .final-ten .timer-display {
-            color: #fffb91;
-            text-shadow: 0 0 25px rgba(255, 251, 145, 0.8), 0 0 60px rgba(255, 82, 129, 0.7);
+            color: color-mix(in srgb, #fffb91 calc(var(--finale-intensity) * 85%), var(--neon-primary));
+            text-shadow: 0 0 calc(22px + var(--finale-intensity) * 28px) rgba(255, 251, 145, 0.85),
+                0 0 calc(32px + var(--finale-intensity) * 48px) rgba(255, 82, 129, 0.55);
         }
 
         .final-ten .timer-ring {
-            border-color: rgba(255, 82, 129, 0.65);
-            box-shadow: inset 0 0 70px rgba(255, 82, 129, 0.35), 0 20px 80px rgba(0, 0, 0, 0.55);
+            border-color: color-mix(
+                in srgb,
+                rgba(255, 82, 129, 0.75) calc(var(--finale-intensity) * 100%),
+                rgba(255, 82, 129, 0.45)
+            );
+            box-shadow: inset 0 0 calc(50px + var(--finale-intensity) * 40px) rgba(255, 82, 129, 0.35),
+                0 20px 80px rgba(0, 0, 0, 0.55);
         }
 
         .final-ten .timer-ring::before {
-            border-color: rgba(255, 251, 145, 0.9);
-            animation-duration: 2s;
+            border-color: color-mix(
+                in srgb,
+                rgba(255, 251, 145, 0.9) calc(var(--finale-intensity) * 100%),
+                rgba(255, 251, 145, 0.7)
+            );
+            animation-duration: calc(6s - var(--finale-intensity) * 4s);
         }
 
         .final-ten .dragon-strip span.active {
-            background: rgba(255, 82, 129, 0.32);
-            border-color: rgba(255, 251, 145, 0.45);
+            background: color-mix(
+                in srgb,
+                rgba(255, 82, 129, 0.42) calc(var(--finale-intensity) * 100%),
+                rgba(255, 82, 129, 0.32)
+            );
+            border-color: color-mix(
+                in srgb,
+                rgba(255, 251, 145, 0.8) calc(var(--finale-intensity) * 100%),
+                rgba(255, 251, 145, 0.45)
+            );
         }
 
         body.detonated {
@@ -440,28 +534,38 @@
         }
 
         footer.signature {
-            position: absolute;
-            bottom: 24px;
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
             width: 100%;
             text-align: center;
-            font-size: 0.8rem;
-            letter-spacing: 0.18em;
-            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.2em;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.38);
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 720px) {
             .counter-shell {
-                padding: 2.6rem 1.8rem;
+                padding: 2.8rem 1.8rem;
             }
 
             .timer-ring {
-                width: 230px;
-                height: 230px;
+                width: 240px;
+                height: 240px;
             }
 
             .timer-display {
-                min-width: 240px;
-                font-size: clamp(3rem, 10vw, 4.2rem);
+                min-width: 260px;
+                font-size: clamp(3rem, 6vw + 1rem, 4.6rem);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
@@ -472,7 +576,7 @@
         <div class="code-track">1010 0101 0010 1100 DRAGON SNAGEN PYTHON LINUX PHP TEBOIL AnomFIN AnomTools&#10;0100 1110 0101 0001 MATRIX CORE RAVE SNAGEN DRAGON BYTECODE STREAMFLOW&#10;0101 1010 0101 1010 TEBOIL LINUX PHP PYTHON DRAGON SNAGEN QUASAR JUGI&#10;1111 0001 1010 0101 SNAGEN DRAGON HYPER THREAD LINUX PHP PYTHON TEBOIL&#10;0101 1010 0101 0011 AnomFIN AnomTools SNAGEN DRAGON LINUX PHP PYTHON</div>
     </div>
     <div class="aura-orbit" aria-hidden="true"></div>
-    <div class="counter-shell" id="counter-shell">
+    <div class="counter-shell" id="counter-shell" data-status="idle">
         <div class="logo-chip" aria-hidden="true">
             <strong>AnomFIN</strong>
             <span>×</span>
@@ -481,9 +585,40 @@
         <h1><span class="word-snagen">Snagen</span> <span class="word-dragon">DRAGON</span> Countdown</h1>
         <p class="subtitle">Nautimme juuri hetkestä – paina nappia ja anna 30 minuutin neon-dragonkronometrin kuljettaa sinut kohti savuisia juhlia.</p>
         <div class="control-panel">
-            <button class="primary-btn" id="start-btn">Nautimme juuri</button>
-            <div class="timer-ring">
-                <div class="timer-display" id="timer-display" aria-live="polite">30:00</div>
+            <div class="timer-ring" role="presentation">
+                <div
+                    class="timer-display"
+                    id="timer-display"
+                    role="timer"
+                    aria-live="polite"
+                    aria-valuemin="0"
+                    aria-valuenow="1800"
+                    aria-label="Valmis"
+                >30:00</div>
+            </div>
+            <div class="time-adjust" aria-label="Ajan säätimet">
+                <div class="adjust-group" data-unit="minutes">
+                    <button class="adjust-btn" data-adjust="minute-decrease" type="button" aria-label="Vähennä minuutteja">
+                        −
+                    </button>
+                    <span>MIN</span>
+                    <button class="adjust-btn" data-adjust="minute-increase" type="button" aria-label="Lisää minuutteja">
+                        +
+                    </button>
+                </div>
+                <div class="adjust-group" data-unit="seconds">
+                    <button class="adjust-btn" data-adjust="second-decrease" type="button" aria-label="Vähennä sekunteja">
+                        −
+                    </button>
+                    <span>SEC</span>
+                    <button class="adjust-btn" data-adjust="second-increase" type="button" aria-label="Lisää sekunteja">
+                        +
+                    </button>
+                </div>
+            </div>
+            <div class="control-buttons">
+                <button id="start-btn" class="primary-btn" type="button">Käynnistä</button>
+                <button id="reset-btn" class="ghost-btn" type="button">Nollaa</button>
             </div>
         </div>
         <div class="dragon-strip" aria-hidden="true">
@@ -505,109 +640,6 @@
 
     <footer class="signature">© 2025 AnomFIN • AnomTools Snagen DRAGON</footer>
 
-    <script>
-        const startBtn = document.getElementById('start-btn');
-        const timerDisplay = document.getElementById('timer-display');
-        const counterShell = document.getElementById('counter-shell');
-        const smokeLayer = document.getElementById('smoke-layer');
-        const detonateMessage = document.getElementById('detonate-message');
-        const stripItems = Array.from(document.querySelectorAll('.dragon-strip span'));
-
-        let countdownInterval = null;
-        let remainingSeconds = 30 * 60;
-        let audioContext = null;
-
-        function formatTime(totalSeconds) {
-            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-            const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
-            return `${minutes}:${seconds}`;
-        }
-
-        function triggerBeep() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.4, audioContext.currentTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.35);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.4);
-        }
-
-        function activateFinale() {
-            document.body.classList.add('detonated');
-            smokeLayer.classList.add('active');
-            detonateMessage.classList.add('active');
-            stripItems.forEach(item => item.classList.remove('active'));
-        }
-
-        function updateStripHighlight(index) {
-            stripItems.forEach((item, idx) => {
-                item.classList.toggle('active', idx === index);
-            });
-        }
-
-        function startCountdown() {
-            if (countdownInterval) {
-                return;
-            }
-
-            startBtn.disabled = true;
-            counterShell.classList.add('countdown-active');
-            updateStripHighlight(0);
-
-            countdownInterval = setInterval(() => {
-                remainingSeconds -= 1;
-
-                if (remainingSeconds <= 0) {
-                    timerDisplay.textContent = '00:00';
-                    clearInterval(countdownInterval);
-                    countdownInterval = null;
-                    counterShell.classList.remove('final-ten');
-                    counterShell.classList.remove('countdown-active');
-                    activateFinale();
-                    return;
-                }
-
-                timerDisplay.textContent = formatTime(remainingSeconds);
-
-                if (remainingSeconds % 450 === 0) {
-                    updateStripHighlight(1);
-                } else if (remainingSeconds % 300 === 0) {
-                    updateStripHighlight(2);
-                }
-
-                if (remainingSeconds <= 10) {
-                    counterShell.classList.add('final-ten');
-                    updateStripHighlight(3);
-                    triggerBeep();
-                    timerDisplay.setAttribute('aria-label', `Loppuräjähdykseen ${remainingSeconds} sekuntia`);
-                }
-            }, 1000);
-        }
-
-        startBtn.addEventListener('click', () => {
-            if (remainingSeconds === 30 * 60) {
-                timerDisplay.textContent = formatTime(remainingSeconds);
-            }
-            startCountdown();
-        });
-
-        // Accessibility: allow pressing Enter/Space while focused
-        startBtn.addEventListener('keyup', (event) => {
-            if ((event.code === 'Space' || event.code === 'Enter') && !countdownInterval) {
-                startCountdown();
-            }
-        });
-    </script>
+    <script type="module" src="js/anom-counter.js"></script>
 </body>
 </html>

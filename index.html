@@ -280,6 +280,121 @@
             </div>
         </section>
 
+        <!-- Cybersecurity meets clarity. -->
+        <section id="diagnostics" class="section-block diagnostics" data-section="diagnostics">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title fade-in-smooth">Kyberturvan analytiikka</h2>
+                    <p class="section-sub">Arvioi riskit ja takaisinmaksu – kaikki suoraan selaimessa.</p>
+                </div>
+                <div class="diagnostics-grid">
+                    <article class="diagnostics-card" aria-labelledby="risk-card-title">
+                        <div class="card-header">
+                            <h3 id="risk-card-title">Riskiradari</h3>
+                            <p class="card-subtitle">Säädä altistus, havaitseminen, palautuminen ja compliance.</p>
+                        </div>
+                        <form id="risk-form" class="diagnostics-form" novalidate>
+                            <fieldset>
+                                <legend class="sr-only">Riskiparametrit</legend>
+                                <div class="form-range">
+                                    <label for="risk-exposure">Hyökkäyspinta</label>
+                                    <input type="range" id="risk-exposure" name="exposure" min="0" max="5" step="1" value="3">
+                                    <output for="risk-exposure">3 / 5</output>
+                                </div>
+                                <div class="form-range">
+                                    <label for="risk-monitoring">Havaitseminen</label>
+                                    <input type="range" id="risk-monitoring" name="monitoring" min="0" max="5" step="1" value="3">
+                                    <output for="risk-monitoring">3 / 5</output>
+                                </div>
+                                <div class="form-range">
+                                    <label for="risk-recovery">Palautuminen</label>
+                                    <input type="range" id="risk-recovery" name="recovery" min="0" max="5" step="1" value="3">
+                                    <output for="risk-recovery">3 / 5</output>
+                                </div>
+                                <div class="form-range">
+                                    <label for="risk-compliance">Compliance</label>
+                                    <input type="range" id="risk-compliance" name="compliance" min="0" max="5" step="1" value="3">
+                                    <output for="risk-compliance">3 / 5</output>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <div class="diagnostics-result" aria-live="polite">
+                            <div class="result-score">
+                                <span class="result-label">Riskipisteet</span>
+                                <span id="risk-score" class="result-value">0</span>
+                            </div>
+                            <div class="result-meta">
+                                <span id="risk-level" class="result-level" data-level="guarded">Valvottu</span>
+                                <span id="risk-telemetry" class="result-telemetry">0 % hyökkäyspintaa · 0 % valvontavajetta</span>
+                            </div>
+                            <ul id="risk-insights" class="result-list">
+                                <li>Syötä arvot liukusäätimillä nähdäksesi riskianalyysin.</li>
+                            </ul>
+                        </div>
+                    </article>
+                    <article class="diagnostics-card" aria-labelledby="roi-card-title">
+                        <div class="card-header">
+                            <h3 id="roi-card-title">Resilienssin ROI</h3>
+                            <p class="card-subtitle">Mallinna investoinnin vaikutus vuotuisiin tappioihin.</p>
+                        </div>
+                        <form id="roi-form" class="diagnostics-form" novalidate>
+                            <fieldset>
+                                <legend class="sr-only">ROI-parametrit</legend>
+                                <div class="form-field">
+                                    <label for="roi-incidents">Vuosittaiset tapaukset</label>
+                                    <input type="number" id="roi-incidents" name="incidentsPerYear" min="0" max="120" step="1" value="6" inputmode="numeric">
+                                </div>
+                                <div class="form-field">
+                                    <label for="roi-cost">Keskimääräinen kustannus / tapaus (€)</label>
+                                    <input type="number" id="roi-cost" name="avgIncidentCost" min="0" max="10000000" step="1000" value="25000" inputmode="decimal">
+                                </div>
+                                <div class="form-field">
+                                    <label for="roi-automation">Automaation peitto (%)</label>
+                                    <input type="number" id="roi-automation" name="automationCoverage" min="0" max="100" step="5" value="45" inputmode="decimal">
+                                </div>
+                                <div class="form-field">
+                                    <label for="roi-improvement">Parannusaste (%)</label>
+                                    <input type="number" id="roi-improvement" name="improvementRate" min="0" max="100" step="5" value="30" inputmode="decimal">
+                                </div>
+                                <div class="form-field">
+                                    <label for="roi-investment">Investointi (€)</label>
+                                    <input type="number" id="roi-investment" name="investment" min="0" max="10000000" step="1000" value="80000" inputmode="decimal">
+                                </div>
+                            </fieldset>
+                        </form>
+                        <div class="diagnostics-result" aria-live="polite">
+                            <div class="result-metric">
+                                <span class="result-label">Nykyiset tappiot</span>
+                                <span id="roi-baseline" class="result-value">€0</span>
+                            </div>
+                            <div class="result-metric">
+                                <span class="result-label">Estetyt tappiot</span>
+                                <span id="roi-savings" class="result-value">€0</span>
+                            </div>
+                            <div class="result-metric">
+                                <span class="result-label">Takaisinmaksu</span>
+                                <span id="roi-payback" class="result-value">Ei takaisinmaksua nykyisillä arvoilla</span>
+                            </div>
+                            <p id="roi-summary" class="result-summary">Täytä tiedot ja näet takaisinmaksuajan.</p>
+                        </div>
+                    </article>
+                    <article class="diagnostics-card blueprint" id="blueprint-card" aria-labelledby="blueprint-card-title">
+                        <div class="card-header">
+                            <h3 id="blueprint-card-title">Toimintabluuprintti</h3>
+                            <p class="card-subtitle">Priorisoidut seuraavat askeleet riskin ja ROI:n perusteella.</p>
+                        </div>
+                        <div class="blueprint-body">
+                            <span id="blueprint-status" class="blueprint-status" data-status="idle">idle</span>
+                            <p id="blueprint-narrative" class="blueprint-narrative">Syötä lähtötiedot arviointiin.</p>
+                            <ul id="blueprint-actions" class="result-list">
+                                <li>Syötä tiedot saadaksesi priorisoidut toimet.</li>
+                            </ul>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
         <section id="security" class="section-block security" data-section="security">
             <div class="container">
                 <div class="security-inner">
@@ -451,6 +566,7 @@
         </div>
     </footer>
 
+    <script type="module" src="js/security-suite.js" defer></script>
     <script src="js/script.js" defer></script>
 </body>
 </html>
