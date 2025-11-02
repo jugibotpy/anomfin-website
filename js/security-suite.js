@@ -23,7 +23,10 @@ const safeNumber = (value, fallback = 0) => {
     return Number.isFinite(numericValue) ? numericValue : fallback;
 };
 
-const readRangeValue = input => Number.parseInt(input.value, 10) || 0;
+const readRangeValue = input => {
+    const parsed = Number.parseInt(input.value, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+};
 
 const readNumberValue = (input, { min = 0, max = Number.POSITIVE_INFINITY } = {}) => {
     const value = safeNumber(input.value, min);

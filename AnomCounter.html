@@ -440,6 +440,7 @@
         }
 
         .final-ten .timer-display {
+            /* color-mix() requires modern browser support (Safari 16.2+, Chrome 111+, Firefox 113+) */
             color: color-mix(in srgb, #fffb91 calc(var(--finale-intensity) * 85%), var(--neon-primary));
             text-shadow: 0 0 calc(22px + var(--finale-intensity) * 28px) rgba(255, 251, 145, 0.85),
                 0 0 calc(32px + var(--finale-intensity) * 48px) rgba(255, 82, 129, 0.55);

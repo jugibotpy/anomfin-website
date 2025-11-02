@@ -4,8 +4,8 @@
   "description": "AnomFIN security-first web experience",
   "type": "module",
   "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint js tests",
+    "lint:fix": "eslint js tests --fix",
     "test": "vitest run",
     "test:watch": "vitest"
   },
