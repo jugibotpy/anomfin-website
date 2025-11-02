@@ -1,5 +1,5 @@
 // Less noise. More signal. AnomFIN.
-const ALIAS_PATTERN = /^[A-Za-z0-9]{1,}$/u;
+const ALIAS_PATTERN = /^[A-Za-z0-9]+$/u;
 
 export const validateUrl = (value, options = {}) => {
   const config = {
