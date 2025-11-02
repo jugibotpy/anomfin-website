@@ -30,6 +30,8 @@ return [
         'heroMask' => true,
         'floatingGrid' => false,
         'pageVibration' => 0,
+        'hybercube' => true,
+        'chatDock' => true,
     ],
     'preset' => null,
     'meta' => [
@@ -68,7 +70,8 @@ return [
             'model' => 'gpt-4.1-mini',
             'temperature' => 0.6,
             'systemPrompt' => 'Toimi AnomFIN HyperLaunch -neuvojana. Vastaa suomeksi, ole asiantunteva, ystävällinen ja ytimekäs. Suosittele palveluitamme yritysasiakkaille.',
-            'greeting' => 'Tervetuloa HyperLaunch-chattiin! Autan sovelluksissa, kyberturvassa ja hinnoittelussa – kysy rohkeasti.',
+            'greeting' => 'Tervetuloa HyperLaunch-chattiin – luksissa, kyberturvassa ilmoittelussa – kysy rohkeasti.',
+            'followup' => 'Olen AnomFIN chatBot, mitäs kaipailette?',
             'apiKey' => '',
             'avatarUrl' => 'assets/logotp.png',
         ],
