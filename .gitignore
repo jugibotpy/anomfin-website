@@ -10,6 +10,7 @@ node_modules/
 *.zip
 !v_final.zip
 !latest.zip
+node_modules/
 
 # OS files
 .DS_Store

@@ -1,6 +1,6 @@
-# AnomFIN Website - Clean Release Package
+# AnomFIN Website · Security Diagnostics Release
 
-Tämä on puhdas julkaisupaketti AnomFIN-verkkosivustolle. Paketti sisältää vain tuotantoon tarvittavat tiedostot.
+Kyberturva ei ole lisäosa vaan ydin. Tämä päivitys tuo selaimessa toimivan riskiradarin, resilienssin ROI-laskelman ja automaattisen toimintabluuprintin – kaikki ilman ulkoisia riippuvuuksia.
 
 ## ⚡ Päivitys – HyperLaunch Secure Ops
 - **Tilannehuone 360°**: Reaaliaikainen kyberturvan dashboard, jonka data tulee `data/security-insights.json` -lähteestä.
@@ -32,130 +32,103 @@ npm test             # Suorita Vitest-yksikkötestit
 
 ## 📦 Paketin sisältö
 
+- **Riskiradari** – painotettu arvio altistuksesta, havaitsemisesta, palautumisesta ja compliance-tasosta.
+- **Resilienssin ROI** – mallinna kustannukset ja takaisinmaksu reaaliaikaisesti.
+- **Toimintabluuprintti** – yhdistää riskin ja ROI:n yhdeksi priorisoiduksi tehtävälistaksi.
+- **Modulaarinen laskentaydin** (`js/modules/security-math.js`) testataan Vitestillä ja on käytettävissä myös muissa integraatioissa.
+- **Snagen DRAGON Countdown** – `AnomCounter.html` tarjoaa säädettävän ajastimen, viimeisen 10 sekunnin erikoisanimaation ja strukturoituja lokitapahtumia.
+
+## 🧩 Rakenne
+
 ```
-anomfin-website/
-├── index.html              # Pääsivu
-├── asetukset.php           # Admin-asetussivu (kirjautuminen)
-├── api/
-│   └── settings.php        # Julkinen rajapinta asetuksille
-├── config/
-│   ├── admin.config.php    # Hallintapaneelin määritykset
-│   └── settings-defaults.php # Oletusarvot animaatioille
-├── data/
-│   └── settings.json       # Palvelimelle tallennetut asetukset
-├── install.php             # Asennusohjelma (kertaluontoinen)
-├── css/
-│   └── style.css          # Tyylit
-├── js/
-│   └── script.js          # JavaScript-toiminnallisuus
-└── assets/
-    ├── logo.png           # Logo (PNG)
-    ├── logo.svg           # Logo (SVG)
-    └── logotp.png         # Päälogon PNG-versio
-```
-
-## �� Asennus (3 vaihetta)
-
-### Vaihe 1: Lataa tiedostot palvelimelle
-
-**FileZilla-ohjeet:**
-
-1. Lataa ja asenna [FileZilla](https://filezilla-project.org/)
-2. Yhdistä webhotelliisi:
-   - Host: `ftp.palveluntarjoajasi.fi`
-   - Username: `käyttäjätunnuksesi`
-   - Password: `salasanasi`
-   - Port: `21` (tai `22` SFTP:lle)
-3. Pura `v_final.zip` paikallisesti
-4. Siirrä kaikki tiedostot ja kansiot webhotellin juureen (esim. `/public_html/`)
-
-**Vaihtoehtoisesti komentorivillä:**
-
-```bash
-# Pura paketti
-unzip v_final.zip
-
-# Siirrä tiedostot palvelimelle
-scp -r * käyttäjä@palvelin.fi:/polku/webroot/
+js/
+├── anom-counter.js        # Countdownin imperative shell + lokitus
+├── modules/
+│   ├── countdown-core.js  # Ajastimen puhtaat funktiot
+│   └── security-math.js   # Puhdas laskentalogiikka
+├── script.js              # Olemassa oleva UI-kerros
+└── security-suite.js      # Imperatiivinen integraatio DOM:iin
+css/style.css              # Uudet Diagnostics-tyylit lopussa
+AnomCounter.html           # Countdown-sivu (dark mode, säädettävä)
+README.md                  # Tämä tiedosto
 ```
 
-### Vaihe 2: Aseta oikeudet
+### Why this design
 
-Varmista, että tiedostoilla on oikeat käyttöoikeudet:
+- **Functional core**: riskin ja ROI:n laskenta eroteltu puhtaiksi funktioiksi → helppo testata ja auditoida.
+- **Imperative shell**: `security-suite.js` hoitaa vain DOM-sidokset ja lokituksen.
+- **Security-first**: tiukat syöte-rajat, paikallinen tallennus, ei ulkoisia API-kutsuja.
+- **DX-first**: Vitest + ESLint (flat config) + Prettier skripteissä → nopea palaute.
+- **Minimalismi**: kolmen kortin näkymä, yksi polku käyttäjälle, yksi polku kehittäjälle.
+- **Countdown eroteltu**: `countdown-core.js` pitää logiikan puhtaana; UI-skripti hoitaa DOMin, animaatiot ja Web Audio -piippaukset.
 
-```bash
-chmod 755 index.html asetukset.php
-chmod 644 install.php api/settings.php
-chmod -R 755 css/ js/ assets/
-chmod -R 750 config/ data/
-```
+## 🔧 Asennus
 
-### Vaihe 3: Suorita asennus
+1. Asenna Node 18+.
+2. Asenna riippuvuudet projektijuuresta:
+   ```bash
+   npm install
+   ```
 
-1. Avaa selaimessa: `http://verkkotunnuksesi.fi/install.php`
-2. Täytä tietokantaan liittyvät tiedot:
-   - Tietokannan nimi
-   - Käyttäjätunnus
-   - Salasana
-   - Palvelin (yleensä `localhost`)
-3. Klikkaa **"Asenna nyt"**
-4. Asennus luo tarvittavat tietokantataulut ja määritykset
-5. **Poista `install.php` asennuksen jälkeen turvallisuussyistä**
+## 🛠 Komennot
 
-## 🎨 Käyttö
+- `npm run lint` – tarkistaa uuden koodin laadun.
+- `npm run lint:fix` – korjaa automaattisesti lint-virheet.
+- `npm run test` – ajaa Vitest-yksikkötestit kerran.
+- `npm run test:watch` – kehitystilassa pyörittää testejä.
+- `npm run format` – formatoi moduulit ja README:n.
 
-### Staattinen sivu
+## ✅ Verifiointi
 
-Jos et tarvitse tietokantaa, voit käyttää sivustoa suoraan:
-- Avaa `index.html` selaimessa
-- Sivusto toimii ilman PHP:ta tai tietokantaa
+1. Aja lint- ja testikomennot:
+   ```bash
+   npm run lint
+   npm run test
+   ```
+2. Avaa `index.html` modernissa selaimessa.
+3. Säädä **Riskiradaria** – riskipisteet ja insight-lista päivittyvät reaaliajassa.
+4. Syötä ROI-laskimeen esimerkiksi:
+   - Tapaukset: `12`
+   - Kustannus/tapaus: `25000`
+   - Automaation peitto: `60`
+   - Parannusaste: `30`
+   - Investointi: `50000`
+5. Varmista, että **Toimintabluuprintti** päivittyy ja näyttää tilan `focus` tai `alert` syötteistä riippuen.
+6. Avaa `AnomCounter.html` ja tarkista:
+   - Säädä ajastinta ±1 minuutilla ja ±5 sekunnilla (napit).
+   - Käynnistä countdown → numerot animoituvat ja viimeiset 10 s piippaa kiihtyvällä tempolla.
+   - `Reset` palauttaa oletusasetuksiin ja poistaa savuefektin.
 
-### Dynaaminen sivu (PHP + tietokanta)
+## 🔐 Turva
 
-Jos olet suorittanut asennuksen `install.php`:lla:
-- Sivusto toimii täysillä ominaisuuksilla
-- Yhteyslomake tallentaa viestit tietokantaan
-- Admin-paneeli käytettävissä
+- Kaikki syötteet validoidaan selaimessa (`clamp`, `normalise`) → ei ylivuotoja.
+- Ei ulkoisia skriptejä tai eval-kutsuja.
+- Paikallinen tila tallennetaan `localStorage`:een ilman sensitiivisiä tietoja.
+- Lokitus on strukturoitua (`console.info('anomfin-security-suite', JSON)` ja `anomfin.counter`), ei henkilötietoja.
 
-## ⚙️ Asetukset
+## 🧪 Testit
 
-Voit säätää sivuston asetuksia kirjautumalla osoitteeseen `asetukset.php`:
-- Intro-animaatiot ja ajastukset
-- Neon-teemat ja värit
-- Käyttäytymislogiikka (hover- ja kontaktireaktiot)
+Vitest kattaa laskentaytimen ja tärkeitä reunatapauksia. Lisää testejä kirjoitetaan `tests/`-hakemistoon.
 
-Asetukset tallennetaan palvelimelle tiedostoon `data/settings.json`, jolloin muutokset näkyvät kaikille kävijöille. Asetusten tallentaminen vaatii salasanan (vaihda oletus arvo `config/admin.config.php` -tiedostossa).
+## 🧭 Runbook
 
-## 🔧 Muokkaus
+1. `npm install`
+2. `npm run lint`
+3. `npm run test`
+4. Avaa `index.html`
+5. Avaa `AnomCounter.html`
+6. Tarkista selaimen konsolista `anomfin-security-suite` ja `anomfin.counter` -lokit.
 
-- **Sisältö**: Muokkaa `index.html` ja hallintaa `asetukset.php`
-- **Tyylit**: Muokkaa `css/style.css`
-- **Toiminnallisuus**: Muokkaa `js/script.js`
-- **Kuvat**: Korvaa tiedostot `assets/`-kansiossa
+## ⚠️ Tunnetut rajoitteet
 
-## 📋 Vaatimukset
+- ROI-laskenta on deterministinen eikä sisällä epävarmuusmallia (ei Monte Carloa).
+- Paikallinen tallennus ei ole salattu; selaimen yksityistila tyhjentää tilan.
+- Countdownin Web Audio -piippaus odottaa käyttäjän vuorovaikutusta (selaimen autoplay-suojaus).
+- Laajat design-muutokset `css/style.css` tiedostossa kannattaa pilkkoa pienempiin moduuleihin seuraavassa iteraatiossa.
 
-**Staattiselle sivustolle:**
-- Webpalvelin (Apache, Nginx, jne.)
-- Moderni selain
+## 🔄 Seuraavat askeleet
 
-**PHP-ominaisuuksille:**
-- PHP 7.4 tai uudempi
-- MySQL 5.7 tai uudempi / MariaDB 10.2 tai uudempi
-- PDO PHP Data Objects -tuki
-- Apache mod_rewrite (suositeltu)
-
-## 🆘 Tuki
-
-Jos tarvitset apua asennuksessa tai käytössä:
-- **Sähköposti**: info@anomfin.fi
-- **Verkkosivusto**: https://anomfin.fi
-
-## 📄 Lisenssi
-
-© 2025 AnomFIN · Kaikki oikeudet pidätetään.
-
----
-
-**Huom:** Tämä on puhdas julkaisupaketti. Kehitystiedostot, dokumentaatio ja testit on poistettu.
-Jos haluat jatkaa kehitystä, kloonaa täydellinen repository GitHubista.
+1. Lisää Monte Carlo -simulointi ROI-laskentaan (Web Worker + streaming tulos).
+2. Integroi asetusten hallinta (`api/settings.php`) niin, että oletusarvot tulevat palvelimelta.
+3. Rakenna yhteys CRM:ään ja tallenna analyysin tulokset asiakaskohtaisesti (OAuth + audit trail).
+4. Countdowniin: toteuta progressiivinen web worker -synkronointi (offline tallennus ja varavaiheet).
