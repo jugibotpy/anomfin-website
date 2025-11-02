@@ -50,6 +50,9 @@ const clamp = (value, min, max) => {
 };
 
 const normalise = (value, min, max) => {
+    if (min > max) {
+        throw new RangeError('Väärä rajajärjestys normalisoinnissa.');
+    }
     const bounded = clamp(value, min, max);
     return max === min ? 0 : (bounded - min) / (max - min);
 };

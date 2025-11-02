@@ -60,6 +60,8 @@ function triggerBeep({ frequencyHz, pulseMs }) {
   const attack = 0.01;
   const decay = Math.max(0.08, pulseMs / 1000 - attack);
 
+  // Use small non-zero values for gain because exponentialRampToValueAtTime cannot reach exactly 0.
+  // Setting gain to 0 can cause errors or audio artifacts in the Web Audio API.
   gainNode.gain.setValueAtTime(0.0001, now);
   gainNode.gain.exponentialRampToValueAtTime(0.4, now + attack);
   gainNode.gain.exponentialRampToValueAtTime(0.001, now + attack + decay);

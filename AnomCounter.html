@@ -439,6 +439,8 @@
             transition: opacity 0.8s ease, transform 0.8s ease, filter 1s ease;
         }
 
+        /* Note: color-mix() requires modern browsers (Chrome 111+, Firefox 113+, Safari 16.2+).
+           Fallback gracefully degrades to static colors in older browsers. */
         .final-ten .timer-display {
             color: color-mix(in srgb, #fffb91 calc(var(--finale-intensity) * 85%), var(--neon-primary));
             text-shadow: 0 0 calc(22px + var(--finale-intensity) * 28px) rgba(255, 251, 145, 0.85),

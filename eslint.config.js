@@ -3,6 +3,8 @@ import globals from 'globals';
 
 export default [
     {
+        // Ignore legacy files (js/script.js, js/bolt.js) - they predate the linting setup
+        // and would require significant refactoring. Focus is on new modular code.
         ignores: ['assets/**', 'css/**', 'js/script.js', 'js/bolt.js'],
     },
     js.configs.recommended,

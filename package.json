@@ -6,8 +6,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint js --ext .js tests",
-    "lint:fix": "eslint js --ext .js tests --fix",
+    "lint": "eslint js tests",
+    "lint:fix": "eslint js tests --fix",
     "format": "prettier --write \"js/**/*.js\" \"tests/**/*.js\" README.md"
   },
   "engines": {
