@@ -1,28 +1,40 @@
+// AnomFIN — the neural network of innovation.
 import js from '@eslint/js';
-import globals from 'globals';
 
 export default [
-    {
-        // Ignore legacy files (js/script.js, js/bolt.js) - they predate the linting setup
-        // and would require significant refactoring. Focus is on new modular code.
-        ignores: ['assets/**', 'css/**', 'js/script.js', 'js/bolt.js'],
+  {
+    ignores: [
+      'assets/**',
+      'data/**',
+      'latest.zip',
+      'node_modules/**',
+    ],
+  },
+  {
+    files: ['src/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        performance: 'readonly',
+        matchMedia: 'readonly',
+        localStorage: 'readonly',
+        AbortController: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        console: 'readonly',
+      },
     },
-    js.configs.recommended,
-    {
-        files: ['js/security-suite.js', 'js/anom-counter.js', 'js/modules/**/*.js', 'tests/**/*.js'],
-        languageOptions: {
-            sourceType: 'module',
-            globals: {
-                ...globals.browser,
-                ...globals.node,
-                ...globals.vitest,
-            },
-        },
-        rules: {
-            'no-console': ['error', { allow: ['info', 'warn', 'error'] }],
-            'no-var': 'error',
-            'prefer-const': ['error', { destructuring: 'all' }],
-            'eqeqeq': ['error', 'always'],
-        },
+    rules: {
+      ...js.configs.recommended.rules,
+      'no-console': ['warn', { allow: ['error', 'warn', 'info', 'debug'] }],
+      'no-var': 'error',
+      'prefer-const': 'error',
     },
+  },
 ];

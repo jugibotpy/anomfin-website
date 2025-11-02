@@ -1,3 +1,4 @@
+/* Trust by design, proof by delivery. */
 /* Reset & Base */
 * {
     margin: 0;
@@ -4256,278 +4257,280 @@ body.chat-fullscreen-open {
     border-radius: 12px;
 }
 
-/* Less noise. More signal. AnomFIN. */
-.diagnostics {
-    background: radial-gradient(circle at top right, rgba(0, 255, 166, 0.12), transparent 55%),
-        linear-gradient(180deg, rgba(9, 18, 28, 0.95) 0%, rgba(9, 18, 28, 0.65) 100%);
-    position: relative;
-    overflow: hidden;
+.shortener-hint {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    color: rgba(244, 247, 251, 0.72);
+    transition: color 0.3s ease;
 }
 
-.diagnostics::after {
-    content: '';
+.shortener-hint[data-state="error"] {
+    color: #ff6b81;
+}
+
+.shortener-hint[data-state="success"] {
+    color: #7dffda;
+}
+
+.security-ops-grid {
+    margin-top: 3rem;
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.security-ops-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.security-ops-header .eyebrow {
+    margin-bottom: 0.35rem;
+}
+
+.security-ops-dashboard,
+.security-ops-playbooks {
+    background: rgba(7, 10, 18, 0.78);
+    border: 1px solid rgba(0, 255, 166, 0.16);
+    border-radius: 22px;
+    padding: 2rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.security-ops-playbooks h3 {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.playbook-list {
+    list-style: none;
+    display: grid;
+    gap: 1.25rem;
+}
+
+.playbook-list h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.35rem;
+}
+
+.playbook-list p {
+    color: rgba(220, 232, 240, 0.78);
+    line-height: 1.5;
+}
+
+.btn.btn-small {
+    padding: 0.6rem 1.1rem;
+    font-size: 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 255, 166, 0.45);
+    background: rgba(0, 255, 166, 0.14);
+    color: #dffef8;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn.btn-small:hover,
+.btn.btn-small:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0, 255, 166, 0.2);
+}
+
+.security-dashboard {
+    position: relative;
+}
+
+.security-dashboard[data-state="loading"]::after {
+    content: 'Päivitetään...';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 20% 20%, rgba(0, 255, 166, 0.05), transparent 40%);
-    pointer-events: none;
-}
-
-.diagnostics .section-header {
-    text-align: center;
-    max-width: 720px;
-    margin: 0 auto 3rem;
-}
-
-.diagnostics-grid {
     display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    position: relative;
-    z-index: 1;
-}
-
-.diagnostics-card {
-    background: rgba(12, 22, 33, 0.78);
-    border: 1px solid rgba(0, 255, 166, 0.2);
+    place-items: center;
+    background: rgba(6, 11, 18, 0.82);
     border-radius: 18px;
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(18px);
-    position: relative;
-    overflow: hidden;
-}
-
-.diagnostics-card::before {
-    content: '';
-    position: absolute;
-    inset: 1px;
-    border-radius: inherit;
-    background: linear-gradient(135deg, rgba(0, 255, 166, 0.08), transparent 60%);
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.diagnostics-card .card-header {
-    position: relative;
-    z-index: 1;
-}
-
-.diagnostics-card h3 {
-    font-size: 1.4rem;
-    margin-bottom: 0.25rem;
-}
-
-.diagnostics-card .card-subtitle {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.diagnostics-form fieldset {
-    border: 0;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 1rem;
-}
-
-.form-range,
-.form-field {
-    display: grid;
-    gap: 0.35rem;
-    position: relative;
-}
-
-.form-range label,
-.form-field label {
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.form-range input[type='range'] {
-    accent-color: var(--neon, #00ffa6);
-}
-
-.form-range output {
-    justify-self: flex-end;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.form-field input[type='number'] {
-    background: rgba(6, 14, 22, 0.85);
-    border: 1px solid rgba(0, 255, 166, 0.25);
-    border-radius: 12px;
-    padding: 0.65rem 0.75rem;
-    color: #fff;
     font-size: 1rem;
-    transition: border-color 160ms ease;
+    letter-spacing: 0.12em;
+    color: rgba(125, 255, 218, 0.82);
 }
 
-.form-field input[type='number']:focus {
-    border-color: rgba(0, 255, 166, 0.8);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 255, 166, 0.15);
-}
-
-.diagnostics-result {
-    background: rgba(3, 9, 15, 0.75);
-    border-radius: 14px;
-    border: 1px solid rgba(0, 255, 166, 0.2);
-    padding: 1rem 1.25rem;
-    display: grid;
-    gap: 0.9rem;
-    position: relative;
-    z-index: 1;
-}
-
-.diagnostics-result::before {
-    content: '';
+.security-dashboard[data-state="error"]::after {
+    content: attr(data-message);
     position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    background: linear-gradient(160deg, rgba(0, 255, 166, 0.18), transparent 65%);
-    opacity: 0.45;
-    pointer-events: none;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(36, 12, 22, 0.85);
+    border-radius: 18px;
+    color: #ff94b6;
+    padding: 1.2rem;
+    text-align: center;
+    line-height: 1.5;
 }
 
-.result-label {
-    display: block;
-    font-size: 0.75rem;
-    text-transform: uppercase;
+.security-dashboard-card {
+    display: grid;
+    gap: 1.6rem;
+    padding: 1.5rem;
+    border-radius: 18px;
+    background: linear-gradient(160deg, rgba(6, 10, 16, 0.92), rgba(7, 16, 28, 0.96));
+    border: 1px solid rgba(0, 255, 166, 0.12);
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.45);
+}
+
+.security-dashboard-header h3 {
+    font-size: 1.35rem;
     letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.55);
 }
 
-.result-value {
-    font-size: 1.8rem;
-    font-weight: 600;
-}
-
-.result-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
-
-.result-level {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(0, 255, 166, 0.12);
-    border-radius: 999px;
-    padding: 0.35rem 0.85rem;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.result-level[data-level='alert'] {
-    background: rgba(255, 94, 94, 0.12);
-    color: #ff8c8c;
-}
-
-.result-level[data-level='critical'],
-.result-level[data-level='severe'] {
-    background: rgba(255, 140, 0, 0.2);
-    color: #ffc58b;
-}
-
-.result-telemetry {
+.security-dashboard-updated {
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(197, 217, 226, 0.68);
 }
 
-.result-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 0.6rem;
-}
-
-.result-list li {
-    position: relative;
-    padding-left: 1.25rem;
-    font-size: 0.95rem;
-    line-height: 1.45;
-}
-
-.result-list li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.55rem;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: var(--neon, #00ffa6);
-    box-shadow: 0 0 10px rgba(0, 255, 166, 0.6);
-}
-
-.result-metric {
+.security-dashboard-score {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 16px;
+    background: rgba(9, 18, 26, 0.85);
+    border: 1px solid rgba(0, 255, 166, 0.16);
+}
+
+.security-dashboard-score .score-value {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #7dffda;
+}
+
+.security-dashboard-score .score-label {
+    font-size: 0.95rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(234, 250, 255, 0.78);
+}
+
+.security-signal-list,
+.security-action-list,
+.security-incident-list,
+.security-diagnostics-list {
+    list-style: none;
+    display: grid;
     gap: 1rem;
 }
 
-.result-summary {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.72);
+.security-signal {
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+    background: rgba(9, 15, 26, 0.7);
+    border: 1px solid rgba(0, 255, 166, 0.14);
 }
 
-.blueprint {
-    border-color: rgba(0, 170, 255, 0.2);
+.security-signal .signal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
 }
 
-.blueprint-body {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.blueprint-status {
-    text-transform: uppercase;
+.security-signal .signal-label {
     font-weight: 600;
-    letter-spacing: 0.12em;
-    font-size: 0.8rem;
-    color: rgba(0, 255, 166, 0.8);
 }
 
-.blueprint-status[data-status='alert'] {
-    color: #ff8c8c;
+.security-signal .signal-score {
+    font-size: 1.1rem;
 }
 
-.blueprint-status[data-status='focus'] {
-    color: #ffc58b;
+.security-signal-warning {
+    border-color: rgba(255, 191, 105, 0.35);
 }
 
-.blueprint-status[data-status='review'] {
-    color: #ffa6ff;
+.security-signal-critical {
+    border-color: rgba(255, 105, 150, 0.45);
 }
 
-.blueprint-narrative {
+.security-action {
+    padding: 1rem 1.2rem;
+    border-radius: 14px;
+    background: rgba(10, 18, 28, 0.75);
+    border: 1px solid rgba(0, 255, 166, 0.12);
+}
+
+.security-action h4 {
     font-size: 1.05rem;
-    color: rgba(255, 255, 255, 0.86);
+    margin-bottom: 0.4rem;
 }
 
-.diagnostics-card[data-state='alert']::before {
-    background: linear-gradient(135deg, rgba(255, 94, 94, 0.18), transparent 60%);
+.security-incident-list .incident {
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 166, 0.1);
+    background: rgba(9, 18, 30, 0.72);
+}
+
+.security-incident-list .incident-critical {
+    border-color: rgba(255, 105, 150, 0.45);
+}
+
+.security-incident-list .incident-warning {
+    border-color: rgba(255, 191, 105, 0.45);
+}
+
+.security-incident-list .incident .incident-title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.security-incident-list .incident .incident-meta {
+    font-size: 0.85rem;
+    color: rgba(196, 214, 226, 0.68);
+}
+
+.security-incident-list .incident .incident-reference {
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(180, 210, 220, 0.6);
+    margin-top: 0.4rem;
+}
+
+.security-diagnostics-summary {
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    background: rgba(8, 16, 28, 0.7);
+    border: 1px solid rgba(0, 255, 166, 0.14);
+}
+
+.security-diagnostics-list .diagnostic {
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 166, 0.1);
+    background: rgba(7, 14, 24, 0.68);
+}
+
+.security-diagnostics-list .diagnostic-pass {
+    border-color: rgba(125, 255, 218, 0.4);
+}
+
+.security-diagnostics-list .diagnostic-fail {
+    border-color: rgba(255, 105, 150, 0.45);
+}
+
+.security-dashboard-placeholder {
+    padding: 1.6rem;
+    text-align: center;
+    color: rgba(203, 221, 231, 0.68);
 }
 
 @media (max-width: 768px) {
-    .diagnostics-grid {
+    .security-ops-grid {
         grid-template-columns: 1fr;
     }
 
-    .result-metric {
-        flex-direction: column;
-        align-items: flex-start;
+    .security-ops-dashboard,
+    .security-ops-playbooks {
+        padding: 1.6rem;
     }
 }
-
