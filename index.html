@@ -95,23 +95,24 @@
                                 <label class="sr-only" for="shortener-alias">Lyhytkoodi</label>
                                 <input type="text" id="shortener-alias" name="alias" placeholder="Alias (max 4 merkkiä)" autocomplete="off" maxlength="4" pattern="[A-Za-z0-9]{1,4}">
                             </div>
-                            <div class="shortener-footer">
-                                <button type="submit" class="btn btn-primary shortener-submit">Luo lyhyt linkki</button>
-                                <div class="shortener-result" id="shortener-result" hidden>
-                                    <span class="result-label">Lyhyt [url]</span>
-                                    <div class="result-link-group">
-                                        <a href="#" id="shortener-link" target="_blank" rel="noopener noreferrer">anomfin.fi/?s=anom</a>
-                                        <button type="button" class="copy-short-link" id="shortener-copy">Kopioi</button>
+                                <div class="shortener-footer">
+                                    <button type="submit" class="btn btn-primary shortener-submit">Luo lyhyt linkki</button>
+                                    <div class="shortener-result" id="shortener-result" hidden>
+                                        <span class="result-label">Lyhyt [url]</span>
+                                        <div class="result-link-group">
+                                            <a href="#" id="shortener-link" target="_blank" rel="noopener noreferrer">anomfin.fi/?s=anom</a>
+                                            <button type="button" class="copy-short-link" id="shortener-copy">Kopioi</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                        <p class="shortener-status" id="shortener-status" role="status" aria-live="polite"></p>
-                    </div>
-                    <ul class="hero-metrics">
-                        <li>
-                            <span class="metric-value">24/7</span>
-                            <span class="metric-label">valvonta ja tuki</span>
+                            </form>
+                            <p class="shortener-status" id="shortener-status" role="status" aria-live="polite"></p>
+                            <p class="shortener-hint" id="shortener-hint" aria-live="polite"></p>
+                        </div>
+                        <ul class="hero-metrics">
+                            <li>
+                                <span class="metric-value">24/7</span>
+                                <span class="metric-label">valvonta ja tuki</span>
                         </li>
                         <li>
                             <span class="metric-value">100%</span>
@@ -414,6 +415,39 @@
                         <a href="#contact" class="btn btn-ghost">Pyydä demo</a>
                     </aside>
                 </div>
+                <div class="security-ops-grid">
+                    <section class="security-ops-dashboard">
+                        <header class="security-ops-header">
+                            <div>
+                                <p class="eyebrow">Reaaliaikainen näkymä</p>
+                                <h3>Tilannehuone 360°</h3>
+                            </div>
+                            <button type="button" class="btn btn-small" data-security-refresh>↻ Päivitä</button>
+                        </header>
+                        <div class="security-dashboard" data-security-dashboard data-state="idle">
+                            <div class="security-dashboard-placeholder">
+                                <p>Haetaan viimeisin turvallisuusaineisto...</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="security-ops-playbooks">
+                        <h3>Resilienssi-brief</h3>
+                        <ul class="playbook-list">
+                            <li>
+                                <h4>Zero Trust -vartio</h4>
+                                <p>MFA pakotus, automaattinen session päättäminen ja lokien replikointi EU-alueelle.</p>
+                            </li>
+                            <li>
+                                <h4>Patch Tuesday Blitz</h4>
+                                <p>48h sisällä prioriteetti 1 -päivitykset, rollback-skenaariot ja varmistettu testiympäristö.</p>
+                            </li>
+                            <li>
+                                <h4>Insidenttipöytäkirja</h4>
+                                <p>Selkeä 5-vaiheinen runbook: havaitse → eristä → kommunikoi → korjaa → dokumentoi.</p>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
             </div>
         </section>
 
@@ -566,7 +600,7 @@
         </div>
     </footer>
 
-    <script type="module" src="js/security-suite.js" defer></script>
+    <script type="module" src="src/index.js"></script>
     <script src="js/script.js" defer></script>
 </body>
 </html>
