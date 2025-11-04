@@ -1740,36 +1740,9 @@ function launchMatrixAnimation(fromElement) {
     }, 4000);
 }
 
-// Make functions globally accessible for testing
+// Make functions globally accessible for testing (console access only)
 window.launchMatrixAnimation = launchMatrixAnimation;
 window.activateRectangle = activateRectangle;
-
-// Add developer test button (only in development)
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    const testButton = document.createElement('button');
-    testButton.textContent = '🎆 Test Matrix Animation';
-    testButton.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 9999;
-        padding: 8px 12px;
-        background: #00ffa6;
-        color: #000;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 12px;
-    `;
-    testButton.onclick = () => {
-        const rectangle = document.querySelector('.hero-grid');
-        if (rectangle) {
-            launchMatrixAnimation(rectangle);
-        }
-    };
-    document.body.appendChild(testButton);
-}
 
 function createMatrixStream(originX, originY, index) {
     const stream = document.createElement('div');
@@ -3236,6 +3209,7 @@ function initChatWidget() {
 
     let isFullscreen = false;
     let fullscreenOverlay = null;
+    let lastSpeaker = null;
 
     const ensureOverlay = () => {
         if (!fullscreenOverlay) {
@@ -3337,10 +3311,11 @@ function initChatWidget() {
         if (!safeContent) return;
 
         const speaker = isUser ? 'user' : 'ai';
+        const sameSpeaker = lastSpeaker === speaker;
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${speaker}`;
 
-        const avatar = createAvatar(isUser, false);
+        const avatar = createAvatar(isUser, sameSpeaker);
         messageDiv.appendChild(avatar);
 
         const body = document.createElement('div');
@@ -3354,6 +3329,7 @@ function initChatWidget() {
         messagesEl.appendChild(messageDiv);
         messagesEl.scrollTop = messagesEl.scrollHeight;
 
+        lastSpeaker = speaker;
         updateHeaderDepth();
 
         if (pushToHistory) {
@@ -3364,9 +3340,10 @@ function initChatWidget() {
     }
 
     function showTypingIndicator() {
+        const sameSpeaker = lastSpeaker === 'ai';
         const typingDiv = document.createElement('div');
         typingDiv.className = 'chat-message typing-indicator ai';
-        typingDiv.appendChild(createAvatar(false, false));
+        typingDiv.appendChild(createAvatar(false, sameSpeaker));
 
         const content = document.createElement('div');
         content.className = 'chat-message-content chat-message-content-typing';
