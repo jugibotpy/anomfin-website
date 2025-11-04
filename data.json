@@ -1,0 +1,360 @@
+{
+  "siteSettings": {
+    "siteName": "Helsinki eBike Center",
+    "tagline": "Sähköpyörien premium-koti Helsingissä",
+    "hero": {
+      "title": "Helsinki eBike Center",
+      "subtitle": "Sähköpyörien premium-koti Helsingissä",
+      "description": "Laadukkaita sähköpyöriä, asiantuntevaa huoltoa ja takuuta, jolla voit luottaa. Paikallista palvelua sydämellä.",
+      "cta1Text": "Varaa koeajo",
+      "cta2Text": "Kysy tarjousta",
+      "backgroundImage": "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1920&h=1080&fit=crop"
+    },
+    "contact": {
+      "address": "Mannerheimintie 123, 00100 Helsinki",
+      "phone": "+358 40 123 4567",
+      "email": "info@helsinkiebike.fi",
+      "openingHours": "Ma-Pe 10-18, La 10-16",
+      "socialMedia": {
+        "facebook": "https://facebook.com/helsinkiebike",
+        "instagram": "https://instagram.com/helsinkiebike"
+      }
+    }
+  },
+  "categories": [
+    {
+      "id": "kaupunki",
+      "name": "Kaupunkipyörät",
+      "description": "Tyylikkäitä ja mukavia sähköpyöriä päivittäiseen kaupunkiajoon",
+      "imageUrl": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=800&h=600&fit=crop"
+    },
+    {
+      "id": "maasto",
+      "name": "Maasto & Gravel",
+      "description": "Tehokkaita sähköpyöriä maastoon ja polkuajeluun",
+      "imageUrl": "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=800&h=600&fit=crop"
+    },
+    {
+      "id": "cargo",
+      "name": "Cargo-pyörät",
+      "description": "Vahvat lastipyörät perheen ja kuljetusten tarpeisiin",
+      "imageUrl": "https://images.unsplash.com/photo-1617939810398-0ca0eb1fc5b7?w=800&h=600&fit=crop"
+    },
+    {
+      "id": "tyo",
+      "name": "Työmatkapyörät",
+      "description": "Luotettavat sähköpyörät pitkiin työmatkoihin",
+      "imageUrl": "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=800&h=600&fit=crop"
+    },
+    {
+      "id": "premium",
+      "name": "Premium-sarja",
+      "description": "Huippuluokan sähköpyörät vaativille käyttäjille",
+      "imageUrl": "https://images.unsplash.com/photo-1559348349-86f1f65817fe?w=800&h=600&fit=crop"
+    }
+  ],
+  "products": [
+    {
+      "id": "urb-1",
+      "name": "Urban Flow",
+      "categoryId": "kaupunki",
+      "imageUrl": "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=800&h=600&fit=crop",
+      "shortDescription": "Tyylikäs kaupunkipyörä päivittäiseen käyttöön",
+      "longDescription": "Urban Flow on suunniteltu modernille kaupunkilaiselle. Kevyt runko, integroitu akku ja hiljainen moottori tekevät tästä täydellisen valinnan päivittäisiin työmatkoihin. Mukana tulee tehokkaat LED-valot ja laadukas lukko.",
+      "price": 2499,
+      "originalPrice": null,
+      "availability": "Varastossa",
+      "tags": ["Suosittu", "Eco-friendly"]
+    },
+    {
+      "id": "urb-2",
+      "name": "City Cruiser Pro",
+      "categoryId": "kaupunki",
+      "imageUrl": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=800&h=600&fit=crop",
+      "shortDescription": "Premium kaupunkipyörä maksimaalista mukavuutta varten",
+      "longDescription": "City Cruiser Pro tarjoaa parhaan mahdollisen ajomukavuuden kaupunkiajossa. Laadukas istuinjousitus, ergonomiset kahvat ja automaat- tinen vaihteisto takaavat miellyttävän ajon kaikissa olosuhteissa. Kantama jopa 120 km yhdellä latauksella.",
+      "price": 3299,
+      "originalPrice": 3599,
+      "availability": "Varastossa",
+      "tags": ["Premium", "Pitkä kantama"]
+    },
+    {
+      "id": "mnt-1",
+      "name": "Trail Blazer X",
+      "categoryId": "maasto",
+      "imageUrl": "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=800&h=600&fit=crop",
+      "shortDescription": "Tehokas maastopyörä seikkailuihin",
+      "longDescription": "Trail Blazer X on rakennettu kestämään. 500W moottori ja 625Wh akku vievät sinut minne tahansa. Laadukkaat jousitukset ja hydrauliset levyjarrut takaavat turvallisuuden vaativassakin maastossa.",
+      "price": 3899,
+      "originalPrice": null,
+      "availability": "Varastossa",
+      "tags": ["Tehokas", "Maasto"]
+    },
+    {
+      "id": "mnt-2",
+      "name": "Gravel Adventure",
+      "categoryId": "maasto",
+      "imageUrl": "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=800&h=600&fit=crop",
+      "shortDescription": "Monipuolinen gravel-pyörä kaikkiin olosuhteisiin",
+      "longDescription": "Gravel Adventure yhdistää maantiepyörän nopeuden ja maastopyörän kestävyyden. Täydellinen valinta pitkiin retkiin sekä asfaltti- että sorateitä pitkin. Voit lisätä matkatavarat helposti kiinnityspisteiden avulla.",
+      "price": 3499,
+      "originalPrice": null,
+      "availability": "2-3 viikon toimitusaika",
+      "tags": ["Monipuolinen", "Retkeily"]
+    },
+    {
+      "id": "crg-1",
+      "name": "Family Cargo",
+      "categoryId": "cargo",
+      "imageUrl": "https://images.unsplash.com/photo-1617939810398-0ca0eb1fc5b7?w=800&h=600&fit=crop",
+      "shortDescription": "Tilava lastipyörä perheelle",
+      "longDescription": "Family Cargo on suunniteltu ajatellen perheitä. Etulokero tarjoaa tilaa kahdelle lapselle (turvaiskuineen) tai suurelle ostoskuormalle. Tehokas moottori auttaa myös kuorman kanssa. Sisältää sadesuojan ja turvavyöt.",
+      "price": 4299,
+      "originalPrice": null,
+      "availability": "Varastossa",
+      "tags": ["Perhe", "Turvallinen"]
+    },
+    {
+      "id": "crg-2",
+      "name": "Business Cargo XL",
+      "categoryId": "cargo",
+      "imageUrl": "https://images.unsplash.com/photo-1559348349-86f1f65817fe?w=800&h=600&fit=crop",
+      "shortDescription": "Raskas lastipyörä ammattikäyttöön",
+      "longDescription": "Business Cargo XL on suunniteltu ammattilaisille. Kantavuus jopa 200 kg ja vankka rakenne kestävät päivittäisen käytön. Modulaarinen lastisysteemi mahdollistaa erilaisten lavalaatikoiden käytön. Sisältää GPS-seurannan.",
+      "price": 5499,
+      "originalPrice": null,
+      "availability": "Tilaustuote",
+      "tags": ["Ammattikäyttö", "GPS"]
+    },
+    {
+      "id": "wrk-1",
+      "name": "Commuter Express",
+      "categoryId": "tyo",
+      "imageUrl": "https://images.unsplash.com/photo-1571333250630-f0230c320b6d?w=800&h=600&fit=crop",
+      "shortDescription": "Nopea työmatkapyörä pitkiin matkoihin",
+      "longDescription": "Commuter Express on optimoitu pitkiin työmatkoihin. 45 km/h huippunopeus (S-Pedelec, vaatii ajokortin) ja 100+ km kantama varmistavat, että pääset perille nopeasti ja tehokkaasti. Mukana integroitu lukko ja tehokkaat LED-valot.",
+      "price": 3999,
+      "originalPrice": 4299,
+      "availability": "Varastossa",
+      "tags": ["Nopea", "S-Pedelec"]
+    },
+    {
+      "id": "wrk-2",
+      "name": "Reliable Commuter",
+      "categoryId": "tyo",
+      "imageUrl": "https://images.unsplash.com/photo-1558981852-426c6c22a060?w=800&h=600&fit=crop",
+      "shortDescription": "Luotettava työmatkapyörä kaikissa sääolosuhteissa",
+      "longDescription": "Reliable Commuter on rakennettu kestämään Suomen vaihtelevat sääolot. Lokasuojat, ketjusuoja ja integroitu lukko tekevät tästä huolettoman valinnan. Tehokas valaistusjärjestelmä ja heijastimet varmistavat näkyvyyden pimeälläkin.",
+      "price": 2799,
+      "originalPrice": null,
+      "availability": "Varastossa",
+      "tags": ["Luotettava", "Talvikäyttö"]
+    },
+    {
+      "id": "prm-1",
+      "name": "Elite Carbon",
+      "categoryId": "premium",
+      "imageUrl": "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=800&h=600&fit=crop",
+      "shortDescription": "Huippulaadukas hiilikuiturunkoinen sähköpyörä",
+      "longDescription": "Elite Carbon on teknologian huippu. Kevyt hiilikuiturunko, huippuluokan komponentit ja integroitu älyjärjestelmä tekevät tästä unelmapyörän vaativalle kuskillle. Mukana tulee premium-lisävarusteet ja 5 vuoden takuu.",
+      "price": 6999,
+      "originalPrice": null,
+      "availability": "Tilaustuote",
+      "tags": ["Premium", "Hiilikuitu", "5v takuu"]
+    },
+    {
+      "id": "prm-2",
+      "name": "Luxury Cruiser",
+      "categoryId": "premium",
+      "imageUrl": "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=800&h=600&fit=crop",
+      "shortDescription": "Ylellinen sähköpyörä maksimaalista mukavuutta varten",
+      "longDescription": "Luxury Cruiser tarjoaa parhaan mahdollisen ajokokemuksen. Kaksipuolinen jousitus, nahkainen istuin, automaattivaihteisto ja integroitu navigaattori luovat ainutlaatuisen ajokokemuksen. Mukana premium-huoltopaketti 3 vuodeksi.",
+      "price": 5999,
+      "originalPrice": null,
+      "availability": "Varastossa",
+      "tags": ["Premium", "Huoltopaketti"]
+    },
+    {
+      "id": "urb-3",
+      "name": "Compact Fold",
+      "categoryId": "kaupunki",
+      "imageUrl": "https://images.unsplash.com/photo-1455641374154-422f32e234cd?w=800&h=600&fit=crop",
+      "shortDescription": "Taitettava sähköpyörä kaupunkiin ja matkalle",
+      "longDescription": "Compact Fold on täydellinen ratkaisu niille, joilla on rajallinen säilytystila tai jotka yhdistelevät pyöräilyä julkisen liikenteen kanssa. Taittuu alle 30 sekunnissa kompaktiksi paketiksi. Kevyt mutta tehokas.",
+      "price": 2199,
+      "originalPrice": null,
+      "availability": "Varastossa",
+      "tags": ["Taitettava", "Kompakti"]
+    },
+    {
+      "id": "mnt-3",
+      "name": "Enduro Beast",
+      "categoryId": "maasto",
+      "imageUrl": "https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=800&h=600&fit=crop",
+      "shortDescription": "Äärimmäinen maastopyörä vaativiin olosuhteisiin",
+      "longDescription": "Enduro Beast on suunniteltu vaativimpiin maasto-olosuhteisiin. 750W moottori, 200mm jousitusliike ja vahvistettu runko kestävät kovan käytön. Täydellinen valinta downhilliin ja enduro-ajoon.",
+      "price": 5299,
+      "originalPrice": null,
+      "availability": "2-3 viikon toimitusaika",
+      "tags": ["Enduro", "Extreme"]
+    },
+    {
+      "id": "wrk-3",
+      "name": "Budget Commuter",
+      "categoryId": "tyo",
+      "imageUrl": "https://images.unsplash.com/photo-1571188654248-7a89213915f7?w=800&h=600&fit=crop",
+      "shortDescription": "Edullinen työmatkapyörä aloittelijoille",
+      "longDescription": "Budget Commuter on loistava vaihtoehto niille, jotka haluavat aloittaa sähköpyöräilyn ilman suurta investointia. Perusominaisuudet ovat kunnossa: luotettava moottori, riittävä kantama ja turvallinen jarrutus.",
+      "price": 1899,
+      "originalPrice": 2099,
+      "availability": "Varastossa",
+      "tags": ["Edullinen", "Aloittelijoille"]
+    },
+    {
+      "id": "prm-3",
+      "name": "Smart Connect",
+      "categoryId": "premium",
+      "imageUrl": "https://images.unsplash.com/photo-1511994477422-b69e44bd4ea9?w=800&h=600&fit=crop",
+      "shortDescription": "Älykäs sähköpyörä täydellä yhteydenpidolla",
+      "longDescription": "Smart Connect sisältää integroidun 4G-yhteyden, GPS-seurannan, varaushälytyksen ja mobiilisovelluksen. Voit tarkkailla pyöräsi tilaa, lukita/avata lukituksen etänä ja saada ilmoituksia huoltotarpeista. Teknologia ja design yhdessä.",
+      "price": 4799,
+      "originalPrice": null,
+      "availability": "Varastossa",
+      "tags": ["Smart", "GPS", "Mobiilisovellus"]
+    }
+  ],
+  "valueProps": [
+    {
+      "id": "huolto",
+      "title": "Huolto talon sisällä",
+      "description": "Oma huoltopajamme takaa nopeat ja laadukkaat huollot. Useimmat työt valmistuvat samana tai seuraavana päivänä.",
+      "icon": "🔧"
+    },
+    {
+      "id": "merkit",
+      "title": "Premium-merkit",
+      "description": "Myymme vain laadukkaita merkkejä, joiden takana on pitkä historia ja vahva takuu.",
+      "icon": "⭐"
+    },
+    {
+      "id": "toimitus",
+      "title": "Nopeat toimitukset",
+      "description": "Varastopyörät toimitetaan 1-3 arkipäivässä Helsingin alueelle. Tilaustuotteet 2-4 viikkoa.",
+      "icon": "🚚"
+    },
+    {
+      "id": "rahoitus",
+      "title": "Joustavat rahoitukset",
+      "description": "Tarjoamme joustavia rahoitusvaihtoehtoja yhteistyössä luotettavien kumppaneidemme kanssa.",
+      "icon": "💳"
+    },
+    {
+      "id": "kokemus",
+      "title": "Asiantunteva palvelu",
+      "description": "Henkilökuntamme on koulutettu auttamaan sinua löytämään juuri sinulle sopivan sähköpyörän.",
+      "icon": "👥"
+    }
+  ],
+  "services": [
+    {
+      "id": "perus",
+      "name": "Perushuolto",
+      "description": "Ketjun huolto, vaihteiden säätö, jarrujen tarkistus ja rengaspaineiden tarkastus. Suositellaan 1-2 kertaa vuodessa.",
+      "price": "69€"
+    },
+    {
+      "id": "taydellinen",
+      "name": "Täyshuolto",
+      "description": "Kattava huolto sisältäen perushuollon lisäksi akkujen testauksen, elektroniikan diagnostiikan ja kaikki tarvittavat säädöt.",
+      "price": "149€"
+    },
+    {
+      "id": "pika",
+      "name": "Pikahuolto",
+      "description": "Akuutin ongelman korjaus samana päivänä. Esimerkiksi rengasrikko, ketjun korjaus tai jarrujen nopea säätö.",
+      "price": "Alk. 39€"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "test-1",
+      "name": "Matti Virtanen",
+      "location": "Helsinki",
+      "text": "Ostin Urban Flow -pyörän viime keväänä ja olen ollut erittäin tyytyväinen. Palvelu oli ystävällistä ja asiantuntevaa. Suosittelen lämpimästi!",
+      "rating": 5
+    },
+    {
+      "id": "test-2",
+      "name": "Laura Korhonen",
+      "location": "Espoo",
+      "text": "Family Cargo on muuttanut perheen arjen. Voimme nyt hoitaa kaikki ostokset ja viedä lapset päiväkotiin pyörällä. Huolto on ollut myös erinomaista.",
+      "rating": 5
+    },
+    {
+      "id": "test-3",
+      "name": "Jukka Mäkinen",
+      "location": "Vantaa",
+      "text": "Commuter Express on tehnyt 20 km työmatkasta nautinnon. Säästän aikaa ja rahaa, ja liikun samalla. Paras hankinta vuosiin!",
+      "rating": 5
+    },
+    {
+      "id": "test-4",
+      "name": "Sanna Lehtonen",
+      "location": "Helsinki",
+      "text": "Olin epävarma sähköpyörän ostosta, mutta Helsinki eBike Centerin henkilökunta auttoi minua valitsemaan täydellisen pyörän. Koeajo oli ratkaiseva!",
+      "rating": 5
+    }
+  ],
+  "faq": [
+    {
+      "id": "faq-1",
+      "question": "Kuinka pitkälle sähköpyörällä pääsee yhdellä latauksella?",
+      "answer": "Kantama riippuu mallista, ajotavasta ja olosuhteista. Valikoimissamme olevat pyörät pääsevät 50-120 km yhdellä latauksella. Esimerkiksi City Cruiser Pro kantama on jopa 120 km taloudellisella ajotavalla."
+    },
+    {
+      "id": "faq-2",
+      "question": "Voinko kokeilla pyörää ennen ostamista?",
+      "answer": "Kyllä! Tarjoamme ilmaisia koeajoja kaikille varastossa oleville malleille. Varaa aika puhelimitse, sähköpostitse tai verkkolomakkeella. Koeajo kestää noin 30-45 minuuttia."
+    },
+    {
+      "id": "faq-3",
+      "question": "Minkälainen takuu pyörissä on?",
+      "answer": "Kaikissa pyörissämme on vähintään 2 vuoden takuu runkoon ja elektroniikkaan. Premium-malleissa takuu on 3-5 vuotta. Akuissa on 2 vuoden takuu tai 500 lataussykliä."
+    },
+    {
+      "id": "faq-4",
+      "question": "Huollatko muiden merkkisiä pyöriä?",
+      "answer": "Kyllä, huollamme myös muualta ostettuja sähköpyöriä. Takuuhuollot suosittelemme kuitenkin tehtämään valtuutetussa liikkeessä. Ota yhteyttä, niin kerromme lisää."
+    },
+    {
+      "id": "faq-5",
+      "question": "Voiko sähköpyörällä ajaa talvella?",
+      "answer": "Kyllä voi! Useimmat malleistamme sopivat hyvin talviajoon. Suosittelemme nastarenkaita ja säännöllistä huoltoa talvikuukausina. Tarjoamme myös talvisäilytyspalvelua."
+    },
+    {
+      "id": "faq-6",
+      "question": "Tarvitseeko sähköpyörään ajokorttia?",
+      "answer": "Tavallisiin sähköpyöriin (max 25 km/h avustus) ei tarvita ajokorttia. S-Pedelec-malleihin (max 45 km/h) tarvitset vähintään mopoauton ajokortin ja kypärän."
+    },
+    {
+      "id": "faq-7",
+      "question": "Miten lataus tapahtuu?",
+      "answer": "Sähköpyörät ladataan tavallisesta pistorasiasta mukana tulevalla laturilla. Lataus kestää yleensä 3-6 tuntia. Akun voi irrottaa ja ladata sisällä tai ladata pyörän ollessa ulkona."
+    },
+    {
+      "id": "faq-8",
+      "question": "Mitä rahoitusvaihtoehtoja tarjoatte?",
+      "answer": "Tarjoamme 0-36 kuukauden rahoitusta yhteistyössä pankkikumppaneidemme kanssa. Esimerkiksi 3000€ pyörän voi hankkia alkaen 100€/kk. Kysy lisää myymälästä!"
+    },
+    {
+      "id": "faq-9",
+      "question": "Voiko pyörän toimittaa kotiin?",
+      "answer": "Kyllä! Toimitamme pyörät Helsingin alueelle 1-3 arkipäivässä. Toimitus sisältää pyörän kasauksen, asetukset ja lyhyen perehdytyksen käyttöön. Toimituskulut alk. 49€."
+    },
+    {
+      "id": "faq-10",
+      "question": "Myyttekö käytettyjä pyöriä?",
+      "answer": "Kyllä, meillä on vaihtuva valikoima laadukkaita käytettyjä pyöriä. Kaikki käytetyt pyörät on huollettu ja niissä on 6 kuukauden takuu. Kysy valikoimasta!"
+    }
+  ]
+}
