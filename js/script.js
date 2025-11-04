@@ -1,3 +1,18 @@
+// i18n Configuration - Finnish text messages
+const MESSAGES = {
+    contact: {
+        requiredFields: 'Täytä yritys-, nimi- ja sähköpostikentät.',
+        invalidEmail: 'Tarkista sähköpostiosoite.',
+        consentRequired: 'Hyväksy tietosuoja, jotta voimme olla yhteydessä.',
+        success: 'Kiitos viestistä – AnomFIN | AnomTools palaa pian asiaan.'
+    },
+    linkShortener: {
+        success: 'Lyhyt linkki on valmis – HyperLaunch valmiina jakoon.',
+        error: 'Lyhennys epäonnistui – tarkista yhteys tai ota yhteyttä AnomFIN-tiimiin.',
+        copied: 'Kopioitu! Jaetaan turvallisesti.'
+    }
+};
+
 // Mobile Navigation Toggle & Smooth Scroll Enhancements
 let navbarRef = null;
 let navLogoRef = null;
@@ -499,26 +514,26 @@ function initContactForm() {
         const consentChecked = contactForm.querySelector('input[name="consent"]')?.checked;
 
         if (!company || !name || !email) {
-            showNotification('Täytä yritys-, nimi- ja sähköpostikentät.', 'error');
+            showNotification(MESSAGES.contact.requiredFields, 'error');
             formStatus.textContent = 'Täytä pakolliset kentät.';
             return;
         }
 
         if (!isValidEmail(email)) {
-            showNotification('Tarkista sähköpostiosoite.', 'error');
+            showNotification(MESSAGES.contact.invalidEmail, 'error');
             formStatus.textContent = 'Virheellinen sähköpostiosoite.';
             return;
         }
 
         if (!consentChecked) {
-            showNotification('Hyväksy tietosuoja, jotta voimme olla yhteydessä.', 'error');
+            showNotification(MESSAGES.contact.consentRequired, 'error');
             formStatus.textContent = 'Hyväksy tietosuojaseloste.';
             return;
         }
 
         contactForm.reset();
         formStatus.textContent = 'Kiitos! Otamme yhteyttä 24 tunnin sisällä.';
-        showNotification('Kiitos viestistä – AnomFIN | AnomTools palaa pian asiaan.', 'success');
+        showNotification(MESSAGES.contact.success, 'success');
     });
 }
 
@@ -623,11 +638,11 @@ function initLinkShortener() {
             linkEl.href = shortUrl;
             resultEl.hidden = false;
             setStatus('Lyhyt linkki luotu! Kopioi ja jaa turvallisesti.', 'success');
-            showNotification('Lyhyt linkki on valmis – HyperLaunch valmiina jakoon.', 'success');
+            showNotification(MESSAGES.linkShortener.success, 'success');
         } catch (error) {
             console.error('Link shortener error:', error);
             setStatus('Palvelimeen ei saatu yhteyttä. Yritä hetken kuluttua uudelleen.', 'error');
-            showNotification('Lyhennys epäonnistui – tarkista yhteys tai ota yhteyttä AnomFIN-tiimiin.', 'error');
+            showNotification(MESSAGES.linkShortener.error, 'error');
         } finally {
             toggleLoading(false);
         }
@@ -650,7 +665,7 @@ function initLinkShortener() {
                 tempInput.remove();
             }
             setStatus('Lyhyt linkki kopioitu leikepöydälle.', 'success');
-            showNotification('Kopioitu! Jaetaan turvallisesti.', 'success');
+            showNotification(MESSAGES.linkShortener.copied, 'success');
         } catch (error) {
             console.error('Clipboard copy failed:', error);
             setStatus('Kopiointi epäonnistui – kopioi manuaalisesti.', 'error');

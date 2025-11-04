@@ -1008,17 +1008,19 @@ body[data-hero-mask="0"] .hero-grid::before {
     left: 0;
     width: clamp(240px, 22vw, 320px);
     pointer-events: none;
-    transform: translate3d(-9999px, -9999px, 0);
+    visibility: hidden;
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.6s ease, visibility 0s linear 0.6s;
     z-index: 1005;
-    will-change: transform, filter;
+    will-change: filter;
     filter: drop-shadow(0 30px 55px rgba(0, 0, 0, 0.45));
     --scroll-progress: 0;
 }
 
 .scroll-companion.ready {
     opacity: 1;
+    visibility: visible;
+    transition: opacity 0.6s ease, visibility 0s linear 0s;
 }
 
 .scroll-companion.chat-panel-fullscreen {
