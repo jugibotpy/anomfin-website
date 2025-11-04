@@ -3,604 +3,1580 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AnomFIN koodaa yrityksellenne yksilölliset sovellukset kaikille alustoille – kyberturva sisäänrakennettuna.">
-    <title>AnomFIN – Yksilölliset sovellukset ja kyberturvaratkaisut</title>
-    <link rel="preload" href="assets/logo.png" as="image" type="image/png">
+    <meta name="description" content="Helsinki eBike Center - Sähköpyörien premium-koti Helsingissä. Laadukkaita sähköpyöriä, asiantuntevaa huoltoa ja paikallista palvelua.">
+    <title>Helsinki eBike Center – Sähköpyörien premium-koti Helsingissä</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SEO Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Helsinki eBike Center">
+    <meta property="og:title" content="Helsinki eBike Center – Sähköpyörien premium-koti Helsingissä">
+    <meta property="og:description" content="Laadukkaita sähköpyöriä, asiantuntevaa huoltoa ja takuuta, jolla voit luottaa. Paikallista palvelua sydämellä.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&h=630&fit=crop">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Helsinki eBike Center">
+    <meta name="twitter:description" content="Sähköpyörien premium-koti Helsingissä">
+    
     <link rel="icon" href="assets/logotp.png" type="image/png">
-    <link rel="apple-touch-icon" href="assets/logo.png">
-    <link rel="canonical" href="https://anomfin.fi" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="AnomFIN" />
-    <meta property="og:title" content="AnomFIN – Yksilölliset sovellukset ja kyberturvaratkaisut" />
-    <meta property="og:description" content="AnomFIN koodaa yrityksellenne yksilölliset sovellukset kaikille alustoille – kyberturva sisäänrakennettuna." />
-    <meta property="og:url" content="https://anomfin.fi" />
-    <meta property="og:image" content="https://anomfin.fi/assets/logo.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AnomFIN – Yksilölliset sovellukset ja kyberturvaratkaisut" />
-    <meta name="twitter:description" content="AnomFIN koodaa yrityksellenne yksilölliset sovellukset kaikille alustoille – kyberturva sisäänrakennettuna." />
-    <meta name="twitter:image" content="https://anomfin.fi/assets/logo.png" />
+    
+    <style>
+        :root {
+            --color-bg: #0a0e1a;
+            --color-bg-light: #131824;
+            --color-bg-card: #1a1f2e;
+            --color-text: #ffffff;
+            --color-text-dim: #a0a8b8;
+            --color-primary: #00d9ff;
+            --color-primary-glow: rgba(0, 217, 255, 0.3);
+            --color-secondary: #00ff88;
+            --color-accent: #ff00ff;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --font-primary: 'Inter', sans-serif;
+            --font-display: 'Space Grotesk', sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header & Navigation */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            transition: var(--transition);
+        }
+        
+        .header.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 4px 20px rgba(0, 217, 255, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: var(--color-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--color-primary);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-primary);
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: var(--color-primary);
+            transition: var(--transition);
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 6rem 2rem 4rem;
+            overflow: hidden;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(255, 0, 255, 0.1));
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            text-align: center;
+        }
+        
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: var(--color-text-dim);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+        
+        .hero-description {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--color-text-dim);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
+        }
+        
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.6s backwards;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-bg);
+            box-shadow: 0 4px 20px var(--color-primary-glow);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 30px var(--color-primary-glow);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: var(--color-bg);
+            transform: translateY(-3px);
+        }
+        
+        /* Section Styles */
+        section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3rem);
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: var(--color-text-dim);
+            font-size: 1.2rem;
+            margin-bottom: 4rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Value Props Grid */
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .value-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .value-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--color-primary-glow), transparent);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .value-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 40px var(--color-primary-glow);
+        }
+        
+        .value-card:hover::before {
+            opacity: 1;
+        }
+        
+        .value-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .value-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .value-card p {
+            color: var(--color-text-dim);
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Categories */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .category-card {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            height: 300px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .category-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .category-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(10, 14, 26, 0.9), transparent);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+        
+        .category-card:hover img {
+            transform: scale(1.1);
+        }
+        
+        .category-card:hover .category-overlay {
+            background: linear-gradient(to top, rgba(0, 217, 255, 0.3), transparent);
+        }
+        
+        .category-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .category-card p {
+            color: var(--color-text-dim);
+        }
+        
+        /* Products Section */
+        .products-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            color: var(--color-text);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 20px var(--color-primary-glow);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-dim);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--color-primary);
+            color: var(--color-bg);
+            border-color: var(--color-primary);
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+        
+        .product-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 40px var(--color-primary-glow);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .product-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-category {
+            color: var(--color-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        
+        .product-name {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-short-desc {
+            color: var(--color-text-dim);
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+        
+        .product-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .product-tag {
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--color-primary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--color-primary);
+        }
+        
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .product-price {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-secondary);
+        }
+        
+        .product-price-original {
+            text-decoration: line-through;
+            color: var(--color-text-dim);
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+        
+        .product-availability {
+            font-size: 0.9rem;
+            color: var(--color-text-dim);
+        }
+        
+        .product-availability.in-stock {
+            color: var(--color-secondary);
+        }
+        
+        .product-expand-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--color-primary);
+            color: var(--color-primary);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+        
+        .product-expand-btn:hover {
+            background: var(--color-primary);
+            color: var(--color-bg);
+        }
+        
+        .product-long-desc {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-border);
+            color: var(--color-text-dim);
+            display: none;
+        }
+        
+        .product-long-desc.show {
+            display: block;
+        }
+        
+        /* Services */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .service-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: var(--transition);
+            text-align: center;
+        }
+        
+        .service-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-10px);
+            box-shadow: 0 10px 40px var(--color-primary-glow);
+        }
+        
+        .service-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--color-primary);
+        }
+        
+        .service-card p {
+            color: var(--color-text-dim);
+            margin-bottom: 1.5rem;
+        }
+        
+        .service-price {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-secondary);
+        }
+        
+        /* Testimonials */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .testimonial-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            font-size: 5rem;
+            color: var(--color-primary);
+            opacity: 0.2;
+            font-family: Georgia, serif;
+        }
+        
+        .testimonial-text {
+            color: var(--color-text-dim);
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+            font-style: italic;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .testimonial-name {
+            font-weight: 600;
+        }
+        
+        .testimonial-location {
+            color: var(--color-text-dim);
+            font-size: 0.9rem;
+        }
+        
+        .testimonial-rating {
+            color: #ffd700;
+        }
+        
+        /* FAQ */
+        .faq-list {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .faq-item:hover {
+            border-color: var(--color-primary);
+        }
+        
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+        
+        .faq-question:hover {
+            color: var(--color-primary);
+        }
+        
+        .faq-icon {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            transition: var(--transition);
+        }
+        
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .faq-answer-content {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--color-text-dim);
+            line-height: 1.8;
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+        
+        /* Contact Form */
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+        
+        .contact-info {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+        
+        .contact-info h3 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: var(--color-primary);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .contact-icon {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            min-width: 30px;
+        }
+        
+        .contact-details p {
+            margin: 0;
+            color: var(--color-text-dim);
+        }
+        
+        .contact-details strong {
+            color: var(--color-text);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .social-link {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 1.5rem;
+        }
+        
+        .social-link:hover {
+            background: var(--color-primary);
+            color: var(--color-bg);
+            transform: translateY(-5px);
+        }
+        
+        .contact-form {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            color: var(--color-text);
+            font-size: 1rem;
+            font-family: var(--font-primary);
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 20px var(--color-primary-glow);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        .form-message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .form-message.success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--color-secondary);
+            color: var(--color-secondary);
+            display: block;
+        }
+        
+        .form-message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff6b6b;
+            display: block;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--color-bg-light);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            text-align: center;
+            color: var(--color-text-dim);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: rgba(10, 14, 26, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                padding: 2rem;
+                gap: 1.5rem;
+                border-bottom: 1px solid var(--color-border);
+            }
+            
+            .nav-menu.active {
+                display: flex;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .hero-cta {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .products-filter {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--color-text-dim);
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <a class="skip-link" href="#main">Siirry sisältöön</a>
-
-    <div class="intro-overlay" aria-hidden="true">
-        <div class="blackout"></div>
-        <img src="assets/logo.png" alt="" class="intro-logo neon-logo" width="320" height="320" decoding="async" fetchpriority="high">
-    </div>
-
-    <nav class="navbar" role="navigation" aria-label="Päävalikko">
+    <!-- Header -->
+    <header class="header" id="header">
         <div class="nav-container">
-            <a class="nav-logo" href="#home" aria-label="AnomFIN etusivu">
-                <span class="nav-logo-symbol">
-                    <img src="assets/logotp.png" alt="AnomFIN | AnomTools logo" class="nav-logo-emblem" width="72" height="72" decoding="async">
-                    <span class="nav-logo-aura" aria-hidden="true">
-                        <span class="nav-logo-orbit"></span>
-                        <span class="nav-logo-comet"></span>
-                        <span class="nav-logo-flare"></span>
-                    </span>
-                </span>
-                <div class="nav-logo-text">
-                    <h2>AnomFIN</h2>
-                    <span class="nav-logo-subtitle">AnomTools HyperFlux</span>
-                </div>
+            <a href="#hero" class="logo">
+                <span class="logo-icon">🚴</span>
+                <span>Helsinki eBike Center</span>
             </a>
-            <ul class="nav-menu" id="primary-menu">
-                <li class="nav-item"><a href="#home" class="nav-link">Etusivu</a></li>
-                <li class="nav-item"><a href="#services" class="nav-link">Palvelut</a></li>
-                <li class="nav-item"><a href="#platforms" class="nav-link">Alustat</a></li>
-                <li class="nav-item"><a href="#applications" class="nav-link">Sovellukset</a></li>
-                <li class="nav-item"><a href="#softamme" class="nav-link">Softamme</a></li>
-                <li class="nav-item"><a href="#security" class="nav-link">Kyberturva</a></li>
-                <li class="nav-item"><a href="#pricing" class="nav-link">Hinnoittelu</a></li>
-                <li class="nav-item"><a href="#contact" class="nav-link nav-link-cta">Ota yhteyttä</a></li>
-            </ul>
-            <button class="nav-toggle" id="mobile-menu" aria-expanded="false" aria-controls="primary-menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#hero" class="nav-link">Etusivu</a></li>
+                    <li><a href="#why" class="nav-link">Miksi me</a></li>
+                    <li><a href="#categories" class="nav-link">Kategoriat</a></li>
+                    <li><a href="#products" class="nav-link">Tuotteet</a></li>
+                    <li><a href="#services" class="nav-link">Huolto</a></li>
+                    <li><a href="#testimonials" class="nav-link">Referenssit</a></li>
+                    <li><a href="#faq" class="nav-link">FAQ</a></li>
+                    <li><a href="#contact" class="nav-link">Yhteystiedot</a></li>
+                </ul>
+            </nav>
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
         </div>
-    </nav>
+    </header>
 
-    <!-- COPILOT_HINT: Tämä tiedosto on MVP. Siirrä sisältö content/site.json → komponentteihin.
-         Luo Astro/Next -projekti ja tee reitit: /, /palvelut/[slug], /hinnoittelu, /yhteys.
-         Komponentit: Hero, CardGrid, Pricing, FAQ. Käytä schema.org. -->
-
-    <main id="main" data-source="content/site.json">
-        <section id="home" class="hero" data-section="hero">
-            <div class="hero-container">
-                <div class="hero-content">
-                    <p class="eyebrow eyebrow-big" data-content-key="heroEyebrow"><span class="flare-boost" data-content-key="heroHighlight">Yksilöllinen</span> sovelluskehitys &amp; kyberturva</p>
-                    <h1 class="hero-title" data-content-key="heroTitle">
-                        <span class="hero-title-line">Yksilöllisten</span>
-                        <span class="hero-title-line">Sovellusten</span>
-                        <span class="hero-title-line">Valmistaminen</span>
-                        <span class="hero-title-line hero-title-subline">- Juuri yrityksenne tarpeisiin.</span>
-                    </h1>
-                    <p class="hero-subtitle" data-content-key="heroSubtitle">Sovelluksia <strong>kaikille alustoille</strong> – mobiilista työpöydälle. Kyberturva sisäänrakennettuna jokaisessa ratkaisussa.</p>
-                    <div class="hero-buttons">
-                        <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn btn-primary">Varaa 30 min kartoitus</a>
-                        <a href="#services" class="btn btn-secondary">Tutustu palveluihin</a>
-                        <a href="AnomCounter.html" class="btn btn-ghost">Snagen DRAGON Countdown</a>
-                    </div>
-                    <div class="link-shortener" id="link-shortener">
-                        <form class="shortener-form" id="short-link-form" novalidate>
-                            <div class="shortener-fields">
-                                <label class="sr-only" for="shortener-target">Pitkä osoite</label>
-                                <input type="url" id="shortener-target" name="target" placeholder="Liitä pitkä URL (https://...)" autocomplete="off" required>
-                                <label class="sr-only" for="shortener-alias">Lyhytkoodi</label>
-                                <input type="text" id="shortener-alias" name="alias" placeholder="Alias (max 4 merkkiä)" autocomplete="off" maxlength="4" pattern="[A-Za-z0-9]{1,4}">
-                            </div>
-                                <div class="shortener-footer">
-                                    <button type="submit" class="btn btn-primary shortener-submit">Luo lyhyt linkki</button>
-                                    <div class="shortener-result" id="shortener-result" hidden>
-                                        <span class="result-label">Lyhyt [url]</span>
-                                        <div class="result-link-group">
-                                            <a href="#" id="shortener-link" target="_blank" rel="noopener noreferrer">anomfin.fi/?s=anom</a>
-                                            <button type="button" class="copy-short-link" id="shortener-copy">Kopioi</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                            <p class="shortener-status" id="shortener-status" role="status" aria-live="polite"></p>
-                            <p class="shortener-hint" id="shortener-hint" aria-live="polite"></p>
-                        </div>
-                        <ul class="hero-metrics">
-                            <li>
-                                <span class="metric-value">24/7</span>
-                                <span class="metric-label">valvonta ja tuki</span>
-                        </li>
-                        <li>
-                            <span class="metric-value">100%</span>
-                            <span class="metric-label">kotimaisuus</span>
-                        </li>
-                        <li>
-                            <span class="metric-value">Avaimet käteen</span>
-                            <span class="metric-label">paketti</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="hero-visual" aria-hidden="true">
-                    <div class="hero-orb"></div>
-                    <div class="hero-grid"></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="services" class="section-block services" data-section="services">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title fade-in-smooth">Palvelumme</h2>
-                    <p class="section-tag" data-content-key="serviceTagline">"Koodia, joka kantaa – tänään ja huomenna."</p>
-                    <p class="section-sub" data-content-key="serviceIntro">Toimitamme pienen toimivan version nopeasti – kasvatamme tarpeen mukaan.</p>
-                </div>
-                <div class="services-grid premium">
-                    <article class="service-card">
-                        <div class="service-icon">⚡</div>
-                        <h3>Kotisivupalvelut HyperLaunch</h3>
-                        <p>Responsiivinen yrityssivusto, optimointi ja jälkiseuranta.</p>
-                        <ul class="service-points">
-                            <li>Ylläpito ja tietoturvapäivitykset 5 vuodeksi</li>
-                            <li>Domain + webhotelli sisältyy</li>
-                            <li>HyperFlux-analytiikka ja suorituskykyraportit</li>
-                        </ul>
-                        <div class="service-price">499 €</div>
-                    </article>
-                    <article class="service-card highlight">
-                        <div class="service-icon">📱</div>
-                        <h3>Mobiili &amp; Desktop -sovellukset</h3>
-                        <p>iOS, Android, Windows, macOS ja Linux – yksi tiimi, sama turvallinen koodi.</p>
-                        <ul class="service-points">
-                            <li>UI/UX-suunnittelu ja prototyypit</li>
-                            <li>Integraatiot CRM/ERP -järjestelmiin</li>
-                            <li>Kyberturva ja kovennukset vakiopalveluna</li>
-                        </ul>
-                        <div class="service-price">Demo ilmaiseksi · Alk. 999 €</div>
-                    </article>
-                    <article class="service-card service-card-flagship">
-                        <div class="service-icon">🧠</div>
-                        <h3>Laajat monialustasovellukset</h3>
-                        <p>Järjestelmät, jotka yhdistävät IoT:n, pilven ja tekoälyn.</p>
-                        <ul class="service-points">
-                            <li>DevSecOps-putki ja jatkuva toimitus</li>
-                            <li>Skalaarinen mikroarkkitehtuuri</li>
-                            <li>Audit trail, SSO ja compliance</li>
-                        </ul>
-                        <div class="service-price">Alk. 2 999 €</div>
-                        <div class="service-luxe-note" aria-hidden="true">
-                            <span class="service-luxe-icon">✶</span>
-                            HyperLaunch Elite Build – koko AnomFIN-tiimi koodaa teille oman digitaalisen ydinsydämen.
-                        </div>
-                    </article>
-                    <article class="service-card">
-                        <div class="service-icon">🤖</div>
-                        <h3>AI-asiakaspalvelubotit</h3>
-                        <p>Tuki 24/7 OpenAI-, Azure- ja on-prem -malleilla.</p>
-                        <ul class="service-points">
-                            <li>Finnish GPT -sovitus ja tietoturvatarkastus</li>
-                            <li>Käyttöönotto verkkosivuille, sovelluksiin ja WhatsAppiin</li>
-                            <li>Raportit ja jatkuva koulutus dataanne vasten</li>
-                        </ul>
-                        <div class="service-price">Alk. 499 € + kuukausilisenssi</div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section id="platforms" class="section-block platforms" data-section="platforms">
-            <div class="container">
-                <div class="section-header">
-                    <p class="eyebrow">Julkaisut kaikille päätelaitteille</p>
-                    <h2 class="section-title">Alustat</h2>
-                </div>
-                <div class="platforms-grid" role="list" id="platform-chiplist">
-                    <div class="platform-chip" role="listitem">iOS</div>
-                    <div class="platform-chip" role="listitem">Android</div>
-                    <div class="platform-chip" role="listitem">macOS</div>
-                    <div class="platform-chip" role="listitem">Windows</div>
-                    <div class="platform-chip" role="listitem">Linux</div>
-                    <div class="platform-chip" role="listitem">Web</div>
-                </div>
-                <div class="platform-visual-gallery" id="platform-visuals" aria-live="polite"></div>
-            </div>
-        </section>
-
-        <section id="applications" class="section-block applications" data-section="applications">
-            <div class="container">
-                <div class="section-header">
-                    <p class="eyebrow">Esimerkkiprojektit</p>
-                    <h2 class="section-title">Sovellukset</h2>
-                    <p class="section-sub">Esimerkkejä toteutetuista ratkaisuista ja avoimista projekteista.</p>
-                </div>
-                <div class="applications-gallery" id="applications-gallery">
-                    <div class="loading-placeholder">
-                        <div class="loading-spinner"></div>
-                        <p>Ladataan projekteja...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="softamme" class="section-block softamme" data-section="softamme">
-            <div class="container">
-                <div class="section-header">
-                    <p class="eyebrow">Avoin lähdekoodi</p>
-                    <h2 class="section-title">Softamme</h2>
-                    <p class="section-sub">AnomFIN GitHub -projektit ja avoimen lähdekoodin periaatteet.</p>
-                </div>
-                <div class="softamme-content">
-                    <div class="softamme-intro">
-                        <p>Uskomme avoimen lähdekoodin voimaan. Kaikki projektimme ovat vapaasti saatavilla GitHubissa, jotta yhteisö voi oppia, osallistua ja kehittää niitä edelleen.</p>
-                        <p>Projektimme kattavat laajan kirjon työkaluja kyberturvasta sovelluskehitykseen, ja ne on rakennettu käyttäen moderneja teknologioita kuten Python, TypeScript, ja Go.</p>
-                    </div>
-                    <div class="softamme-principles">
-                        <h3>Avoimen lähdekoodin periaatteet</h3>
-                        <ul class="checks">
-                            <li><strong>Läpinäkyvyys:</strong> Kaikki koodi on avointa ja tarkastettavissa</li>
-                            <li><strong>Yhteisöllisyys:</strong> Kehitämme yhdessä avoimen yhteisön kanssa</li>
-                            <li><strong>Innovaatio:</strong> Jaamme parhaat käytännöt ja työkalut</li>
-                            <li><strong>Turvallisuus:</strong> Avoin koodi = avoin tietoturva-auditointi</li>
-                        </ul>
-                    </div>
-                    <div class="softamme-projects">
-                        <h3>Projektimme</h3>
-                        <div class="softamme-deck" id="softamme-deck">
-                            <article class="soft-card">
-                                <h4>AnomFIN HyperFlux</h4>
-                                <p>Realtime SOC-hallintapaneeli, joka seuraa liikennettä ja triggaa automaattiset toimenpiteet.</p>
-                                <span class="soft-stack">Stack: Go · TypeScript · Suricata</span>
-                            </article>
-                            <article class="soft-card">
-                                <h4>JugiBot v4</h4>
-                                <p>Monikielinen asiakaspalvelubotti OpenAI- ja Azure-yhteyksillä, hallintanäkymä asetuksineen.</p>
-                                <span class="soft-stack">Stack: Python · FastAPI · GPT-4.1</span>
-                            </article>
-                            <article class="soft-card">
-                                <h4>LexAI</h4>
-                                <p>Tekoälyjuristi, joka tiivistää sopimukset, nostaa riskikohdat ja tuottaa muutos-ehdotukset.</p>
-                                <span class="soft-stack">Stack: Next.js · LangChain · Pinecone</span>
-                            </article>
-                        </div>
-                        <p class="softamme-tech">
-                            <strong>Teknologiat:</strong> Kali Linux, Ubuntu v22.04, Python, TypeScript, Go, Docker, Terraform, Azure
-                        </p>
-                    </div>
-                    <div class="softamme-cta">
-                        <a href="https://github.com/AnomFIN" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                            Tutustu GitHubiin →
-                        </a>
-                        <button id="mobile-hypercube-trigger" class="btn btn-secondary mobile-only">
-                            Näytä HyperCube 🎯
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Cybersecurity meets clarity. -->
-        <section id="diagnostics" class="section-block diagnostics" data-section="diagnostics">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title fade-in-smooth">Kyberturvan analytiikka</h2>
-                    <p class="section-sub">Arvioi riskit ja takaisinmaksu – kaikki suoraan selaimessa.</p>
-                </div>
-                <div class="diagnostics-grid">
-                    <article class="diagnostics-card" aria-labelledby="risk-card-title">
-                        <div class="card-header">
-                            <h3 id="risk-card-title">Riskiradari</h3>
-                            <p class="card-subtitle">Säädä altistus, havaitseminen, palautuminen ja compliance.</p>
-                        </div>
-                        <form id="risk-form" class="diagnostics-form" novalidate>
-                            <fieldset>
-                                <legend class="sr-only">Riskiparametrit</legend>
-                                <div class="form-range">
-                                    <label for="risk-exposure">Hyökkäyspinta</label>
-                                    <input type="range" id="risk-exposure" name="exposure" min="0" max="5" step="1" value="3">
-                                    <output for="risk-exposure">3 / 5</output>
-                                </div>
-                                <div class="form-range">
-                                    <label for="risk-monitoring">Havaitseminen</label>
-                                    <input type="range" id="risk-monitoring" name="monitoring" min="0" max="5" step="1" value="3">
-                                    <output for="risk-monitoring">3 / 5</output>
-                                </div>
-                                <div class="form-range">
-                                    <label for="risk-recovery">Palautuminen</label>
-                                    <input type="range" id="risk-recovery" name="recovery" min="0" max="5" step="1" value="3">
-                                    <output for="risk-recovery">3 / 5</output>
-                                </div>
-                                <div class="form-range">
-                                    <label for="risk-compliance">Compliance</label>
-                                    <input type="range" id="risk-compliance" name="compliance" min="0" max="5" step="1" value="3">
-                                    <output for="risk-compliance">3 / 5</output>
-                                </div>
-                            </fieldset>
-                        </form>
-                        <div class="diagnostics-result" aria-live="polite">
-                            <div class="result-score">
-                                <span class="result-label">Riskipisteet</span>
-                                <span id="risk-score" class="result-value">0</span>
-                            </div>
-                            <div class="result-meta">
-                                <span id="risk-level" class="result-level" data-level="guarded">Valvottu</span>
-                                <span id="risk-telemetry" class="result-telemetry">0 % hyökkäyspintaa · 0 % valvontavajetta</span>
-                            </div>
-                            <ul id="risk-insights" class="result-list">
-                                <li>Syötä arvot liukusäätimillä nähdäksesi riskianalyysin.</li>
-                            </ul>
-                        </div>
-                    </article>
-                    <article class="diagnostics-card" aria-labelledby="roi-card-title">
-                        <div class="card-header">
-                            <h3 id="roi-card-title">Resilienssin ROI</h3>
-                            <p class="card-subtitle">Mallinna investoinnin vaikutus vuotuisiin tappioihin.</p>
-                        </div>
-                        <form id="roi-form" class="diagnostics-form" novalidate>
-                            <fieldset>
-                                <legend class="sr-only">ROI-parametrit</legend>
-                                <div class="form-field">
-                                    <label for="roi-incidents">Vuosittaiset tapaukset</label>
-                                    <input type="number" id="roi-incidents" name="incidentsPerYear" min="0" max="120" step="1" value="6" inputmode="numeric">
-                                </div>
-                                <div class="form-field">
-                                    <label for="roi-cost">Keskimääräinen kustannus / tapaus (€)</label>
-                                    <input type="number" id="roi-cost" name="avgIncidentCost" min="0" max="10000000" step="1000" value="25000" inputmode="decimal">
-                                </div>
-                                <div class="form-field">
-                                    <label for="roi-automation">Automaation peitto (%)</label>
-                                    <input type="number" id="roi-automation" name="automationCoverage" min="0" max="100" step="5" value="45" inputmode="decimal">
-                                </div>
-                                <div class="form-field">
-                                    <label for="roi-improvement">Parannusaste (%)</label>
-                                    <input type="number" id="roi-improvement" name="improvementRate" min="0" max="100" step="5" value="30" inputmode="decimal">
-                                </div>
-                                <div class="form-field">
-                                    <label for="roi-investment">Investointi (€)</label>
-                                    <input type="number" id="roi-investment" name="investment" min="0" max="10000000" step="1000" value="80000" inputmode="decimal">
-                                </div>
-                            </fieldset>
-                        </form>
-                        <div class="diagnostics-result" aria-live="polite">
-                            <div class="result-metric">
-                                <span class="result-label">Nykyiset tappiot</span>
-                                <span id="roi-baseline" class="result-value">€0</span>
-                            </div>
-                            <div class="result-metric">
-                                <span class="result-label">Estetyt tappiot</span>
-                                <span id="roi-savings" class="result-value">€0</span>
-                            </div>
-                            <div class="result-metric">
-                                <span class="result-label">Takaisinmaksu</span>
-                                <span id="roi-payback" class="result-value">Ei takaisinmaksua nykyisillä arvoilla</span>
-                            </div>
-                            <p id="roi-summary" class="result-summary">Täytä tiedot ja näet takaisinmaksuajan.</p>
-                        </div>
-                    </article>
-                    <article class="diagnostics-card blueprint" id="blueprint-card" aria-labelledby="blueprint-card-title">
-                        <div class="card-header">
-                            <h3 id="blueprint-card-title">Toimintabluuprintti</h3>
-                            <p class="card-subtitle">Priorisoidut seuraavat askeleet riskin ja ROI:n perusteella.</p>
-                        </div>
-                        <div class="blueprint-body">
-                            <span id="blueprint-status" class="blueprint-status" data-status="idle">idle</span>
-                            <p id="blueprint-narrative" class="blueprint-narrative">Syötä lähtötiedot arviointiin.</p>
-                            <ul id="blueprint-actions" class="result-list">
-                                <li>Syötä tiedot saadaksesi priorisoidut toimet.</li>
-                            </ul>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section id="security" class="section-block security" data-section="security">
-            <div class="container">
-                <div class="security-inner">
-                    <div class="security-content">
-                        <p class="eyebrow">Kyberturva sisäänrakennettuna</p>
-                        <h2 class="section-title">Kyberturva</h2>
-                        <ul class="checks">
-                            <li>PhishHunterAI™ – huijausviestien tunnistus ja riskipisteytys</li>
-                            <li>SMS Shield™ – tekstiviestihuijausten torjunta</li>
-                            <li>M365/Google kovennukset ja valvonta</li>
-                            <li>Incident-apuri: eristys, forensiikka, palautus</li>
-                        </ul>
-                    </div>
-                    <aside class="security-cta">
-                        <h3>PoC viikoissa</h3>
-                        <p>Rakennamme pienen, todennettavan kokeilun nopeasti ja viemme tuotantoon turvallisesti.</p>
-                        <a href="#contact" class="btn btn-ghost">Pyydä demo</a>
-                    </aside>
-                </div>
-                <div class="security-ops-grid">
-                    <section class="security-ops-dashboard">
-                        <header class="security-ops-header">
-                            <div>
-                                <p class="eyebrow">Reaaliaikainen näkymä</p>
-                                <h3>Tilannehuone 360°</h3>
-                            </div>
-                            <button type="button" class="btn btn-small" data-security-refresh>↻ Päivitä</button>
-                        </header>
-                        <div class="security-dashboard" data-security-dashboard data-state="idle">
-                            <div class="security-dashboard-placeholder">
-                                <p>Haetaan viimeisin turvallisuusaineisto...</p>
-                            </div>
-                        </div>
-                    </section>
-                    <section class="security-ops-playbooks">
-                        <h3>Resilienssi-brief</h3>
-                        <ul class="playbook-list">
-                            <li>
-                                <h4>Zero Trust -vartio</h4>
-                                <p>MFA pakotus, automaattinen session päättäminen ja lokien replikointi EU-alueelle.</p>
-                            </li>
-                            <li>
-                                <h4>Patch Tuesday Blitz</h4>
-                                <p>48h sisällä prioriteetti 1 -päivitykset, rollback-skenaariot ja varmistettu testiympäristö.</p>
-                            </li>
-                            <li>
-                                <h4>Insidenttipöytäkirja</h4>
-                                <p>Selkeä 5-vaiheinen runbook: havaitse → eristä → kommunikoi → korjaa → dokumentoi.</p>
-                            </li>
-                        </ul>
-                    </section>
-                </div>
-            </div>
-        </section>
-
-        <section id="pricing" class="section-block pricing" data-section="pricing">
-            <div class="container">
-                <div class="section-header">
-                    <p class="eyebrow">Palvelupaketit</p>
-                    <h2 class="section-title">Hinnoittelu</h2>
-                </div>
-                <div class="pricing-grid">
-                    <article class="price-card">
-                        <h3>Start</h3>
-                        <p class="price">alk. 690 € / kk</p>
-                        <ul>
-                            <li><strong>SLA:</strong> NBD (seuraava arkipäivä)</li>
-                            <li>Alkuauditointi</li>
-                            <li>Peruskovennus</li>
-                            <li>Koulutus + 1 simulaatio</li>
-                        </ul>
-                    </article>
-                    <article class="price-card highlight">
-                        <div class="badge">Suosituin</div>
-                        <h3>Protect</h3>
-                        <p class="price">alk. 1 490 € / kk</p>
-                        <ul>
-                            <li><strong>SLA:</strong> 4h</li>
-                            <li>Start + 24/7 valvonta</li>
-                            <li>Kuukausiraportti</li>
-                            <li>Kvartaali-katselmus</li>
-                        </ul>
-                    </article>
-                    <article class="price-card price-card-elite">
-                        <h3>Elite</h3>
-                        <p class="price">alk. 3 490 € / kk</p>
-                        <ul>
-                            <li><strong>SLA:</strong> 1h</li>
-                            <li>Protect + IR SLA</li>
-                            <li>Laajennettu automaatio</li>
-                            <li>Laajennetut simulaatiot</li>
-                        </ul>
-                        <div class="price-elite-note" aria-hidden="true">
-                            <span class="price-elite-icon">👑</span>
-                            HyperLaunch Elite Signature – oma SOC-tiimi, täysi DevSecOps &amp; jatkuva innovaatio AnomFINin johdolla.
-                        </div>
-                    </article>
-                </div>
-
-                <div class="faq" aria-label="Usein kysytyt kysymykset">
-                    <details>
-                        <summary>Mitä SLA tarkoittaa?</summary>
-                        <p>Palvelutasosopimus: vasteaika hälytyksille ja tukipyynnöille. Start: NBD, Protect: 4h, Elite: 1h.</p>
-                    </details>
-                    <details>
-                        <summary>Onko määräaikaa?</summary>
-                        <p>Kuukausi kerrallaan tai 12 kk alennuksella. Ei vendor-lockia.</p>
-                    </details>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section-block contact" data-section="contact">
-            <div class="container contact-inner">
-                <div class="contact-info">
-                    <p class="eyebrow">Yhteys</p>
-                    <h2 class="section-title">Ota yhteyttä</h2>
-                    <p>Varataan kartoitus, priorisoidaan tarpeet ja tuodaan ratkaisut tuotantoon turvallisesti.</p>
-                    <ul class="contact-methods">
-                        <li>
-                            <span class="contact-label">Sähköposti</span>
-                            <a href="mailto:info@anomfin.fi">info@anomfin.fi</a>
-                        </li>
-                        <li>
-                            <span class="contact-label">Puhelin</span>
-                            <a href="tel:+358401234567">+358 40 123 4567</a>
-                        </li>
-                        <li>
-                            <span class="contact-label">Tuki</span>
-                            <a href="mailto:soc@anomfin.fi">soc@anomfin.fi</a>
-                        </li>
-                    </ul>
-                </div>
-                <form class="contact-form" method="post" action="#" novalidate>
-                    <div class="form-grid">
-                        <label>Yritys
-                            <input type="text" name="company" required>
-                        </label>
-                        <label>Nimi
-                            <input type="text" name="name" required>
-                        </label>
-                        <label>Sähköposti
-                            <input type="email" name="email" required>
-                        </label>
-                        <label>Puhelin
-                            <input type="tel" name="phone">
-                        </label>
-                        <label>Henkilömäärä
-                            <input type="number" name="headcount" min="1">
-                        </label>
-                        <label>Tarve / kuvaus
-                            <textarea name="message" rows="4" placeholder="Kuvaa lyhyesti ongelma tai tavoite"></textarea>
-                        </label>
-                        <label class="consent">
-                            <input type="checkbox" name="consent" required>
-                            Hyväksyn tietosuojan.
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Lähetä</button>
-                    <p class="form-status" role="status" aria-live="polite"></p>
-                </form>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <div class="container footer-content">
-            <div class="footer-brand">
-                <img src="assets/logotp.png" alt="" width="28" height="28">
-                <div>
-                    <strong>AnomFIN</strong>
-                    <p>Rakennamme turvallisia sovelluksia kaikille alustoille.</p>
-                </div>
-            </div>
-            <div class="footer-links">
-                <div>
-                    <h4>Pikalinkit</h4>
-                    <ul>
-                        <li><a href="#services">Palvelut</a></li>
-                        <li><a href="#security">Kyberturva</a></li>
-                        <li><a href="#pricing">Hinnoittelu</a></li>
-                        <li><a href="#contact">Yhteys</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4>Resurssit</h4>
-                    <ul>
-                        <li><a href="#privacy">Tietosuoja</a></li>
-                        <li><a href="#terms">Ehdot</a></li>
-                        <li><a href="mailto:soc@anomfin.fi">SOC 24/7</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-cta">
-                <h4>Aloitetaan</h4>
-                <p>Siirrä kritiikka backlogista tuotantoon – turvallisesti.</p>
-                <a href="mailto:info@anomfin.fi?subject=Kartoitusvaraus" class="btn btn-secondary">Varaa kartoitus</a>
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <img id="heroBg" class="hero-bg" alt="">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title" id="heroTitle">Loading...</h1>
+            <p class="hero-subtitle" id="heroSubtitle"></p>
+            <p class="hero-description" id="heroDescription"></p>
+            <div class="hero-cta">
+                <a href="#contact" class="btn btn-primary" id="cta1">Varaa koeajo</a>
+                <a href="#contact" class="btn btn-secondary" id="cta2">Kysy tarjousta</a>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>© 2025 AnomFIN · Rakennettu AnomTools-tiimin kanssa</p>
+    </section>
+
+    <!-- Why Us Section -->
+    <section id="why">
+        <h2 class="section-title">Miksi Helsinki eBike Center?</h2>
+        <p class="section-subtitle">Olemme sähköpyörien erikoisliike sydämellä Helsingissä</p>
+        <div class="value-grid" id="valueGrid"></div>
+    </section>
+
+    <!-- Categories Section -->
+    <section id="categories">
+        <h2 class="section-title">Kategoriamme</h2>
+        <p class="section-subtitle">Löydä juuri sinulle sopiva sähköpyörä</p>
+        <div class="category-grid" id="categoryGrid"></div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products">
+        <h2 class="section-title">Tuotteemme</h2>
+        <p class="section-subtitle">Laajin valikoima sähköpyöriä Helsingissä</p>
+        
+        <div class="products-filter">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Etsi tuotteita...">
+            </div>
+            <div class="filter-buttons" id="filterButtons"></div>
         </div>
+        
+        <div class="products-grid" id="productsGrid"></div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services">
+        <h2 class="section-title">Huolto & Jälkimarkkina</h2>
+        <p class="section-subtitle">Pidämme pyöräsi kunnossa koko sen elinkaaren ajan</p>
+        <div class="services-grid" id="servicesGrid"></div>
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="#contact" class="btn btn-primary">Varaa huoltoaika</a>
+        </div>
+    </section>
+
+    <!-- Financing Section -->
+    <section id="financing" style="background: var(--color-bg-light); padding: 6rem 2rem; margin: 0 -2rem;">
+        <div style="max-width: 1400px; margin: 0 auto; text-align: center;">
+            <h2 class="section-title">Rahoitus & Koeajot</h2>
+            <p class="section-subtitle">Teemme sähköpyörän hankkimisen helpoksi</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                <div class="value-card">
+                    <div class="value-icon">💳</div>
+                    <h3>Joustava rahoitus</h3>
+                    <p>Tarjoamme rahoitusta 0-36 kuukaudelle. Esimerkiksi 3000€ pyörä vain <strong>100€/kk</strong> alkaen. Ei käsittelymaksuja!</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🚴</div>
+                    <h3>Ilmaiset koeajot</h3>
+                    <p>Koeaja haluamaasi mallia 30-45 minuuttia Helsingin kaduilla. Varaa aika nyt!</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🎁</div>
+                    <h3>Kaupan päälle</h3>
+                    <p>Jokaiseen pyörään kuuluu perusvarusteet: lukko, valot ja ensimmäinen huolto ilmaiseksi.</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem;">
+                <a href="#contact" class="btn btn-primary">Varaa koeajo nyt</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials">
+        <h2 class="section-title">Asiakkaamme suosittelevat</h2>
+        <p class="section-subtitle">Lue mitä asiakkaamme sanovat</p>
+        <div class="testimonials-grid" id="testimonialsGrid"></div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq">
+        <h2 class="section-title">Usein kysytyt kysymykset</h2>
+        <p class="section-subtitle">Vastauksia yleisimpiin kysymyksiin</p>
+        <div class="faq-list" id="faqList"></div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <h2 class="section-title">Ota yhteyttä</h2>
+        <p class="section-subtitle">Olemme valmiina auttamaan sinua</p>
+        
+        <div class="contact-container">
+            <div class="contact-info">
+                <h3>Yhteystiedot</h3>
+                <div class="contact-item">
+                    <span class="contact-icon">📍</span>
+                    <div class="contact-details">
+                        <strong>Osoite</strong>
+                        <p id="contactAddress">Loading...</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <div class="contact-details">
+                        <strong>Puhelin</strong>
+                        <p id="contactPhone">Loading...</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <div class="contact-details">
+                        <strong>Sähköposti</strong>
+                        <p id="contactEmail">Loading...</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">🕒</span>
+                    <div class="contact-details">
+                        <strong>Aukioloajat</strong>
+                        <p id="contactHours">Loading...</p>
+                    </div>
+                </div>
+                <div class="social-links" id="socialLinks"></div>
+            </div>
+            
+            <form class="contact-form" id="contactForm">
+                <div class="form-message" id="formMessage"></div>
+                <div class="form-group">
+                    <label for="name">Nimi *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Sähköposti *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Kiinnostava kategoria</label>
+                    <select id="category" name="category">
+                        <option value="">Valitse kategoria...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message">Viesti *</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Lähetä viesti</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Helsinki eBike Center. Kaikki oikeudet pidätetään.</p>
+        <p style="margin-top: 0.5rem;">Sähköpyörien premium-koti Helsingissä 🚴</p>
     </footer>
 
-    <script type="module" src="src/index.js"></script>
-    <script src="js/script.js" defer></script>
+    <script>
+        // Global state
+        let siteData = null;
+        let allProducts = [];
+        let currentFilter = 'all';
+        
+        // Load data from localStorage or data.json
+        async function loadData() {
+            try {
+                // Check localStorage first
+                const localData = localStorage.getItem('ebike-data');
+                if (localData) {
+                    siteData = JSON.parse(localData);
+                    console.log('Loaded data from localStorage');
+                } else {
+                    // Load from data.json
+                    const response = await fetch('data.json');
+                    siteData = await response.json();
+                    console.log('Loaded data from data.json');
+                }
+                
+                // Initialize the site
+                initializeSite();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.body.innerHTML = '<div class="loading">Virhe datan lataamisessa. Tarkista että data.json tiedosto on saatavilla.</div>';
+            }
+        }
+        
+        // Initialize site with data
+        function initializeSite() {
+            if (!siteData) return;
+            
+            // Populate hero
+            document.getElementById('heroTitle').textContent = siteData.siteSettings.hero.title;
+            document.getElementById('heroSubtitle').textContent = siteData.siteSettings.hero.subtitle;
+            document.getElementById('heroDescription').textContent = siteData.siteSettings.hero.description;
+            document.getElementById('heroBg').src = siteData.siteSettings.hero.backgroundImage;
+            document.getElementById('cta1').textContent = siteData.siteSettings.hero.cta1Text;
+            document.getElementById('cta2').textContent = siteData.siteSettings.hero.cta2Text;
+            
+            // Populate value props
+            populateValueProps();
+            
+            // Populate categories
+            populateCategories();
+            
+            // Populate products
+            allProducts = siteData.products;
+            populateFilterButtons();
+            populateProducts(allProducts);
+            
+            // Populate services
+            populateServices();
+            
+            // Populate testimonials
+            populateTestimonials();
+            
+            // Populate FAQ
+            populateFAQ();
+            
+            // Populate contact info
+            populateContactInfo();
+            
+            // Initialize animations
+            initializeAnimations();
+        }
+        
+        // Populate value props
+        function populateValueProps() {
+            const grid = document.getElementById('valueGrid');
+            grid.innerHTML = siteData.valueProps.map(prop => `
+                <div class="value-card fade-in">
+                    <div class="value-icon">${prop.icon}</div>
+                    <h3>${prop.title}</h3>
+                    <p>${prop.description}</p>
+                </div>
+            `).join('');
+        }
+        
+        // Populate categories
+        function populateCategories() {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = siteData.categories.map(cat => `
+                <div class="category-card fade-in" data-category="${cat.id}">
+                    <img src="${cat.imageUrl}" alt="${cat.name}">
+                    <div class="category-overlay">
+                        <h3>${cat.name}</h3>
+                        <p>${cat.description}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const categoryId = card.dataset.category;
+                    filterProducts(categoryId);
+                    document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        }
+        
+        // Populate filter buttons
+        function populateFilterButtons() {
+            const container = document.getElementById('filterButtons');
+            const buttons = [
+                { id: 'all', label: 'Kaikki' },
+                ...siteData.categories.map(cat => ({ id: cat.id, label: cat.name }))
+            ];
+            
+            container.innerHTML = buttons.map(btn => `
+                <button class="filter-btn ${btn.id === 'all' ? 'active' : ''}" data-filter="${btn.id}">
+                    ${btn.label}
+                </button>
+            `).join('');
+            
+            // Add click handlers
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterProducts(btn.dataset.filter);
+                });
+            });
+        }
+        
+        // Filter products
+        function filterProducts(filter) {
+            currentFilter = filter;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = allProducts;
+            
+            if (filter !== 'all') {
+                filtered = filtered.filter(p => p.categoryId === filter);
+            }
+            
+            if (searchTerm) {
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.shortDescription.toLowerCase().includes(searchTerm) ||
+                    p.longDescription.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            populateProducts(filtered);
+        }
+        
+        // Populate products
+        function populateProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            
+            if (products.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--color-text-dim); padding: 3rem;">Ei tuloksia hakuehdoilla.</div>';
+                return;
+            }
+            
+            grid.innerHTML = products.map(product => {
+                const category = siteData.categories.find(c => c.id === product.categoryId);
+                const inStock = product.availability === 'Varastossa';
+                
+                return `
+                    <div class="product-card fade-in">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image">
+                        <div class="product-content">
+                            <div class="product-category">${category ? category.name : ''}</div>
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-short-desc">${product.shortDescription}</p>
+                            ${product.tags.length > 0 ? `
+                                <div class="product-tags">
+                                    ${product.tags.map(tag => `<span class="product-tag">${tag}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                            <div class="product-footer">
+                                <div>
+                                    <span class="product-price">${product.price}€</span>
+                                    ${product.originalPrice ? `<span class="product-price-original">${product.originalPrice}€</span>` : ''}
+                                </div>
+                                <span class="product-availability ${inStock ? 'in-stock' : ''}">${product.availability}</span>
+                            </div>
+                            <button class="product-expand-btn" data-product-id="${product.id}">
+                                Lisätiedot ▼
+                            </button>
+                            <div class="product-long-desc" id="desc-${product.id}">
+                                ${product.longDescription}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Add expand handlers
+            document.querySelectorAll('.product-expand-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productId = btn.dataset.productId;
+                    const desc = document.getElementById(`desc-${productId}`);
+                    desc.classList.toggle('show');
+                    btn.textContent = desc.classList.contains('show') ? 'Piilota ▲' : 'Lisätiedot ▼';
+                });
+            });
+            
+            // Reinitialize animations for new products
+            initializeAnimations();
+        }
+        
+        // Populate services
+        function populateServices() {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = siteData.services.map(service => `
+                <div class="service-card fade-in">
+                    <h3>${service.name}</h3>
+                    <p>${service.description}</p>
+                    <div class="service-price">${service.price}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Populate testimonials
+        function populateTestimonials() {
+            const grid = document.getElementById('testimonialsGrid');
+            grid.innerHTML = siteData.testimonials.map(testimonial => `
+                <div class="testimonial-card fade-in">
+                    <p class="testimonial-text">${testimonial.text}</p>
+                    <div class="testimonial-author">
+                        <div>
+                            <div class="testimonial-name">${testimonial.name}</div>
+                            <div class="testimonial-location">${testimonial.location}</div>
+                        </div>
+                        <div class="testimonial-rating">${'⭐'.repeat(testimonial.rating)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Populate FAQ
+        function populateFAQ() {
+            const list = document.getElementById('faqList');
+            list.innerHTML = siteData.faq.map(item => `
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>${item.question}</span>
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">${item.answer}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', () => {
+                    const item = question.parentElement;
+                    const wasActive = item.classList.contains('active');
+                    
+                    // Close all other items
+                    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+                    
+                    // Toggle current item
+                    if (!wasActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        }
+        
+        // Populate contact info
+        function populateContactInfo() {
+            const contact = siteData.siteSettings.contact;
+            document.getElementById('contactAddress').textContent = contact.address;
+            document.getElementById('contactPhone').textContent = contact.phone;
+            document.getElementById('contactEmail').textContent = contact.email;
+            document.getElementById('contactHours').textContent = contact.openingHours;
+            
+            // Social links
+            const socialContainer = document.getElementById('socialLinks');
+            socialContainer.innerHTML = `
+                <a href="${contact.socialMedia.facebook}" class="social-link" target="_blank" rel="noopener">📘</a>
+                <a href="${contact.socialMedia.instagram}" class="social-link" target="_blank" rel="noopener">📷</a>
+            `;
+            
+            // Populate category dropdown in form
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = '<option value="">Valitse kategoria...</option>' +
+                siteData.categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+        }
+        
+        // Initialize scroll animations
+        function initializeAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        }
+        
+        // Smooth scroll for navigation
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('a[href^="#"]')) {
+                e.preventDefault();
+                const target = document.querySelector(e.target.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // Close mobile menu if open
+                    document.getElementById('navMenu').classList.remove('active');
+                }
+            }
+        });
+        
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            // Update active nav link
+            const sections = document.querySelectorAll('section[id]');
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('navMenu').classList.toggle('active');
+        });
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            filterProducts(currentFilter);
+        });
+        
+        // Contact form submission
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                category: document.getElementById('category').value,
+                message: document.getElementById('message').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('Form submission:', formData);
+            
+            // Show success message
+            const messageDiv = document.getElementById('formMessage');
+            messageDiv.textContent = 'Kiitos yhteydenotostasi! Vastaamme sinulle mahdollisimman pian.';
+            messageDiv.className = 'form-message success';
+            
+            // Reset form
+            e.target.reset();
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                messageDiv.className = 'form-message';
+            }, 5000);
+        });
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
 </body>
 </html>
