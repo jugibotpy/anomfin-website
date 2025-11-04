@@ -806,11 +806,9 @@ function renderLoginPage(string $message = ''): string
 
     function hexToRgb(hex){
       const m = hex.replace('#','');
+      if(!/^[0-9a-fA-F]{6}$/.test(m)) return null;
       const bigint=parseInt(m,16);
-      if(m.length===6){
-        return [(bigint>>16)&255,(bigint>>8)&255,bigint&255];
-      }
-      return [0,255,150];
+      return [(bigint>>16)&255,(bigint>>8)&255,bigint&255];
     }
 
     function load(){
@@ -974,8 +972,11 @@ function renderLoginPage(string $message = ''): string
       const neon = document.getElementById('neon').value;
       out['--neon'] = neon;
       const sGreenHex = document.getElementById('square-green').value;
-      const [r,g,b] = hexToRgb(sGreenHex);
-      out['--square-green-rgba'] = `${r},${g},${b}`;
+      const rgb = hexToRgb(sGreenHex);
+      if (rgb) {
+        const [r,g,b] = rgb;
+        out['--square-green-rgba'] = `${r},${g},${b}`;
+      }
       const ease = document.getElementById('logo-ease').value.trim();
       out['--logo-ease'] = ease;
 
